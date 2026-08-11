@@ -34,6 +34,40 @@ Plain text → Markdown → rich document → styled document → component docu
 
 At no point should the language punish someone for having started simply.
 
+## The line HMX crosses
+
+The closest prior art is **Markdoc**, and the distinction is not cosmetic. Markdoc is a
+declarative content-publishing format: it deliberately keeps arbitrary code out of
+documents so they stay analysable, validatable, and safe to transform. Interactivity comes
+from whatever component the host application registers behind a tag.
+
+HMX takes the same starting point and crosses the line Markdoc chooses not to:
+
+> **HyMarkX is a Markdown-first language in which documents can progressively become
+> applications — with state, events, styling, and logic as native semantics the compiler
+> owns, not as handoffs to components written elsewhere.**
+
+Concretely, this must eventually be native HMX rather than a tag delegating to a React
+component someone wrote separately:
+
+```md
+@state count = 0
+
+[+](button) -> count++
+
+Count: {count}
+```
+
+*(Illustrative. That syntax is not decided — see ADR-0002 and the caveats in §6.)*
+
+If HMX ends up as Markdown + directives + variables + scoped styles, it has rebuilt
+Markdoc with different punctuation and should not exist. `ROADMAP.md` puts an explicit
+go/no-go gate at the end of Phase 3 for exactly this reason.
+
+What HMX should take *from* Markdoc, without argument: **schema discipline.** Typed
+attributes and declared allowed-children are what make a component model checkable by a
+compiler, completable by an editor, and reliably generatable by a model.
+
 ## What HMX is not
 
 HMX is **not** "MDX with more syntax." That is the project's primary failure mode and

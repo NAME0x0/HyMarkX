@@ -34,15 +34,36 @@ One carefully designed native construct, taken all the way.
 - frontmatter
 - nesting, escaping, unclosed-fence recovery, `HMX1001`/`HMX2001`/`HMX2002`
 - a small built-in component set to prove the mechanism (`card`, `note`, `grid`)
+- **component schemas**: typed attributes, allowed children, validation diagnostics
 - golden AST + HTML fixtures; Markdown-compatibility suite still green
 
 **Exit:** the compatibility guarantee (SPEC §3) is mechanically verified; a
-non-trivial document using directives compiles to correct, runtime-free HTML.
+non-trivial document using directives compiles to correct, runtime-free HTML; an invalid
+attribute value produces a useful diagnostic rather than being passed through.
 
 ## Phase 3 — Styling
 
 Global styles, scoped styles, and the decision on whether native style shorthand earns
 its place. Design tokens considered, not assumed. Exit: a styled page ships zero JS.
+
+## Gate — "is this just Markdoc?"
+
+**A go/no-go review between Phase 3 and Phase 4. Not a formality.**
+
+At the end of Phase 3, HMX will be: Markdown + directives + schemas + variables + scoped
+styles. That is substantially the territory Markdoc already occupies, and Markdoc occupies
+it well. If the project stopped here it should not have been built.
+
+Everything that makes HMX worth existing is on the far side of this gate: native state,
+native events, a compiled minimal runtime, `.hmx` components authored without a separate
+TSX file, and a real toolchain. Markdoc deliberately declines to cross that line; crossing
+it is the entire thesis.
+
+The review asks one question: **is there a credible, demonstrated path to native
+interactivity, or are we building a content publisher with different punctuation?** A
+throwaway prototype of the Phase 6 counter example is the evidence. If the answer is no,
+the honest outcomes are to redesign or to stop — not to continue into Phases 4–8 on
+momentum.
 
 ## Phase 4 — Expressions
 

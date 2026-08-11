@@ -17,6 +17,12 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 | `@hymarkx/cli` | `hmx build`, `hmx check` |
 | CommonMark + GFM conformance suites | must be green before Phase 2 |
 
+## P1 — Phase 2
+
+| Item | Notes |
+|---|---|
+| **Component schemas** | Promoted from Research. A directive whose attributes are unvalidated strings is syntax, not a component model. Schemas are what turn `:::chart{type=line}` into something the compiler can check, an editor can complete, and a model can generate reliably. Markdoc demonstrates this works; it is the single most transferable idea from it. Required for Phase 2 exit. |
+
 ## P1 — carried into Phase 2
 
 | Item | Notes |
@@ -48,7 +54,10 @@ Rejected items record *why*, so they are not relitigated without new evidence.
   Mitigation sketch: closed keyword set, block position only, `@name` + space.
   Decide in Phase 4 with real documents as evidence. See ADR-0002.
 - Incremental parsing / tree-sitter grammar for editor tooling (Phase 7 input)
-- Schema-checkable components for reliable AI generation (charter §27)
+- Multi-line directive configuration. `{...}` attributes get unwieldy for a chart with
+  six settings, but a YAML-ish directive body would be a *third* syntax family alongside
+  attributes and frontmatter. Decide with real documents in Phase 2; do not add a third
+  family casually.
 - Whether HMX needs a native style shorthand at all, or CSS + scoping suffices
 
 ## Deferred

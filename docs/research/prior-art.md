@@ -70,6 +70,33 @@ idea (attribute validation, useful diagnostics, AI-checkable output) and diverge
 (a) using directive syntax rather than `{% %}`, and (b) intending to cross into
 interactivity, which Markdoc declines.
 
+**The overlap is large enough to be a project risk, not a footnote.** Markdoc already has
+tags with attributes, nesting, variables, conditionals, functions, partials, an AST, a
+serializable render tree, schema validation, and HTML/React/custom renderers. Its variables
+are immutable during rendering and its stated position is that it is *not* a templating
+language and does not mix arbitrary code with content — a deliberate design choice, not a
+gap waiting to be filled.
+
+Which means: **Markdown + directives + variables + conditionals + components is not a
+product.** That combination is Markdoc. HMX's justification rests entirely on native state,
+native events, compiled output proportional to capability, `.hmx` components authorable
+without a separate framework file, and a real toolchain — the things Markdoc declines to
+build because they would compromise its analysability.
+
+Two structural ideas transfer directly and should be treated as decided:
+
+1. **`parse → transform → render` with a serializable tree between transform and render.**
+   Markdoc is independent evidence that AST → render-tree → backend is the right shape for
+   Markdown-derived systems. It does not change ADR-0006 (no IR until a second backend
+   needs one), but it does raise confidence that an IR is where we end up.
+2. **Schema-declared components.** Promoted from research to a Phase 2 requirement.
+
+One idea does *not* transfer: Markdoc's separation of "developer configures tags" from
+"author writes content" is right for a documentation pipeline and wrong for HMX's stated
+progression. `:::metric` should do something reasonable before anyone writes
+`schema/Metric.ts`, `components/Metric.tsx`, and a renderer config. Strong defaults are
+part of the thesis, not a convenience.
+
 ---
 
 ## Generic directives (`remark-directive` / `micromark-extension-directive`)
