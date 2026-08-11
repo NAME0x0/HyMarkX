@@ -60,6 +60,9 @@ the integrity of generated output.
 | T8 | Prototype pollution | attribute names like `__proto__` | attribute bags are `null`-prototype objects; `__proto__`/`constructor`/`prototype` keys rejected (`HMX3005`) |
 | T9 | ReDoS / parser DoS | pathological nesting or backtracking input | micromark is linear-time by construction; nesting depth capped; fuzzing planned before 1.0 |
 | T10 | Path traversal | `../../etc/passwd` in an import or asset path | resolution confined to the project root; absolute and escaping paths rejected (`HMX3006`) |
+| T11 | Entity-expansion DoS in frontmatter | a billion-laughs YAML document | `maxAliasCount: 10`; required test asserting prompt rejection with `HMX2021` |
+| T12 | Tag-driven object construction in frontmatter | YAML type tags that instantiate host objects | `schema: 'core'`, `customTags: []`, `merge: false`, `stringKeys: true` |
+| T13 | Prototype pollution via frontmatter keys | `__proto__:` in a mapping | mappings rebuilt with `Object.create(null)`; forbidden keys rejected with `HMX3007` using the same list as directive attributes |
 
 ## Deliberate non-goals at 0.0.x
 
