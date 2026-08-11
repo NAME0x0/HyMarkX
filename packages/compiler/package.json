@@ -4,6 +4,9 @@
   "description": "Trust-aware HTML compiler and diagnostic renderer for HyMarkX (HMX).",
   "license": "MIT OR Apache-2.0",
   "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NAME0x0/HyMarkX.git",

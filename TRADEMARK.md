@@ -12,6 +12,12 @@ call your version by this project's name.
 `HyMarkX` · `HMX` · the `.hmx` file extension used as a product identifier ·
 the `hmx` command name · the `@hymarkx` package scope · any project logo
 
+**Registry status** (2026-08-11): the npm package `hymarkx` and the npm organization
+`hymarkx` — and therefore the `@hymarkx` scope — are held by the project. The unscoped
+name `hmx` is **not** obtainable: npm's name-similarity policy rejects it as too close to
+existing packages. This costs nothing, because a package declares its own binary name —
+`hymarkx` installs a command called `hmx` regardless.
+
 ## What you may do without asking
 
 - Use the software for anything, commercially or otherwise, per the code licence.

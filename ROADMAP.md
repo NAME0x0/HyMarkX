@@ -93,7 +93,11 @@ backend, not as the definition of the language.
 ## Phase 9 — Production hardening
 
 Fuzzing, security audit, performance targets from measured baselines, compatibility
-suites, documentation completeness, license decision, 0.1 publish.
+suites, documentation completeness, 0.1 publish.
+
+Publishing checklist: remove `"private": true` from every package manifest (it exists to
+prevent an accidental pre-alpha release), confirm `publishConfig.access` is `public` on the
+scoped packages, and replace the `hymarkx` placeholder on npm with the real CLI.
 
 ## Phase 10 — Ecosystem
 
