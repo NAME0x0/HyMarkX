@@ -1,6 +1,7 @@
 import type { Root } from '@hymarkx/ast'
 import { parse } from '@hymarkx/parser'
 import { analyze } from './analyze/index.js'
+import { builtinComponents, mergeComponentRegistries } from './components/builtins.js'
 import { renderDiagnostic, renderDiagnostics } from './diagnostics/render.js'
 import { htmlBackend } from './emit/html.js'
 import type { CompileOptions, CompileResult } from './types.js'
@@ -25,8 +26,12 @@ export function compileAst(
   source: string,
   options: CompileOptions = {},
 ): CompileResult {
-  const analyzed = analyze(root)
-  const emitted = htmlBackend.emit(analyzed, { trust: options.trust ?? 'document' })
+  const trust = options.trust ?? 'document'
+  const analyzed = analyze(root, {
+    components: mergeComponentRegistries(options.components),
+    trust,
+  })
+  const emitted = htmlBackend.emit(analyzed, { trust })
   return {
     html: emitted.html,
     diagnostics: [...analyzed.diagnostics, ...emitted.diagnostics],
@@ -34,7 +39,19 @@ export function compileAst(
   }
 }
 
-export { renderDiagnostic, renderDiagnostics }
+export { builtinComponents, renderDiagnostic, renderDiagnostics }
 export type { RenderDiagnosticOptions } from './diagnostics/render.js'
 export type { Backend, EmitResult } from './emit/backend.js'
 export type { CompileOptions, CompileResult, TrustMode } from './types.js'
+export type {
+  AttributeSchema,
+  AttributeType,
+  ComponentRegistry,
+  ComponentRenderer,
+  ComponentSchema,
+  DirectiveKind,
+  RenderedElement,
+  RenderPlan,
+  ResolvedAttribute,
+  ResolvedAttributes,
+} from './components/types.js'

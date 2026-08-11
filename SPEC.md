@@ -97,6 +97,44 @@ Attribute syntax follows HTML conventions inside `{}`:
 - Unknown attributes on a known component MUST produce warning `HMX2001` — never a
   silent drop.
 
+### 4.2.1 Components and schemas *(Phase 2)*
+
+A **component** is a directive name bound to a schema. A processor MUST maintain a
+registry mapping names to schemas, and MUST NOT derive an HTML element name from the
+document — component names come from the registry only.
+
+A schema declares the directive forms the component may take, its attributes and their
+types, whether content is permitted, and whether a label is permitted. Schemas MUST be
+representable as JSON: no functions, no host objects. Rendering is defined separately from
+the schema so that schemas remain exportable to other tools.
+
+Attribute types are `string`, `number`, `boolean`, `enum`, `identifier`, and `url`.
+A `url`-typed value MUST be subject to the same scheme policy as a Markdown link
+destination in the active trust mode (§7); a processor MUST NOT implement a second,
+independent URL policy.
+
+`id`, `class`, and `title` are accepted on every component without declaration. `class`
+values MUST be restricted to a safe character set rather than escaped into the attribute,
+and `id` MUST satisfy the `identifier` rule.
+
+Validation diagnostics:
+
+| Code | Severity | Condition |
+|---|---|---|
+| `HMX2001` | warning | Unknown attribute on a known component |
+| `HMX2002` | warning | Unknown component; content renders without a wrapper |
+| `HMX2003` | error | Required attribute missing |
+| `HMX2004` | error | Value outside an enum's permitted values |
+| `HMX2005` | error | Value fails its declared type or range |
+| `HMX2006` | warning | Content not permitted by the component's `children` rule |
+| `HMX2007` | error | Label required and absent, or present and forbidden |
+| `HMX2008` | error | Component written in a directive form it does not declare |
+| `HMX2010` | warning | More than one `#id` shorthand; the last wins |
+
+A diagnostic about an attribute MUST carry the span of that attribute, not of the whole
+directive. Where a processor can identify a near-match for an unknown name or value, it
+SHOULD offer it as a suggestion, and MUST omit the suggestion rather than offer a poor one.
+
 ### 4.3 Frontmatter *(Phase 2)*
 
 A document MAY begin with a YAML frontmatter block delimited by `---`. It MUST be the

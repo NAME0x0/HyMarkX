@@ -16,11 +16,20 @@ describe('Markdown HTML fixtures', () => {
     const expected = readFileSync(new URL('expected.html', fixtureDirectory), 'utf8')
     const result = compile(input, { from: `${fixtureName}/input.md`, trust: 'app' })
 
-    if (fixtureName.startsWith('directives-')) {
+    if (fixtureName === 'components-invalid') {
+      expect(result.diagnostics.map(({ code, severity }) => ({ code, severity }))).toEqual([
+        { code: 'HMX2002', severity: 'warning' },
+        { code: 'HMX2001', severity: 'warning' },
+        { code: 'HMX2004', severity: 'error' },
+        { code: 'HMX2005', severity: 'error' },
+        { code: 'HMX2005', severity: 'error' },
+      ])
+    } else if (fixtureName.startsWith('directives-')) {
       expect(result.diagnostics.length).toBeGreaterThan(0)
+      const expectedCode = fixtureName === 'directives-basic' ? 'HMX2001' : 'HMX2002'
       expect(
         result.diagnostics.every(
-          (diagnostic) => diagnostic.code === 'HMX2002' && diagnostic.severity === 'warning',
+          (diagnostic) => diagnostic.code === expectedCode && diagnostic.severity === 'warning',
         ),
       ).toBe(true)
     } else {

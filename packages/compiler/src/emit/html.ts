@@ -2,6 +2,7 @@ import { createDiagnostic, visit } from '@hymarkx/ast'
 import type { Definition, Diagnostic, Node, Root, Span, TableCell } from '@hymarkx/ast'
 import type { AnalyzedDocument } from '../analyze/index.js'
 import type { TrustMode } from '../types.js'
+import type { DirectiveNode, RenderedElement, RenderPlan } from '../components/types.js'
 import type { Backend, EmitResult } from './backend.js'
 import { encodeUrl, escapeHtml } from './escape.js'
 import { isAllowedDocumentUrl, sanitizeRawHtml } from './sanitize.js'
@@ -54,6 +55,85 @@ function pushInOrder(stack: EmitAction[], actions: readonly EmitAction[]): void 
 
 function childActions(nodes: readonly Node[], context: EmitContext): EmitAction[] {
   return nodes.map((node) => emitNode(node, context))
+}
+
+function elementStart(element: RenderedElement): string {
+  let output = `<${element.tag}`
+  for (const [name, value] of Object.entries(element.attributes)) {
+    output += ` ${name}="${escapeHtml(value)}"`
+  }
+  return `${output}>`
+}
+
+function withUniversalAttributes(
+  plan: RenderPlan,
+  attributes: Readonly<Record<string, unknown>>,
+): RenderPlan {
+  const outer = plan.wrappers[0]
+  if (outer === undefined) {
+    return plan
+  }
+  const authorClass = typeof attributes.class === 'string' ? attributes.class : undefined
+  const rendererClass = outer.attributes.class
+  const mergedClass = [rendererClass, authorClass].filter(Boolean).join(' ')
+  const outerAttributes = {
+    ...outer.attributes,
+    ...(mergedClass === '' ? {} : { class: mergedClass }),
+    ...(typeof attributes.id === 'string' ? { id: attributes.id } : {}),
+    ...(typeof attributes.title === 'string' ? { title: attributes.title } : {}),
+  }
+  return {
+    ...plan,
+    wrappers: [{ ...outer, attributes: outerAttributes }, ...plan.wrappers.slice(1)],
+  }
+}
+
+function directiveActions(
+  node: DirectiveNode,
+  context: EmitContext,
+  document: AnalyzedDocument,
+): EmitAction[] {
+  const component = document.components.get(node)
+  if (component === undefined || !component.kindAllowed) {
+    if (node.type === 'textDirective') {
+      return childActions(node.children, inlineContext)
+    }
+    if (node.type === 'leafDirective') {
+      return childActions(node.label ?? [], inlineContext)
+    }
+    return [
+      ...childActions(node.label ?? [], inlineContext),
+      ...childActions(node.children, blockContext),
+    ]
+  }
+
+  const plan = withUniversalAttributes(
+    component.renderer(node, component.attributes),
+    component.attributes,
+  )
+  const actions: EmitAction[] = plan.wrappers.map((wrapper) => write(elementStart(wrapper)))
+  const label = node.type === 'textDirective' ? [] : (node.label ?? [])
+  if (label.length > 0) {
+    if (plan.labelWrapper !== undefined) {
+      actions.push(write(elementStart(plan.labelWrapper)))
+    }
+    actions.push(...childActions(label, inlineContext))
+    if (plan.labelWrapper !== undefined) {
+      actions.push(write(`</${plan.labelWrapper.tag}>`))
+    }
+  }
+  if (node.type === 'textDirective') {
+    actions.push(...childActions(node.children, inlineContext))
+  } else if (node.type === 'containerDirective') {
+    actions.push(...childActions(node.children, blockContext))
+  }
+  for (let index = plan.wrappers.length - 1; index >= 0; index -= 1) {
+    const wrapper = plan.wrappers[index]
+    if (wrapper !== undefined) {
+      actions.push(write(`</${wrapper.tag}>${context.block && index === 0 ? '\n' : ''}`))
+    }
+  }
+  return actions
 }
 
 function collectDefinitions(root: Root): ReadonlyMap<string, Definition> {
@@ -387,16 +467,13 @@ function emitHtml(document: AnalyzedDocument, options: HtmlOptions): EmitResult 
         pushInOrder(stack, tableCellActions(node, context))
         break
       case 'textDirective':
-        pushInOrder(stack, childActions(node.children, inlineContext))
+        pushInOrder(stack, directiveActions(node, context, document))
         break
       case 'leafDirective':
-        pushInOrder(stack, childActions(node.label ?? [], inlineContext))
+        pushInOrder(stack, directiveActions(node, context, document))
         break
       case 'containerDirective':
-        pushInOrder(stack, [
-          ...childActions(node.label ?? [], inlineContext),
-          ...childActions(node.children, blockContext),
-        ])
+        pushInOrder(stack, directiveActions(node, context, document))
         break
       default:
         assertNeverNode(node)

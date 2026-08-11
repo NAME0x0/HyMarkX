@@ -1,10 +1,20 @@
 import { createDiagnostic, visit } from '@hymarkx/ast'
 import type { Diagnostic, Root } from '@hymarkx/ast'
+import type { ComponentRegistry, DirectiveNode } from '../components/types.js'
+import { nearestSuggestion, validateComponent } from '../components/validate.js'
+import type { AnalyzedComponent } from '../components/validate.js'
+import type { TrustMode } from '../types.js'
 
 /** Syntax tree plus diagnostics produced by semantic analysis. */
 export interface AnalyzedDocument {
   readonly root: Root
   readonly diagnostics: readonly Diagnostic[]
+  readonly components: ReadonlyMap<DirectiveNode, AnalyzedComponent>
+}
+
+interface AnalyzeOptions {
+  readonly components: ComponentRegistry
+  readonly trust: TrustMode
 }
 
 /**
@@ -46,9 +56,10 @@ function checkDirectiveLikeParagraphs(root: Root, diagnostics: Diagnostic[]): vo
   })
 }
 
-/** Runs the Phase 1 semantic checks without mutating the syntax tree. */
-export function analyze(root: Root): AnalyzedDocument {
+/** Runs semantic component checks without mutating the syntax tree. */
+export function analyze(root: Root, options: AnalyzeOptions): AnalyzedDocument {
   const diagnostics: Diagnostic[] = []
+  const components = new Map<DirectiveNode, AnalyzedComponent>()
 
   checkDirectiveLikeParagraphs(root, diagnostics)
 
@@ -58,16 +69,36 @@ export function analyze(root: Root): AnalyzedDocument {
       node.type === 'leafDirective' ||
       node.type === 'containerDirective'
     ) {
-      diagnostics.push(
-        createDiagnostic({
-          code: 'HMX2002',
-          severity: 'warning',
-          message: `Unknown directive "${node.name}"; rendering its content without a wrapper.`,
-          span: node.position,
-        }),
-      )
+      const schema = Object.hasOwn(options.components.schemas, node.name)
+        ? options.components.schemas[node.name]
+        : undefined
+      const renderer = Object.hasOwn(options.components.renderers, node.name)
+        ? options.components.renderers[node.name]
+        : undefined
+      if (schema === undefined || renderer === undefined) {
+        const replacement = nearestSuggestion(node.name, Object.keys(options.components.schemas))
+        diagnostics.push(
+          createDiagnostic({
+            code: 'HMX2002',
+            severity: 'warning',
+            message: `Unknown directive "${node.name}"; rendering its content without a wrapper.`,
+            span: node.position,
+            ...(replacement === undefined
+              ? {}
+              : {
+                  suggestion: {
+                    message: `Replace with "${replacement}".`,
+                    replacement,
+                    span: node.position,
+                  },
+                }),
+          }),
+        )
+      } else {
+        components.set(node, validateComponent(node, schema, renderer, options.trust, diagnostics))
+      }
     }
   })
 
-  return { root, diagnostics }
+  return { root, diagnostics, components }
 }

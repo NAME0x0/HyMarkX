@@ -1,4 +1,5 @@
 import type { Diagnostic } from '@hymarkx/ast'
+import type { ComponentRegistry } from './components/types.js'
 
 /** Host-selected trust boundary used while emitting HTML. */
 export type TrustMode = 'document' | 'app'
@@ -11,6 +12,8 @@ export interface CompileOptions {
   readonly from?: string
   /** Enables GFM tables, task lists, strikethrough, and autolinks. Default: `true`. */
   readonly gfm?: boolean
+  /** Additional or replacement name-keyed component schemas and renderers. */
+  readonly components?: ComponentRegistry
 }
 
 /** Result of compiling source or an existing HMX syntax tree. */

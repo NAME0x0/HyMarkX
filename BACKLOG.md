@@ -31,6 +31,12 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 
 ## P2
 
+- **Fence-count nesting is a usability trap.** Nesting containers requires the *outer*
+  fence to carry more colons, so the natural `:::grid` wrapping `:::metric` silently closes
+  the outer container. `HMX1001` reports it clearly, but every author will write it wrong
+  first. Options: have the formatter renumber fences (Phase 7), or reconsider the nesting
+  rule. Inherited from ADR-0002. Feed this into the Phase 3 gate — if the natural way to
+  write nested components is wrong, that is evidence about the syntax, not the author.
 - **Deep nesting overflows `mdast-util-gfm-autolink-literal`.** Its tree transform is
   recursive, so a document nested ~10,000 deep crashes it even though our converter and
   plain mdast handle it. Currently surfaced as diagnostic `HMX1002` rather than a

@@ -27,11 +27,11 @@ describe('compile', () => {
 
   it('degrades unknown directives transparently without emitting their attributes', () => {
     const source = [
-      ':::card[**Title**]{onclick="alert(1)" data-secret=hidden}',
+      ':::panel[**Title**]{onclick="alert(1)" data-secret=hidden}',
       'Body :mark[hot]{style="display:none"}',
       ':::',
       '',
-      '::note[*Leaf*]{onclick="alert(2)"}',
+      '::hint[*Leaf*]{onclick="alert(2)"}',
       '',
     ].join('\n')
     const result = compile(source, { trust: 'app' })
@@ -46,7 +46,7 @@ describe('compile', () => {
       {
         code: 'HMX2002',
         severity: 'warning',
-        message: 'Unknown directive "card"; rendering its content without a wrapper.',
+        message: 'Unknown directive "panel"; rendering its content without a wrapper.',
       },
       {
         code: 'HMX2002',
@@ -56,7 +56,7 @@ describe('compile', () => {
       {
         code: 'HMX2002',
         severity: 'warning',
-        message: 'Unknown directive "note"; rendering its content without a wrapper.',
+        message: 'Unknown directive "hint"; rendering its content without a wrapper.',
       },
     ])
   })
@@ -95,7 +95,7 @@ describe('compile', () => {
   })
 
   it('reports a recognized directive as unknown rather than unrecognized', () => {
-    const codes = compile(':::card{a="ok"}\nx\n:::\n').diagnostics.map((d) => d.code)
+    const codes = compile(':::widget{a="ok"}\nx\n:::\n').diagnostics.map((d) => d.code)
     expect(codes).toContain('HMX2002')
     expect(codes).not.toContain('HMX1011')
   })

@@ -68,7 +68,7 @@ describe('built hmx CLI', () => {
     expect(result.stderr).toBe('')
   })
 
-  it('builds directive documents with warning-only diagnostics and exit code zero', () => {
+  it('builds component documents with warning-only diagnostics and exit code zero', () => {
     const result = spawnSync(
       process.execPath,
       [
@@ -84,10 +84,11 @@ describe('built hmx CLI', () => {
     )
 
     expect(result.status).toBe(0)
-    expect(result.stdout).toBe('<strong>Revenue</strong><p>Text <em>new</em>.</p>\n')
-    expect(result.stderr).toContain('warning[HMX2002]: Unknown directive "card"')
-    expect(result.stderr).toContain('warning[HMX2002]: Unknown directive "badge"')
-    expect(result.stderr).toContain('0 errors, 2 warnings in 1 file')
+    expect(result.stdout).toContain('<article class="hmx-card large" id="hero" title="Q1">')
+    expect(result.stdout).toContain('<span class="hmx-badge hmx-badge-info"><em>new</em></span>')
+    expect(result.stderr).toContain('warning[HMX2001]: Unknown attribute "bare"')
+    expect(result.stderr).toContain('warning[HMX2001]: Unknown attribute "tone"')
+    expect(result.stderr).toContain('0 errors, 3 warnings in 1 file')
   })
 
   it('uses exit code 1 for document diagnostics and 2 for usage or I/O failures', () => {

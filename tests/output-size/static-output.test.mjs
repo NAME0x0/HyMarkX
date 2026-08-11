@@ -14,4 +14,14 @@ describe('static output proportionality', () => {
       STATIC_HTML_BYTE_BUDGET,
     )
   })
+
+  it('emits all built-in components without JavaScript or a runtime', () => {
+    const result = compile(
+      ':::note\nn\n:::\n\n:::card\nc\n:::\n\n:::grid\ng\n:::\n\n:::metric\nm\n:::\n\n:badge[b]\n',
+    )
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.html.includes('<script')).toBe(false)
+    expect(result.html.toLowerCase()).not.toContain('hmx-runtime')
+  })
 })
