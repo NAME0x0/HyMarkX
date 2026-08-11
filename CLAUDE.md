@@ -28,7 +28,9 @@ production code only for edits smaller than the delegation overhead.
 
 ## Current state
 
-Phase 0 complete. Phase 1 (Markdown foundation) in progress — see `ROADMAP.md`.
+Phases 0 and 1 complete: `@hymarkx/{ast,parser,compiler,cli}` build Markdown to HTML at
+652/652 CommonMark conformance with a working trust boundary. Phase 2 (directives +
+component schemas) is next — see `ROADMAP.md`.
 
 ## Naming
 

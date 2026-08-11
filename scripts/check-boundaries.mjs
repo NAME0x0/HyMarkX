@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url))
 const packagesDirectory = resolve(repositoryRoot, 'packages')
 const parserSourceDirectory = resolve(packagesDirectory, 'parser', 'src')
+const cliSourceDirectory = resolve(packagesDirectory, 'cli', 'src')
 const forbiddenPackage =
   /^(?:micromark|mdast|hast|unist|remark|unified)|^@types\/(?:mdast|unist|hast)(?:$|\/)/
 const sourceExtension = /\.(?:[cm]?[jt]sx?)$/
@@ -13,6 +14,10 @@ const importPatterns = [
   /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
   /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
 ]
+// Node globals are not imports, so the specifier scan above cannot see them. Without this,
+// `process.env` in the compiler would typecheck and pass the boundary check while quietly
+// making the compiler unable to run in a browser.
+const forbiddenGlobal = /(?<![.\w$])(?:process|Buffer|__dirname|__filename)(?![\w$])/g
 const ignoredDirectories = new Set(['.git', '.tmp', 'coverage', 'dist', 'node_modules'])
 const violations = []
 
@@ -36,28 +41,55 @@ function checkManifest(packageDirectory) {
   }
 }
 
-function checkSourceFile(path) {
-  if (path.startsWith(`${parserSourceDirectory}${sep}`) || path === parserSourceDirectory) {
-    return
-  }
+/**
+ * Blanks comments and quoted strings so the global scan cannot match English prose — the
+ * word "process" in a diagnostic message is not a Node dependency. Template literals are
+ * left intact so `${process.env.X}` is still caught; prose inside one may false-positive,
+ * which is the safer direction for a guard.
+ */
+function stripCommentsAndStrings(source) {
+  return source
+    .replaceAll(/\/\*[\s\S]*?\*\//g, ' ')
+    .replaceAll(/'(?:\\.|[^'\\\n])*'/g, "''")
+    .replaceAll(/"(?:\\.|[^"\\\n])*"/g, '""')
+    .replaceAll(/(^|[^:'"`])\/\/[^\n]*/g, '$1 ')
+}
 
+function checkSourceFile(path) {
+  const isParserSource = path.startsWith(`${parserSourceDirectory}${sep}`)
+  const isCliSource = path.startsWith(`${cliSourceDirectory}${sep}`)
   const source = readFileSync(path, 'utf8')
   for (const pattern of importPatterns) {
     pattern.lastIndex = 0
     for (const match of source.matchAll(pattern)) {
       const specifier = match[1]
-      if (specifier !== undefined && forbiddenPackage.test(specifier)) {
+      if (specifier !== undefined && forbiddenPackage.test(specifier) && !isParserSource) {
         violations.push(`${displayPath(path)} imports ${specifier}`)
       }
+      if (
+        specifier?.startsWith('node:') === true &&
+        !isCliSource &&
+        path.includes(`${sep}src${sep}`)
+      ) {
+        violations.push(
+          `${displayPath(path)} imports ${specifier}; only @hymarkx/cli may use Node builtins`,
+        )
+      }
+    }
+  }
+
+  if (!isCliSource && path.includes(`${sep}src${sep}`)) {
+    const code = stripCommentsAndStrings(source)
+    forbiddenGlobal.lastIndex = 0
+    for (const match of code.matchAll(forbiddenGlobal)) {
+      violations.push(
+        `${displayPath(path)} uses the Node global \`${match[0]}\`; only @hymarkx/cli may assume Node`,
+      )
     }
   }
 }
 
 function walkSource(directory) {
-  if (directory === parserSourceDirectory) {
-    return
-  }
-
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     const path = resolve(directory, entry.name)
     if (entry.isDirectory()) {

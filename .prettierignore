@@ -5,3 +5,5 @@ coverage/
 .vitest/
 pnpm-lock.yaml
 **/*.md
+tests/conformance/commonmark-0.31.2.json
+fixtures/markdown/**/expected.html

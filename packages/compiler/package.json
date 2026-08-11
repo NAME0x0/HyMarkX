@@ -1,0 +1,20 @@
+{
+  "name": "@hymarkx/compiler",
+  "version": "0.0.0",
+  "description": "Trust-aware HTML compiler and diagnostic renderer for HyMarkX (HMX).",
+  "license": "MIT OR Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@hymarkx/ast": "workspace:*",
+    "@hymarkx/parser": "workspace:*"
+  }
+}

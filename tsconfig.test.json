@@ -9,7 +9,13 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@hymarkx/ast": ["./packages/ast/src/index.ts"],
+      "@hymarkx/parser": ["./packages/parser/src/index.ts"],
+      "@hymarkx/compiler": ["./packages/compiler/src/index.ts"],
+      "@hymarkx/cli": ["./packages/cli/src/index.ts"]
+    }
   },
   "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts"]
 }

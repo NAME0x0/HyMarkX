@@ -10,7 +10,7 @@ Competitive analysis, design principles, first ADRs, MVP definition, parser stra
 architecture proposal. **Exit:** `VISION.md`, `ARCHITECTURE.md`, `SPEC.md` (draft),
 `SECURITY.md`, ADR-0001…0009, `docs/research/prior-art.md`. No production code.
 
-## Phase 1 — Markdown foundation
+## Phase 1 — Markdown foundation ✅
 
 Prove the boring part works perfectly before adding anything.
 
