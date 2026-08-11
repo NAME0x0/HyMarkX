@@ -42,7 +42,8 @@ future packages is not created.
 
 ```
 packages/
-  ast/       @hymarkx/ast       node types, builders, visitor, span utilities. Zero deps.
+  ast/       @hymarkx/ast       core shared vocabulary: node types, spans, builders, visitor,
+                                and the Diagnostic type. Zero runtime dependencies.
   parser/    @hymarkx/parser    source → HMX AST. Only package allowed to import micromark/mdast.
   compiler/  @hymarkx/compiler  AST → analysis → HTML. Owns diagnostics and backends.
   cli/       @hymarkx/cli       `hmx` binary. Thin: argument parsing, file I/O, reporting.
