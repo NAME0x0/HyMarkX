@@ -1,0 +1,14 @@
+# Golden fixtures and conformance data are byte-compared. CRLF would break them on
+# Windows checkouts, so line endings are LF in the repo and in the working tree.
+* text=auto eol=lf
+
+# Fixtures are exact bytes: never touch them, even for text detection.
+fixtures/** -text
+tests/conformance/** -text
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+pnpm-lock.yaml -diff linguist-generated
