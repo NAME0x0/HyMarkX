@@ -42,6 +42,15 @@ Rejected items record *why*, so they are not relitigated without new evidence.
   plain mdast handle it. Currently surfaced as diagnostic `HMX1002` rather than a
   `RangeError`. Real fixes: implement autolink-literal detection in our own iterative
   converter, or upstream an iterative transform. Relevant to threat T9.
+- **Media components (`video`, `audio`, `embed`).** Verified 2026-08-11: images of every
+  format — PNG, GIF, SVG, JPEG, WebP — work from any CDN in both trust modes via ordinary
+  `![alt](url)`. But `<video>`, `<audio>`, `<iframe>`, and `<picture>` are outside the
+  sanitizer allowlist, so they are stripped in `document` mode and available only through
+  raw HTML in `app` mode. There is currently no safe native way to embed video. Built-in
+  components with `url`-typed attributes would route through the existing scheme allowlist
+  and work safely in `document` mode — precisely the case the schema system exists for.
+  `embed` additionally needs a host allowlist, since `<iframe>` carries XSS and
+  clickjacking risk that a scheme check alone does not address.
 - Diagnostic renderer with the framed source-excerpt format (ARCHITECTURE §4)
 - `docs/diagnostics/` code registry, generated from source so it cannot drift
 - Dependency-graph CI check enforcing the parser/compiler boundary
