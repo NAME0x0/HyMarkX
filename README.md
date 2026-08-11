@@ -116,5 +116,16 @@ Track progress in [`ROADMAP.md`](ROADMAP.md).
 
 ## License
 
-Undecided — pending the project owner's explicit choice. Until a license file exists,
-all rights are reserved.
+Licensed under either of [MIT](LICENSE-MIT) or [Apache License 2.0](LICENSE-APACHE), at
+your option. Rationale in [ADR-0010](docs/adr/0010-licensing.md).
+
+**Your content stays yours.** Compiler output — and the HMX runtime embedded in that
+output — imposes no licensing obligation on the documents, sites, or applications you
+build with HyMarkX.
+
+The **name** is handled separately: `HyMarkX`, `HMX`, `.hmx`, `hmx`, and `@hymarkx` are
+project marks, so that `.hmx` keeps meaning one thing. Forks are welcome under the code
+license; see [`TRADEMARK.md`](TRADEMARK.md) for naming them.
+
+Unless you state otherwise, any contribution you intentionally submit for inclusion is
+dual licensed as above, with no additional terms.

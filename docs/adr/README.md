@@ -15,6 +15,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0007](0007-trust-modes.md) | Two host-selected trust modes | Accepted |
 | [0008](0008-no-plugin-api-yet.md) | No public plugin API before phases stabilize | Accepted, revisit Phase 9 |
 | [0009](0009-implementation-language.md) | TypeScript 7, ESM only, Node ≥ 22.12 | Accepted |
+| [0010](0010-licensing.md) | Dual licence `MIT OR Apache-2.0` + trademark policy | Accepted |
 
 ## Decisions still open
 
@@ -23,7 +24,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | Styling model (scoped CSS, tokens, native shorthand?) | Phase 3 | ADR-0010 |
 | `@`-statement family vs directive-only control flow | Phase 4 | evidence from real documents; see ADR-0002 |
 | Component contract (props, slots, scope, typing) | Phase 5 | every question in charter §41 answered first |
+| CLA vs DCO for outside contributions | before the first external PR | ADR-0010: a DCO does not grant relicensing rights |
 | State and reactivity model | Phase 6 | lifecycle specified before syntax |
 | Runtime/hydration strategy (islands granularity) | Phase 6 | |
 | TSX interoperability direction | Phase 8 | |
-| License | before first publish | owner's decision, not the toolchain's |
