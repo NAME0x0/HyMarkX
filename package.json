@@ -13,7 +13,7 @@
     "lint": "oxlint --deny-warnings packages",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && node scripts/check-boundaries.mjs"
+    "check": "pnpm build && pnpm lint && pnpm typecheck && pnpm test && node scripts/check-boundaries.mjs"
   },
   "devDependencies": {
     "oxlint": "^1.0.0",
