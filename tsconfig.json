@@ -1,4 +1,4 @@
 {
   "files": [],
-  "references": [{ "path": "./packages/ast" }]
+  "references": [{ "path": "./packages/ast" }, { "path": "./packages/parser" }]
 }

@@ -24,5 +24,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check
         run: pnpm check
+      - name: Check dependency boundaries
+        run: node scripts/check-boundaries.mjs
       - name: Check formatting
         run: pnpm format:check

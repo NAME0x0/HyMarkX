@@ -1,0 +1,28 @@
+{
+  "name": "@hymarkx/parser",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@hymarkx/ast": "workspace:*",
+    "mdast-util-from-markdown": "^2.0.3",
+    "mdast-util-gfm-autolink-literal": "^2.0.1",
+    "mdast-util-gfm-strikethrough": "^2.0.0",
+    "mdast-util-gfm-table": "^2.0.0",
+    "mdast-util-gfm-task-list-item": "^2.0.0",
+    "micromark-extension-gfm-autolink-literal": "^2.1.0",
+    "micromark-extension-gfm-strikethrough": "^2.1.0",
+    "micromark-extension-gfm-table": "^2.1.1",
+    "micromark-extension-gfm-task-list-item": "^2.1.0"
+  },
+  "description": "Markdown parser producing the HyMarkX (HMX) syntax tree.",
+  "license": "MIT OR Apache-2.0"
+}

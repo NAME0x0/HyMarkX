@@ -25,6 +25,11 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 
 ## P2
 
+- **Deep nesting overflows `mdast-util-gfm-autolink-literal`.** Its tree transform is
+  recursive, so a document nested ~10,000 deep crashes it even though our converter and
+  plain mdast handle it. Currently surfaced as diagnostic `HMX1002` rather than a
+  `RangeError`. Real fixes: implement autolink-literal detection in our own iterative
+  converter, or upstream an iterative transform. Relevant to threat T9.
 - Diagnostic renderer with the framed source-excerpt format (ARCHITECTURE §4)
 - `docs/diagnostics/` code registry, generated from source so it cannot drift
 - Dependency-graph CI check enforcing the parser/compiler boundary
