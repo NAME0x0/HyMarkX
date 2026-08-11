@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.12.3",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "tsc -b --pretty false",
+    "typecheck": "tsc -p tsconfig.test.json --pretty false",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint --deny-warnings packages",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm lint && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "oxlint": "^1.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
+}

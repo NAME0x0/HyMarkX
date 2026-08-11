@@ -1,0 +1,15 @@
+{
+  // Typecheck every package's source AND tests in one pass, so a new package is covered
+  // the moment it exists rather than when someone remembers to add it to a script.
+  //
+  // skipLibCheck is on because vitest/vite ship .d.ts files that reference DOM globals
+  // (EventTarget, AbortSignal, WebSocket). The base config deliberately omits the DOM
+  // lib — the compiler must run without assuming a browser — and we are not going to
+  // weaken that just to typecheck someone else's declarations.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts"]
+}

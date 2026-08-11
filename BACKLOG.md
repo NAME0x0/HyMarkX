@@ -17,6 +17,12 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 | `@hymarkx/cli` | `hmx build`, `hmx check` |
 | CommonMark + GFM conformance suites | must be green before Phase 2 |
 
+## P1 — carried into Phase 2
+
+| Item | Notes |
+|---|---|
+| `containerDirective` traversal index | A container has two child arrays (`label`, `children`), so `visit` reports an index into their concatenation. Read-only passes are fine; index-based mutation is not. Settle the label representation when directives land, then fix `childrenOf` and drop the warning comment in `packages/ast/src/visit.ts`. |
+
 ## P2
 
 - Diagnostic renderer with the framed source-excerpt format (ARCHITECTURE §4)
