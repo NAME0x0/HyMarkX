@@ -1,0 +1,187 @@
+{
+  "type": "root",
+  "hmxVersion": "0.0.0",
+  "children": [
+    {
+      "type": "containerDirective",
+      "name": "card",
+      "attributes": [
+        {
+          "name": "id",
+          "value": "hero",
+          "position": {
+            "start": { "line": 1, "column": 22, "offset": 21 },
+            "end": { "line": 1, "column": 27, "offset": 26 }
+          },
+          "nameSpan": {
+            "start": { "line": 1, "column": 22, "offset": 21 },
+            "end": { "line": 1, "column": 27, "offset": 26 }
+          },
+          "valueSpan": {
+            "start": { "line": 1, "column": 23, "offset": 22 },
+            "end": { "line": 1, "column": 27, "offset": 26 }
+          }
+        },
+        {
+          "name": "class",
+          "value": "large",
+          "position": {
+            "start": { "line": 1, "column": 28, "offset": 27 },
+            "end": { "line": 1, "column": 34, "offset": 33 }
+          },
+          "nameSpan": {
+            "start": { "line": 1, "column": 28, "offset": 27 },
+            "end": { "line": 1, "column": 34, "offset": 33 }
+          },
+          "valueSpan": {
+            "start": { "line": 1, "column": 29, "offset": 28 },
+            "end": { "line": 1, "column": 34, "offset": 33 }
+          }
+        },
+        {
+          "name": "title",
+          "value": "Q1",
+          "position": {
+            "start": { "line": 1, "column": 35, "offset": 34 },
+            "end": { "line": 1, "column": 45, "offset": 44 }
+          },
+          "nameSpan": {
+            "start": { "line": 1, "column": 35, "offset": 34 },
+            "end": { "line": 1, "column": 40, "offset": 39 }
+          },
+          "valueSpan": {
+            "start": { "line": 1, "column": 42, "offset": 41 },
+            "end": { "line": 1, "column": 44, "offset": 43 }
+          }
+        },
+        {
+          "name": "bare",
+          "value": null,
+          "position": {
+            "start": { "line": 1, "column": 46, "offset": 45 },
+            "end": { "line": 1, "column": 50, "offset": 49 }
+          },
+          "nameSpan": {
+            "start": { "line": 1, "column": 46, "offset": 45 },
+            "end": { "line": 1, "column": 50, "offset": 49 }
+          }
+        },
+        {
+          "name": "empty",
+          "value": "",
+          "position": {
+            "start": { "line": 1, "column": 51, "offset": 50 },
+            "end": { "line": 1, "column": 59, "offset": 58 }
+          },
+          "nameSpan": {
+            "start": { "line": 1, "column": 51, "offset": 50 },
+            "end": { "line": 1, "column": 56, "offset": 55 }
+          },
+          "valueSpan": {
+            "start": { "line": 1, "column": 58, "offset": 57 },
+            "end": { "line": 1, "column": 58, "offset": 57 }
+          }
+        }
+      ],
+      "label": [
+        {
+          "type": "strong",
+          "children": [
+            {
+              "type": "text",
+              "value": "Revenue",
+              "position": {
+                "start": { "line": 1, "column": 11, "offset": 10 },
+                "end": { "line": 1, "column": 18, "offset": 17 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 1, "column": 9, "offset": 8 },
+            "end": { "line": 1, "column": 20, "offset": 19 }
+          }
+        }
+      ],
+      "children": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "value": "Text ",
+              "position": {
+                "start": { "line": 2, "column": 1, "offset": 60 },
+                "end": { "line": 2, "column": 6, "offset": 65 }
+              }
+            },
+            {
+              "type": "textDirective",
+              "name": "badge",
+              "attributes": [
+                {
+                  "name": "tone",
+                  "value": "warm",
+                  "position": {
+                    "start": { "line": 2, "column": 20, "offset": 79 },
+                    "end": { "line": 2, "column": 29, "offset": 88 }
+                  },
+                  "nameSpan": {
+                    "start": { "line": 2, "column": 20, "offset": 79 },
+                    "end": { "line": 2, "column": 24, "offset": 83 }
+                  },
+                  "valueSpan": {
+                    "start": { "line": 2, "column": 25, "offset": 84 },
+                    "end": { "line": 2, "column": 29, "offset": 88 }
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "type": "emphasis",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "new",
+                      "position": {
+                        "start": { "line": 2, "column": 14, "offset": 73 },
+                        "end": { "line": 2, "column": 17, "offset": 76 }
+                      }
+                    }
+                  ],
+                  "position": {
+                    "start": { "line": 2, "column": 13, "offset": 72 },
+                    "end": { "line": 2, "column": 18, "offset": 77 }
+                  }
+                }
+              ],
+              "position": {
+                "start": { "line": 2, "column": 6, "offset": 65 },
+                "end": { "line": 2, "column": 30, "offset": 89 }
+              }
+            },
+            {
+              "type": "text",
+              "value": ".",
+              "position": {
+                "start": { "line": 2, "column": 30, "offset": 89 },
+                "end": { "line": 2, "column": 31, "offset": 90 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 2, "column": 1, "offset": 60 },
+            "end": { "line": 2, "column": 31, "offset": 90 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 1, "column": 1, "offset": 0 },
+        "end": { "line": 3, "column": 4, "offset": 94 }
+      }
+    }
+  ],
+  "position": {
+    "start": { "line": 1, "column": 1, "offset": 0 },
+    "end": { "line": 4, "column": 1, "offset": 95 }
+  }
+}

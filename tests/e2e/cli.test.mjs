@@ -68,6 +68,28 @@ describe('built hmx CLI', () => {
     expect(result.stderr).toBe('')
   })
 
+  it('builds directive documents with warning-only diagnostics and exit code zero', () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        cliPath,
+        'build',
+        'fixtures/markdown/directives-basic/input.md',
+        '--out',
+        '-',
+        '--trust',
+        'app',
+      ],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toBe('<strong>Revenue</strong><p>Text <em>new</em>.</p>\n')
+    expect(result.stderr).toContain('warning[HMX2002]: Unknown directive "card"')
+    expect(result.stderr).toContain('warning[HMX2002]: Unknown directive "badge"')
+    expect(result.stderr).toContain('0 errors, 2 warnings in 1 file')
+  })
+
   it('uses exit code 1 for document diagnostics and 2 for usage or I/O failures', () => {
     const unsupported = spawnSync(process.execPath, [cliPath, 'check', 'README.txt', '--json'], {
       cwd: repositoryRoot,

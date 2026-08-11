@@ -9,6 +9,7 @@ import { gfmAutolinkLiteral } from 'micromark-extension-gfm-autolink-literal'
 import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough'
 import { gfmTable } from 'micromark-extension-gfm-table'
 import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item'
+import { directiveFromMarkdown, directiveTokenizer } from './directives.js'
 import { fromMdast } from './from-mdast.js'
 import { ParserInternalError } from './internal-error.js'
 import { SourcePositions } from './positions.js'
@@ -39,6 +40,8 @@ export interface ParseResult {
 }
 
 const gfmExtensions = [gfmAutolinkLiteral(), gfmStrikethrough(), gfmTable(), gfmTaskListItem()]
+
+const directiveExtension = directiveTokenizer()
 
 const gfmMdastExtensions = [
   gfmAutolinkLiteralFromMarkdown(),
@@ -86,19 +89,20 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
   const normalizedSource = normalizeSource(source)
   const positions = new SourcePositions(normalizedSource)
   const from = options.from ?? '<anonymous>'
+  const diagnostics: Diagnostic[] = []
 
   try {
-    const mdastRoot =
-      options.gfm === false
-        ? fromMarkdown(normalizedSource)
-        : fromMarkdown(normalizedSource, {
-            extensions: gfmExtensions,
-            mdastExtensions: gfmMdastExtensions,
-          })
+    const mdastRoot = fromMarkdown(normalizedSource, {
+      extensions: [directiveExtension, ...(options.gfm === false ? [] : gfmExtensions)],
+      mdastExtensions: [
+        directiveFromMarkdown(diagnostics, positions),
+        ...(options.gfm === false ? [] : gfmMdastExtensions),
+      ],
+    })
 
     return {
       root: fromMdast(mdastRoot, normalizedSource),
-      diagnostics: [],
+      diagnostics,
       source: normalizedSource,
     }
   } catch (error) {

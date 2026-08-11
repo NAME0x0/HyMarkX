@@ -1,5 +1,7 @@
 import { createDiagnostic } from '@hymarkx/ast'
 import type {
+  Attribute,
+  AttributeList,
   BlockContent,
   Heading,
   LinkReference,
@@ -32,6 +34,8 @@ interface MdastNode {
   readonly label?: unknown
   readonly referenceType?: unknown
   readonly align?: unknown
+  readonly attributes?: unknown
+  readonly name?: unknown
 }
 
 interface ConversionFrame {
@@ -143,6 +147,61 @@ function toSpan(node: MdastNode, positions: SourcePositions): Span {
       positions.span,
     )
   }
+}
+
+function spanField(
+  value: unknown,
+  field: string,
+  nodeType: string,
+  positions: SourcePositions,
+): Span {
+  return toSpan({ type: `${nodeType}.${field}`, position: value }, positions)
+}
+
+function attributesOf(node: MdastNode, positions: SourcePositions): AttributeList {
+  if (!Array.isArray(node.attributes)) {
+    throw internalError(`mdast node "${node.type}" has no attributes array`, positions.span)
+  }
+
+  const attributes: Attribute[] = []
+  for (const value of node.attributes) {
+    if (!isRecord(value) || typeof value.name !== 'string') {
+      throw internalError(
+        `mdast node "${node.type}" has an invalid directive attribute`,
+        positions.span,
+      )
+    }
+    if (value.value !== null && typeof value.value !== 'string') {
+      throw internalError(
+        `mdast node "${node.type}" has an invalid directive attribute value`,
+        positions.span,
+      )
+    }
+
+    attributes.push({
+      name: value.name,
+      value: value.value,
+      position: spanField(value.position, 'attribute.position', node.type, positions),
+      nameSpan: spanField(value.nameSpan, 'attribute.nameSpan', node.type, positions),
+      ...(value.valueSpan === undefined
+        ? {}
+        : {
+            valueSpan: spanField(value.valueSpan, 'attribute.valueSpan', node.type, positions),
+          }),
+    })
+  }
+
+  return attributes
+}
+
+function directiveLabel(node: MdastNode, positions: SourcePositions): [] | undefined {
+  if (node.label === undefined) {
+    return undefined
+  }
+  if (!Array.isArray(node.label)) {
+    throw internalError(`mdast node "${node.type}" has an invalid label`, positions.span)
+  }
+  return []
 }
 
 function tableAlignment(
@@ -294,9 +353,54 @@ function createNode(node: MdastNode, positions: SourcePositions): Node {
       return { type: 'tableRow', children: [], position }
     case 'tableCell':
       return { type: 'tableCell', children: [], position }
+    case 'textDirective':
+      return {
+        type: 'textDirective',
+        name: requiredString(node.name, 'name', node.type, positions),
+        attributes: attributesOf(node, positions),
+        children: [],
+        position,
+      }
+    case 'leafDirective': {
+      const label = directiveLabel(node, positions)
+      return {
+        type: 'leafDirective',
+        name: requiredString(node.name, 'name', node.type, positions),
+        attributes: attributesOf(node, positions),
+        ...(label === undefined ? {} : { label }),
+        position,
+      }
+    }
+    case 'containerDirective': {
+      const label = directiveLabel(node, positions)
+      return {
+        type: 'containerDirective',
+        name: requiredString(node.name, 'name', node.type, positions),
+        attributes: attributesOf(node, positions),
+        ...(label === undefined ? {} : { label }),
+        children: [],
+        position,
+      }
+    }
     default:
       throw internalError(`Unsupported mdast node type "${node.type}"`, position)
   }
+}
+
+function labelChildrenOf(
+  node: MdastNode,
+  positions: SourcePositions,
+): readonly unknown[] | undefined {
+  if (node.type !== 'containerDirective' && node.type !== 'leafDirective') {
+    return undefined
+  }
+  if (node.label === undefined) {
+    return undefined
+  }
+  if (!Array.isArray(node.label)) {
+    throw internalError(`mdast node "${node.type}" has an invalid label`, positions.span)
+  }
+  return node.label
 }
 
 function childrenOf(node: MdastNode, positions: SourcePositions): readonly unknown[] | undefined {
@@ -315,6 +419,8 @@ function childrenOf(node: MdastNode, positions: SourcePositions): readonly unkno
     case 'table':
     case 'tableRow':
     case 'tableCell':
+    case 'containerDirective':
+    case 'textDirective':
       if (!Array.isArray(node.children)) {
         throw internalError(`mdast node "${node.type}" has no children array`, positions.span)
       }
@@ -328,10 +434,27 @@ function childrenOf(node: MdastNode, positions: SourcePositions): readonly unkno
     case 'image':
     case 'definition':
     case 'imageReference':
+    case 'leafDirective':
       return undefined
     default:
       throw internalError(`Unsupported mdast node type "${node.type}"`, positions.span)
   }
+}
+
+function appendLabel(parent: Node, child: Node, positions: SourcePositions): void {
+  if (
+    (parent.type === 'containerDirective' || parent.type === 'leafDirective') &&
+    parent.label !== undefined &&
+    isPhrasingContent(child)
+  ) {
+    parent.label.push(child)
+    return
+  }
+
+  throw internalError(
+    `mdast node "${child.type}" cannot be a label child of "${parent.type}"`,
+    positions.span,
+  )
 }
 
 function isBlockContent(node: Node): node is BlockContent {
@@ -417,7 +540,17 @@ function appendChild(parent: Node, child: Node, positions: SourcePositions): voi
       }
       break
     case 'containerDirective':
+      if (isBlockContent(child)) {
+        parent.children.push(child)
+        return
+      }
+      break
     case 'textDirective':
+      if (isPhrasingContent(child)) {
+        parent.children.push(child)
+        return
+      }
+      break
     case 'leafDirective':
     case 'thematicBreak':
     case 'code':
@@ -463,12 +596,25 @@ export function fromMdast(value: unknown, source: string): Root {
     }
 
     const sourceChildren = childrenOf(frame.source, positions)
-    if (sourceChildren === undefined) {
+    const sourceLabel = labelChildrenOf(frame.source, positions)
+    if (sourceChildren === undefined && sourceLabel === undefined) {
       continue
     }
 
     const childFrames: ConversionFrame[] = []
-    for (const sourceChild of sourceChildren) {
+    for (const sourceChild of sourceLabel ?? []) {
+      if (!isMdastNode(sourceChild)) {
+        throw internalError(
+          `mdast node "${frame.source.type}" has an invalid label child`,
+          positions.span,
+        )
+      }
+      const outputChild = createNode(sourceChild, positions)
+      appendLabel(frame.output, outputChild, positions)
+      childFrames.push({ source: sourceChild, output: outputChild })
+    }
+
+    for (const sourceChild of sourceChildren ?? []) {
       if (!isMdastNode(sourceChild)) {
         throw internalError(
           `mdast node "${frame.source.type}" has an invalid child`,

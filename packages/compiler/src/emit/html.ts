@@ -393,7 +393,10 @@ function emitHtml(document: AnalyzedDocument, options: HtmlOptions): EmitResult 
         pushInOrder(stack, childActions(node.label ?? [], inlineContext))
         break
       case 'containerDirective':
-        pushInOrder(stack, childActions(node.children, blockContext))
+        pushInOrder(stack, [
+          ...childActions(node.label ?? [], inlineContext),
+          ...childActions(node.children, blockContext),
+        ])
         break
       default:
         assertNeverNode(node)

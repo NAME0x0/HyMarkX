@@ -7,9 +7,50 @@ export interface AnalyzedDocument {
   readonly diagnostics: readonly Diagnostic[]
 }
 
+/**
+ * Matches a line that opens like a block directive: two or more colons immediately
+ * followed by a directive name character. Prose such as `:: note` or a bare `:::` does
+ * not match, because a name character must follow the colons with no space.
+ */
+const DIRECTIVE_LIKE = /^:{2,}[A-Za-z0-9]/
+
+/**
+ * Reports paragraphs that look like a block directive but were not parsed as one.
+ *
+ * The tokenizer refuses to open a directive whose attribute block is malformed — for
+ * example `:::card{ bad` or the not-yet-supported `:::card{title={user.name}}` — and the
+ * line then falls through to ordinary Markdown. Without this check the document renders
+ * the source text verbatim and says nothing, which is the least debuggable failure a
+ * markup language can have.
+ */
+function checkDirectiveLikeParagraphs(root: Root, diagnostics: Diagnostic[]): void {
+  visit(root, (node) => {
+    if (node.type !== 'paragraph') {
+      return
+    }
+
+    const first = node.children[0]
+    if (first?.type !== 'text' || !DIRECTIVE_LIKE.test(first.value)) {
+      return
+    }
+
+    diagnostics.push(
+      createDiagnostic({
+        code: 'HMX1011',
+        severity: 'warning',
+        message: 'This line looks like a directive but was not recognized as one.',
+        span: node.position,
+        expected: 'a well-formed attribute block, such as :::name{key="value"}',
+      }),
+    )
+  })
+}
+
 /** Runs the Phase 1 semantic checks without mutating the syntax tree. */
 export function analyze(root: Root): AnalyzedDocument {
   const diagnostics: Diagnostic[] = []
+
+  checkDirectiveLikeParagraphs(root, diagnostics)
 
   visit(root, (node) => {
     if (

@@ -16,7 +16,16 @@ describe('Markdown HTML fixtures', () => {
     const expected = readFileSync(new URL('expected.html', fixtureDirectory), 'utf8')
     const result = compile(input, { from: `${fixtureName}/input.md`, trust: 'app' })
 
-    expect(result.diagnostics).toEqual([])
+    if (fixtureName.startsWith('directives-')) {
+      expect(result.diagnostics.length).toBeGreaterThan(0)
+      expect(
+        result.diagnostics.every(
+          (diagnostic) => diagnostic.code === 'HMX2002' && diagnostic.severity === 'warning',
+        ),
+      ).toBe(true)
+    } else {
+      expect(result.diagnostics).toEqual([])
+    }
     expect(result.html).toBe(expected)
   })
 })

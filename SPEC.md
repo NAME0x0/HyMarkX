@@ -85,8 +85,15 @@ Attribute syntax follows HTML conventions inside `{}`:
 - Multiple `.class` shorthands MUST combine. Multiple `#id` shorthands: the last wins,
   and the processor SHOULD emit warning `HMX2010`.
 - Attribute values are **strings** at this language version. Expression-valued
-  attributes (`{title={user.name}}`) are specified in Phase 4 and MUST be rejected
-  with `HMX1010` until then, rather than silently treated as literal text.
+  attributes (`{title={user.name}}`) are specified in Phase 4. Until then a processor
+  MUST NOT treat them as literal string values.
+  - In a **text** directive the construct is recognized and MUST be rejected with
+    `HMX1010`.
+  - In a **leaf or container** directive the tokenizer does not recognize the line as a
+    directive at all, and it degrades to ordinary Markdown text. A processor MUST then
+    emit `HMX1011` (warning) for any paragraph whose first line matches `:{2,}[A-Za-z0-9]`,
+    so that the failure is reported rather than silent. The same rule catches ordinary
+    malformed attribute blocks such as `:::card{ bad`.
 - Unknown attributes on a known component MUST produce warning `HMX2001` — never a
   silent drop.
 
