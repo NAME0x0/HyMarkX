@@ -49,6 +49,17 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 
 ## Research
 
+- **Grammar-constrained generation export.** Emit the component schemas and HMX grammar as
+  JSON Schema plus a GBNF/EBNF grammar, so any language model generating `.hmx` can be
+  constrained to structurally valid output rather than validated after the fact. Follows
+  directly from schemas (HMX-005), the restricted expression language (ADR-0004), and
+  deterministic formatting. MDX structurally cannot do this — its content is a JavaScript
+  module, so the valid set is not expressible as a grammar. Design the schema format to be
+  exportable from the start; the export itself is Phase 7–9, after the grammar stabilizes.
+- **Suggestion diagnostics.** Edit-distance matching over known component and attribute
+  names, so `:::mertic` proposes `metric`. Cheap, deterministic, and most of the felt
+  "the compiler understands me" experience. Land alongside schemas.
+
 - **`@`-prefixed statement family** (`@let`, `@if`, `@for`) — better ergonomics than
   `:::if{…}` but a second grammar and an ambiguity risk with prose starting `@`.
   Mitigation sketch: closed keyword set, block position only, `@name` + space.
@@ -77,3 +88,4 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 | Full JavaScript as the expression language | Kills `document` mode, static analysis, SSR portability, and framework neutrality. JS remains available as an `app`-mode escape hatch. (ADR-0004) |
 | Rust/WASM compiler core now | No measurement identifies a bottleneck. Would halve contributor accessibility and complicate browser use. (ADR-0009) |
 | Shipping a universal client runtime | Contradicts output proportionality; the main performance advantage over MDX/React. |
+| An LLM-shaped inference engine inside the compiler (custom tokenizer/encoder/decoder/chunking/attention "vertices" that infer author intent without a model) | Category error, not a scope problem. Those components are plumbing that feeds learned weights; without the weights a tokenizer is a lexer and attention vertices are an AST — both of which we already have. The blocker is information-theoretic: when an author writes `:::chart`, the information about what they meant is not in the document. An LLM appears to supply it by drawing on a corpus; with no corpus there is nothing to draw on. Building it would produce unpredictable, undebuggable behaviour — failure mode §52 "excessive magic" — in a tool whose entire value is determinism. The achievable version of "the language understands me" is schemas, strong defaults, suggestion diagnostics, and type-system-style contextual inference, all of which are already planned. The productive inversion is under Research: export a grammar that constrains models generating HMX, rather than imitating one. |
