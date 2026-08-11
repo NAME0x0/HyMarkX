@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "description": "Command-line interface for building and checking HyMarkX (HMX) documents.",
   "license": "MIT OR Apache-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NAME0x0/HyMarkX.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/NAME0x0/HyMarkX#readme",
+  "bugs": "https://github.com/NAME0x0/HyMarkX/issues",
   "type": "module",
   "bin": {
     "hmx": "./dist/bin.js"

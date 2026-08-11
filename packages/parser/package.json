@@ -1,6 +1,16 @@
 {
   "name": "@hymarkx/parser",
   "version": "0.0.0",
+  "description": "Markdown parser producing the HyMarkX (HMX) syntax tree.",
+  "license": "MIT OR Apache-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NAME0x0/HyMarkX.git",
+    "directory": "packages/parser"
+  },
+  "homepage": "https://github.com/NAME0x0/HyMarkX#readme",
+  "bugs": "https://github.com/NAME0x0/HyMarkX/issues",
   "type": "module",
   "exports": {
     ".": {
@@ -22,7 +32,5 @@
     "micromark-extension-gfm-strikethrough": "^2.1.0",
     "micromark-extension-gfm-table": "^2.1.1",
     "micromark-extension-gfm-task-list-item": "^2.1.0"
-  },
-  "description": "Markdown parser producing the HyMarkX (HMX) syntax tree.",
-  "license": "MIT OR Apache-2.0"
+  }
 }
