@@ -11,8 +11,9 @@ import {
   text,
   visit,
   visitOf,
+  yaml,
 } from '../src/index.js'
-import type { BlockContent, Heading, Node } from '../src/index.js'
+import type { BlockContent, Heading, Node, Yaml } from '../src/index.js'
 
 function describeNode(node: Node): string {
   return node.type === 'text' ? `text:${node.value}` : node.type
@@ -20,6 +21,7 @@ function describeNode(node: Node): string {
 
 function mixedTree(): Node {
   return root('0.0.0', [
+    yaml('title: metadata'),
     heading(1, [text('title')]),
     blockquote([paragraph([text('before'), emphasis([text('inside')]), text('after')])]),
     containerDirective('card', [], [text('label')], [paragraph([text('body')])]),
@@ -36,6 +38,7 @@ describe('visit', () => {
 
     expect(order).toEqual([
       'root',
+      'yaml',
       'heading',
       'text:title',
       'blockquote',
@@ -59,7 +62,7 @@ describe('visit', () => {
     })
 
     expect(relationships).toContain('root@none:0')
-    expect(relationships).toContain('blockquote@root:1')
+    expect(relationships).toContain('blockquote@root:2')
     expect(relationships).toContain('text:inside@emphasis:0')
     expect(relationships).toContain('text:label@containerDirective:0')
     expect(relationships).toContain('paragraph@containerDirective:1')
@@ -77,6 +80,7 @@ describe('visit', () => {
 
     expect(order).toEqual([
       'root',
+      'yaml',
       'heading',
       'text:title',
       'blockquote',
@@ -113,6 +117,7 @@ describe('visit', () => {
 
     expect(order).toEqual([
       'root',
+      'yaml',
       'heading',
       'text:title',
       'blockquote',
@@ -136,7 +141,7 @@ describe('visit', () => {
       },
     )
 
-    expect(exits).toEqual(['text:title', 'heading'])
+    expect(exits).toEqual(['yaml', 'text:title', 'heading'])
   })
 
   it('visitOf narrows the selected node type', () => {
@@ -148,6 +153,17 @@ describe('visit', () => {
     })
 
     expect(depths).toEqual([1])
+  })
+
+  it('treats YAML frontmatter as a leaf node', () => {
+    const values: string[] = []
+
+    visitOf(mixedTree(), 'yaml', (node) => {
+      expectTypeOf(node).toEqualTypeOf<Yaml>()
+      values.push(node.value)
+    })
+
+    expect(values).toEqual(['title: metadata'])
   })
 
   it('traverses a 10,000-deep tree without overflowing the call stack', () => {

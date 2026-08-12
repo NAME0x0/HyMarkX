@@ -4,6 +4,11 @@ build/
 coverage/
 .vitest/
 pnpm-lock.yaml
+
+# Golden fixtures and conformance data are compared byte for byte. Formatting them
+# rewrites the expected output and breaks the suites that depend on it.
+fixtures/
+tests/conformance/*.json
 **/*.md
 tests/conformance/commonmark-0.31.2.json
 fixtures/markdown/**/expected.html

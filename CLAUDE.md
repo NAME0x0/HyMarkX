@@ -28,9 +28,12 @@ production code only for edits smaller than the delegation overhead.
 
 ## Current state
 
-Phases 0 and 1 complete: `@hymarkx/{ast,parser,compiler,cli}` build Markdown to HTML at
-652/652 CommonMark conformance with a working trust boundary. Phase 2 (directives +
-component schemas) is next — see `ROADMAP.md`.
+Phases 0-2 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
+directives to HTML at 652/652 CommonMark conformance, with schema-validated components,
+frontmatter, and a working trust boundary. Zero JavaScript in static output.
+
+Phase 3 (styling) is next, followed by the "is this just Markdoc?" go/no-go gate — see
+`ROADMAP.md`.
 
 ## Naming
 

@@ -25,7 +25,7 @@ Prove the boring part works perfectly before adding anything.
 CommonMark suite; the parser→compiler boundary holds (no unified imports in
 `compiler`); >0 diagnostics implemented with real spans.
 
-## Phase 2 — First HMX extension: directives
+## Phase 2 — First HMX extension: directives ✅
 
 One carefully designed native construct, taken all the way.
 

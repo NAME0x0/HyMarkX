@@ -25,6 +25,7 @@ export {
   text,
   textDirective,
   thematicBreak,
+  yaml,
 } from './builders.js'
 export {
   getAttribute,
@@ -80,6 +81,7 @@ export type {
   Text,
   TextDirective,
   ThematicBreak,
+  Yaml,
 } from './types.js'
 export { EXIT, SKIP, visit, visitOf } from './visit.js'
 export type { VisitorResult } from './visit.js'

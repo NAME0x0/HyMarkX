@@ -230,6 +230,12 @@ function createNode(node: MdastNode, positions: SourcePositions): Node {
   switch (node.type) {
     case 'root':
       return { type: 'root', hmxVersion: HMX_VERSION, children: [], position }
+    case 'yaml':
+      return {
+        type: 'yaml',
+        value: requiredString(node.value, 'value', node.type, positions),
+        position,
+      }
     case 'paragraph':
       return { type: 'paragraph', children: [], position }
     case 'heading':
@@ -426,6 +432,7 @@ function childrenOf(node: MdastNode, positions: SourcePositions): readonly unkno
       }
       return node.children
     case 'thematicBreak':
+    case 'yaml':
     case 'code':
     case 'html':
     case 'text':
@@ -490,7 +497,7 @@ function isPhrasingContent(node: Node): node is PhrasingContent {
 }
 
 function isRootContent(node: Node): node is RootContent {
-  return isBlockContent(node) || node.type === 'definition'
+  return isBlockContent(node) || node.type === 'definition' || node.type === 'yaml'
 }
 
 function appendChild(parent: Node, child: Node, positions: SourcePositions): void {
@@ -553,6 +560,7 @@ function appendChild(parent: Node, child: Node, positions: SourcePositions): voi
       break
     case 'leafDirective':
     case 'thematicBreak':
+    case 'yaml':
     case 'code':
     case 'html':
     case 'text':

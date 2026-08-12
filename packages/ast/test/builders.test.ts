@@ -27,6 +27,7 @@ import {
   text,
   textDirective,
   thematicBreak,
+  yaml,
 } from '../src/index.js'
 import type { Span } from '../src/index.js'
 
@@ -40,6 +41,11 @@ describe('node builders', () => {
       name: 'root',
       actual: root('0.0.0', []),
       expected: { type: 'root', hmxVersion: '0.0.0', children: [], position: SYNTHETIC_SPAN },
+    },
+    {
+      name: 'yaml',
+      actual: yaml('title: Example'),
+      expected: { type: 'yaml', value: 'title: Example', position: SYNTHETIC_SPAN },
     },
     {
       name: 'paragraph',

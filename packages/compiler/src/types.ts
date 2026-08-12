@@ -4,6 +4,14 @@ import type { ComponentRegistry } from './components/types.js'
 /** Host-selected trust boundary used while emitting HTML. */
 export type TrustMode = 'document' | 'app'
 
+/** A scalar value accepted in parsed frontmatter. */
+export type FrontmatterScalar = string | number | boolean | null
+
+/** A parsed frontmatter mapping exposed to compiler consumers. */
+export type FrontmatterValue = {
+  readonly [key: string]: FrontmatterScalar | readonly FrontmatterScalar[] | FrontmatterValue
+}
+
 /** Options controlling parsing, analysis, and HTML emission. */
 export interface CompileOptions {
   /** Host-selected. Never inferred from document content. Default: `document`. */
@@ -24,4 +32,6 @@ export interface CompileResult {
   readonly diagnostics: readonly Diagnostic[]
   /** Normalized source indexed by every diagnostic span. */
   readonly source: string
+  /** Parsed frontmatter, or undefined when the document has none. */
+  readonly frontmatter?: FrontmatterValue
 }

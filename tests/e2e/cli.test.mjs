@@ -68,6 +68,29 @@ describe('built hmx CLI', () => {
     expect(result.stderr).toBe('')
   })
 
+  it('includes parsed frontmatter in check and build JSON output', () => {
+    const input = 'fixtures/markdown/frontmatter/input.md'
+    const check = spawnSync(process.execPath, [cliPath, 'check', input, '--json'], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+    })
+    const build = spawnSync(
+      process.execPath,
+      [cliPath, 'build', input, '--out', outputRoot, '--json'],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )
+
+    expect(check.status).toBe(0)
+    expect(build.status).toBe(0)
+    expect(JSON.parse(check.stdout).frontmatter).toMatchObject({
+      title: 'Frontmatter fixture',
+      draft: false,
+    })
+    expect(JSON.parse(build.stdout).frontmatter).toEqual(JSON.parse(check.stdout).frontmatter)
+    expect(check.stderr).toBe('')
+    expect(build.stderr).toBe('')
+  })
+
   it('builds component documents with warning-only diagnostics and exit code zero', () => {
     const result = spawnSync(
       process.execPath,

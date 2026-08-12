@@ -10,6 +10,7 @@ import { gfmStrikethrough } from 'micromark-extension-gfm-strikethrough'
 import { gfmTable } from 'micromark-extension-gfm-table'
 import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item'
 import { directiveFromMarkdown, directiveTokenizer } from './directives.js'
+import { frontmatterFromMarkdown, frontmatterTokenizer } from './frontmatter.js'
 import { fromMdast } from './from-mdast.js'
 import { ParserInternalError } from './internal-error.js'
 import { SourcePositions } from './positions.js'
@@ -21,6 +22,13 @@ export interface ParseOptions {
   readonly gfm?: boolean
   /** File path included in diagnostics. Default: `'<anonymous>'`. */
   readonly from?: string
+  /**
+   * Recognize a leading `---` block as frontmatter. Default: `true`.
+   *
+   * The compiler sets this to `false` and reparses when a leading block turns out not to
+   * be a YAML mapping, because `---` is also ordinary CommonMark.
+   */
+  readonly frontmatter?: boolean
 }
 
 /** The complete result of parsing normalized Markdown source. */
@@ -42,6 +50,7 @@ export interface ParseResult {
 const gfmExtensions = [gfmAutolinkLiteral(), gfmStrikethrough(), gfmTable(), gfmTaskListItem()]
 
 const directiveExtension = directiveTokenizer()
+const frontmatterExtension = frontmatterTokenizer()
 
 const gfmMdastExtensions = [
   gfmAutolinkLiteralFromMarkdown(),
@@ -93,8 +102,13 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
 
   try {
     const mdastRoot = fromMarkdown(normalizedSource, {
-      extensions: [directiveExtension, ...(options.gfm === false ? [] : gfmExtensions)],
+      extensions: [
+        ...(options.frontmatter === false ? [] : [frontmatterExtension]),
+        directiveExtension,
+        ...(options.gfm === false ? [] : gfmExtensions),
+      ],
       mdastExtensions: [
+        ...(options.frontmatter === false ? [] : [frontmatterFromMarkdown(positions)]),
         directiveFromMarkdown(diagnostics, positions),
         ...(options.gfm === false ? [] : gfmMdastExtensions),
       ],

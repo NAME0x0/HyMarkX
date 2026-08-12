@@ -138,8 +138,26 @@ SHOULD offer it as a suggestion, and MUST omit the suggestion rather than offer 
 ### 4.3 Frontmatter *(Phase 2)*
 
 A document MAY begin with a YAML frontmatter block delimited by `---`. It MUST be the
-first thing in the file. Its value MUST be a mapping. Frontmatter is metadata: it MUST
-NOT be able to alter the document's trust mode (§7).
+first thing in the file. Frontmatter is metadata: it MUST NOT be able to alter the
+document's trust mode (§7).
+
+**Recognition rule** *(normative)*. `---` is also ordinary CommonMark: `---\nFoo\n---` is a
+thematic break followed by a setext heading, and `---\n---` is two thematic breaks. Both
+appear in the conformance suite, so a processor MUST NOT treat every leading `---` block as
+frontmatter — §3 outranks this section.
+
+A leading block is frontmatter **only if** its content parses as a YAML mapping. Otherwise
+the document MUST be processed as ordinary Markdown, with the block rendering exactly as
+CommonMark requires.
+
+When the block is not frontmatter, a processor MUST report the reason **only** if the block
+was plainly intended as frontmatter — that is, if it contains a line matching
+`^[ \t]*[A-Za-z_][A-Za-z0-9_-]*[ \t]*:(\s|$)`. This keeps a typo in real frontmatter
+(`title: [unclosed`) from silently rendering as prose, while leaving genuine Markdown
+undisturbed.
+
+A processor MUST parse YAML with entity expansion bounded, merge keys disabled, custom tags
+disabled, and string-only keys. See `SECURITY.md` threats T11–T13.
 
 Reserved keys at this version: `title`, `description`, `layout`, `lang`, `draft`.
 Unknown keys are preserved and exposed to backends; they MUST NOT error.

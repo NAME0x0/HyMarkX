@@ -101,6 +101,40 @@ describe('document trust mode', () => {
   })
 })
 
+describe('frontmatter security', () => {
+  it('rejects billion-laughs expansion with HMX2021 in under two seconds', () => {
+    const source = `---
+a: &a [lol, lol, lol, lol, lol, lol, lol, lol, lol]
+b: &b [*a, *a, *a, *a, *a, *a, *a, *a, *a]
+c: &c [*b, *b, *b, *b, *b, *b, *b, *b, *b]
+---`
+    const started = performance.now()
+    const result = compile(source)
+    const elapsed = performance.now() - started
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual(['HMX2021'])
+    expect(elapsed).toBeLessThan(2_000)
+  })
+
+  it('does not construct values from language-specific tags', () => {
+    const result = compile('---\npayload: !!js/function function () {}\n---')
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual(['HMX2021'])
+    expect(result.frontmatter).toBeUndefined()
+  })
+
+  it('rejects forbidden keys and leaves Object.prototype unpolluted', () => {
+    const result = compile(
+      '---\n__proto__: polluted\nconstructor: polluted\nprototype: polluted\n---',
+    )
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual(['HMX3007', 'HMX3007', 'HMX3007'])
+    expect(result.frontmatter).toEqual({})
+    expect(Object.getPrototypeOf(result.frontmatter)).toBeNull()
+    expect(Object.prototype).not.toHaveProperty('polluted')
+  })
+})
+
 describe('CLI path confinement', () => {
   it('rejects an input-relative output path that escapes --out', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'hmx-security-'))

@@ -277,6 +277,8 @@ function emitHtml(document: AnalyzedDocument, options: HtmlOptions): EmitResult 
       case 'root':
         pushInOrder(stack, childActions(node.children, blockContext))
         break
+      case 'yaml':
+        break
       case 'paragraph': {
         const content = childActions(node.children, inlineContext)
         if (context.tightParagraph === true) {

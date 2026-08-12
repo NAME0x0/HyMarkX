@@ -45,6 +45,7 @@ function childrenOf(node: Node): readonly Node[] | undefined {
       // representation is settled in Phase 2. Tracked as P1 in BACKLOG.md.
       return node.label === undefined ? node.children : [...node.label, ...node.children]
     case 'thematicBreak':
+    case 'yaml':
     case 'code':
     case 'html':
     case 'text':

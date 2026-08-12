@@ -30,6 +30,7 @@ import type {
   Text,
   TextDirective,
   ThematicBreak,
+  Yaml,
 } from './types.js'
 
 /** Creates a document root node. */
@@ -39,6 +40,11 @@ export function root(
   position: Span = SYNTHETIC_SPAN,
 ): Root {
   return { type: 'root', hmxVersion, children, position }
+}
+
+/** Creates a YAML frontmatter node without parsing its value. */
+export function yaml(value: string, position: Span = SYNTHETIC_SPAN): Yaml {
+  return { type: 'yaml', value, position }
 }
 
 /** Creates a paragraph node. */

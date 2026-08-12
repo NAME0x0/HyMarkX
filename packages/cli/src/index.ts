@@ -2,7 +2,7 @@ import { lstat, mkdir, readFile, realpath, writeFile } from 'node:fs/promises'
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { parseArgs } from 'node:util'
 import { compile, renderDiagnostic } from '@hymarkx/compiler'
-import type { CompileResult, TrustMode } from '@hymarkx/compiler'
+import type { CompileResult, FrontmatterValue, TrustMode } from '@hymarkx/compiler'
 
 /** Current CLI package version. */
 export const VERSION = '0.0.0'
@@ -147,6 +147,24 @@ function defaultIo(): CliIo {
   }
 }
 
+function jsonFrontmatter(
+  inputs: readonly string[],
+  frontmatters: ReadonlyMap<string, FrontmatterValue>,
+): FrontmatterValue | Readonly<Record<string, FrontmatterValue>> | undefined {
+  if (frontmatters.size === 0) {
+    return undefined
+  }
+  if (inputs.length === 1) {
+    return frontmatters.get(inputs[0] ?? '')
+  }
+
+  const output = Object.create(null) as Record<string, FrontmatterValue>
+  for (const [input, value] of frontmatters) {
+    output[input] = value
+  }
+  return output
+}
+
 /** Runs the `hmx` command and resolves to its documented process exit code. */
 export async function runCli(
   arguments_: readonly string[] = process.argv.slice(2),
@@ -205,6 +223,7 @@ export async function runCli(
   const records: DiagnosticRecord[] = []
   const targets = new Map<string, OutputTarget>()
   const collisions = new Set<string>()
+  const frontmatters = new Map<string, FrontmatterValue>()
   let ioFailed = false
 
   if (command === 'build' && parsed.values.out !== '-') {
@@ -285,6 +304,9 @@ export async function runCli(
         from: input,
       })),
     )
+    if (result.frontmatter !== undefined) {
+      frontmatters.set(input, result.frontmatter)
+    }
 
     if (command !== 'build') {
       continue
@@ -327,7 +349,10 @@ export async function runCli(
 
   const diagnostics = records.map((record) => record.diagnostic)
   if (parsed.values.json === true) {
-    io.stdout.write(`${JSON.stringify({ diagnostics })}\n`)
+    const frontmatter = jsonFrontmatter(inputs, frontmatters)
+    io.stdout.write(
+      `${JSON.stringify({ diagnostics, ...(frontmatter === undefined ? {} : { frontmatter }) })}\n`,
+    )
   } else {
     for (const record of records) {
       io.stderr.write(

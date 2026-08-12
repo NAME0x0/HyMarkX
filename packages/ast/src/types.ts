@@ -27,6 +27,13 @@ export interface Root extends NodeBase {
   children: RootContent[]
 }
 
+/** A frontmatter block. Only valid as the first child of the root. */
+export interface Yaml extends NodeBase {
+  type: 'yaml'
+  /** Raw text between the delimiters, excluding them. Unparsed. */
+  value: string
+}
+
 /** A paragraph containing phrasing content. */
 export interface Paragraph extends NodeBase {
   type: 'paragraph'
@@ -246,7 +253,7 @@ export type PhrasingContent =
   | TextDirective
 
 /** Any node accepted directly under the document root. */
-export type RootContent = BlockContent | Definition
+export type RootContent = BlockContent | Definition | Yaml
 
 /** Any node in an HMX syntax tree. */
 export type Node = Root | RootContent | ListItem | TableRow | TableCell | PhrasingContent
