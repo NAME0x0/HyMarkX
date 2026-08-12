@@ -31,6 +31,23 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 
 ## P2
 
+*The first three were found by the HMX-P01 interactivity prototype. All are bounded design
+gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
+
+- **Render plans cannot emit void elements.** `RenderPlan.wrappers` describes paired tags
+  only, so a component rendering `<input>` produces `<input ...></input>`. Browsers
+  normalise it and behaviour is correct, but the serialised HTML is invalid. Needed before
+  any component emits `input`, `img`, `br`, or `hr`. Add a `void: true` flag to
+  `RenderedElement`.
+- **Attribute values cannot contain escaped quotes.** `on-click="last = \"Byron\""` fails to
+  parse — the backslash-escaped quote ends the attribute and the block degrades to prose
+  with `HMX1011`. Single quotes work as a workaround. String literals inside event handlers
+  are common enough that this needs deciding before Phase 4 syntax is settled; it is
+  evidence for that decision, not merely a bug.
+- **The AST records decoded attribute values but not how they were written.** Distinguishing
+  `value=1` from `value="1"` currently requires re-reading the source through the
+  attribute's spans. It works and stays AST-driven, but the expression phase would be
+  cleaner with an explicit literal-kind field on `Attribute`.
 - **Fence-count nesting is a usability trap.** Nesting containers requires the *outer*
   fence to carry more colons, so the natural `:::grid` wrapping `:::metric` silently closes
   the outer container. `HMX1001` reports it clearly, but every author will write it wrong

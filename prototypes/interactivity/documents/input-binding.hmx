@@ -1,0 +1,10 @@
+::state{first=Ada last=Lovelace}
+
+:::input{bind=first}
+:::
+
+Hello, :v[first] :v[last].
+
+:::button{on-click='last = "Byron"'}
+Rename
+:::

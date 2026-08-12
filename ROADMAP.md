@@ -46,9 +46,49 @@ attribute value produces a useful diagnostic rather than being passed through.
 Global styles, scoped styles, and the decision on whether native style shorthand earns
 its place. Design tokens considered, not assumed. Exit: a styled page ships zero JS.
 
-## Gate — "is this just Markdoc?"
+## Gate — "is this just Markdoc?" ✅ PASSED (2026-08-12)
 
-**A go/no-go review between Phase 3 and Phase 4. Not a formality.**
+**Run early, before Phase 3, so that styling was not built on an unanswered question.**
+
+The evidence is `prototypes/interactivity/` (throwaway, task HMX-P01), verified
+independently by the orchestrator rather than accepted on report.
+
+**What was demonstrated.** A document using only syntax that already parses —
+`::state{count=0}`, `:::button{on-click="count = count + 1"}`, `:v[count]` — compiles to a
+working interactive page. Driven in a real DOM it goes `Count is 0.` → `Count is 3.` after
+three clicks. Two-way input binding also works.
+
+| | gzipped |
+|---|---|
+| **HMX counter, entire page** | **492 B** |
+| Vanilla JS counter, total payload | 350 B |
+| React counter, total payload | 47,750 B |
+
+The runtime is 367 B gzipped. React is ~97× larger for the same counter, and hand-written
+vanilla is the floor we are within 1.4× of.
+
+**The mechanism is sound.** Expressions compile to a small instruction tree —
+`["a","count",["b","+",["i","count"],["l",1]]]` — walked by a switch-based interpreter.
+No `eval`, no `new Function`. `alert(1)`, `window.location`, `a.b`, `import('x')`,
+`constructor`, `this`, and IIFEs are all rejected with precise messages, so ADR-0004's
+restricted expression language is enforceable rather than aspirational.
+
+**Output proportionality holds.** A document without state emits a 0-byte runtime, no
+`<script>`, and HTML byte-identical to the production compiler. Verified by comparison, not
+assumed.
+
+**Verdict: continue.** Nothing in the AST, the parser, or the restricted expression model
+blocks compiled small-runtime interactivity. HMX is not confined to Markdoc's territory.
+
+**What this does NOT establish**, and must not be cited as if it did: production security
+for expressions, SSR, hydration, component scoping, general attribute expressions, or
+derived state. State here is page-level with a trivial dependency graph — the genuinely hard
+parts of reactivity (derived values, update ordering, batching, cycles) are untested. Three
+concrete gaps were found and recorded in `BACKLOG.md`.
+
+---
+
+### Original gate criteria (kept for the record)
 
 At the end of Phase 3, HMX will be: Markdown + directives + schemas + variables + scoped
 styles. That is substantially the territory Markdoc already occupies, and Markdoc occupies

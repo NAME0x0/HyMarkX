@@ -1,6 +1,35 @@
 # TASK HMX-P01 — Throwaway interactivity prototype (gate evidence)
 
-**Status:** in progress · **Assignee:** Codex · **Not production code**
+**Status:** ACCEPTED — gate PASSED · **Assignee:** Codex · **Not production code**
+
+## Outcome (orchestrator review, 2026-08-12)
+
+Verdict in `ROADMAP.md`. Everything below was verified independently rather than accepted
+on report.
+
+- **The counter works.** Driven in a real DOM from the built page: `Count is 0.` →
+  `Count is 3.` after three clicks. 775 bytes total, 492 gzipped.
+- **No `eval`, no `new Function`.** Expressions compile to an instruction tree walked by a
+  switch. `alert(1)`, `window.location`, `a.b`, `import('x')`, `constructor`, `this`, and
+  IIFEs all rejected with precise messages.
+- **Static path untouched.** Zero-byte runtime, no `<script>`, HTML byte-identical to the
+  production compiler — compared directly, not assumed.
+- `packages/` untouched; the existing 890 tests still pass.
+
+**One reproducibility problem.** The report claimed DOM verification, but jsdom was not
+installed in this repository — Codex used an installation from elsewhere on the machine, so
+the central claim could not be re-run. I added jsdom as a root devDependency and reproduced
+it. A result that cannot be reproduced in the repository is not evidence, and this is the
+kind of gap that would have quietly invalidated the gate.
+
+**Codex's negative findings were accurate and useful**, which is what this task most needed:
+the void-element gap in render plans, the attribute-escaping failure that made the brief's
+own second document unparseable, and the missing literal-kind information on attributes. All
+three are recorded in `BACKLOG.md`. It kept a failing document
+(`documents/input-binding-as-brief.hmx`) and a test preserving the negative result rather
+than quietly editing the brief's example — exactly right.
+
+Svelte was honestly reported as "not measured" instead of estimated.
 
 ## CONTEXT
 

@@ -1,0 +1,16 @@
+{
+  "name": "@hymarkx/interactivity-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "measure": "node scripts/measure.mjs",
+    "test": "node --test test/compiler.check.mjs test/expression.check.mjs test/runtime.check.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "21.1.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "terser": "^5.44.0"
+  }
+}

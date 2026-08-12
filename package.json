@@ -16,6 +16,7 @@
     "check": "pnpm build && pnpm lint && pnpm typecheck && pnpm test && node scripts/check-boundaries.mjs"
   },
   "devDependencies": {
+    "jsdom": "^30.0.1",
     "oxlint": "^1.0.0",
     "prettier": "^3.0.0",
     "typescript": "7.0.2",
