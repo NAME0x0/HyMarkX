@@ -5,6 +5,7 @@ import { builtinComponents, mergeComponentRegistries } from './components/builti
 import { renderDiagnostic, renderDiagnostics } from './diagnostics/render.js'
 import { htmlBackend } from './emit/html.js'
 import { compileFrontmatter } from './frontmatter.js'
+import { emptyScopeDiagnostics, prepareStyles } from './styles.js'
 import type { CompileOptions, CompileResult } from './types.js'
 
 /** Compiles normalized Markdown source to trust-aware HTML. */
@@ -32,6 +33,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   const compiled = compileAst(parsed.root, parsed.source, options)
   return {
     html: compiled.html,
+    css: compiled.css,
     diagnostics: [...carried, ...parsed.diagnostics, ...compiled.diagnostics],
     source: parsed.source,
     ...(compiled.frontmatter === undefined ? {} : { frontmatter: compiled.frontmatter }),
@@ -50,10 +52,29 @@ export function compileAst(
     components: mergeComponentRegistries(options.components),
     trust,
   })
-  const emitted = htmlBackend.emit(analyzed, { trust })
+  const styles = prepareStyles(analyzed, source, {
+    ...(options.from === undefined ? {} : { from: options.from }),
+    collectAuthorStyles: trust === 'app',
+  })
+  const emitted = htmlBackend.emit(analyzed, {
+    trust,
+    omittedNodes: styles.omittedNodes,
+    scopeAttributes: styles.scopeAttributes,
+  })
+  const html =
+    options.inlineCss === true && styles.css !== ''
+      ? `<style>\n${styles.css}\n</style>\n${emitted.html}`
+      : emitted.html
   return {
-    html: emitted.html,
-    diagnostics: [...frontmatter.diagnostics, ...analyzed.diagnostics, ...emitted.diagnostics],
+    html,
+    css: styles.css,
+    diagnostics: [
+      ...frontmatter.diagnostics,
+      ...analyzed.diagnostics,
+      ...styles.diagnostics,
+      ...emitted.diagnostics,
+      ...emptyScopeDiagnostics(styles, emitted.html),
+    ],
     source,
     ...(frontmatter.value === undefined ? {} : { frontmatter: frontmatter.value }),
   }

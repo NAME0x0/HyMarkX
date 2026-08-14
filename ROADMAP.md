@@ -41,7 +41,7 @@ One carefully designed native construct, taken all the way.
 non-trivial document using directives compiles to correct, runtime-free HTML; an invalid
 attribute value produces a useful diagnostic rather than being passed through.
 
-## Phase 3 — Styling
+## Phase 3 — Styling ✅
 
 Global styles, scoped styles, and the decision on whether native style shorthand earns
 its place. Design tokens considered, not assumed. Exit: a styled page ships zero JS.

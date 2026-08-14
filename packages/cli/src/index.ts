@@ -27,6 +27,7 @@ interface OutputTarget {
   readonly input: string
   readonly root: string
   readonly path: string
+  readonly cssPath: string
 }
 
 const ZERO_SPAN = {
@@ -61,8 +62,8 @@ function isInside(root: string, path: string): boolean {
   )
 }
 
-function outputName(path: string): string {
-  return `${basename(path, extname(path))}.html`
+function outputName(path: string, extension: '.html' | '.css'): string {
+  return `${basename(path, extname(path))}${extension}`
 }
 
 function outputTarget(
@@ -73,7 +74,12 @@ function outputTarget(
   const inputPath = resolve(cwd, input)
   if (out === undefined) {
     const root = dirname(inputPath)
-    return { input: inputPath, root, path: resolve(root, outputName(inputPath)) }
+    return {
+      input: inputPath,
+      root,
+      path: resolve(root, outputName(inputPath, '.html')),
+      cssPath: resolve(root, outputName(inputPath, '.css')),
+    }
   }
   if (out === '-') {
     return undefined
@@ -81,8 +87,13 @@ function outputTarget(
 
   const root = resolve(cwd, out)
   const relativeInput = relative(cwd, inputPath)
-  const relativeOutput = `${relativeInput.slice(0, -extname(relativeInput).length)}.html`
-  return { input: inputPath, root, path: resolve(root, relativeOutput) }
+  const relativeStem = relativeInput.slice(0, -extname(relativeInput).length)
+  return {
+    input: inputPath,
+    root,
+    path: resolve(root, `${relativeStem}.html`),
+    cssPath: resolve(root, `${relativeStem}.css`),
+  }
 }
 
 async function pathExists(path: string): Promise<boolean> {
@@ -296,6 +307,7 @@ export async function runCli(
       trust,
       from: input,
       gfm: parsed.values.gfm,
+      inlineCss: command === 'build' && parsed.values.out === '-',
     })
     records.push(
       ...result.diagnostics.map((diagnostic) => ({
@@ -324,7 +336,13 @@ export async function runCli(
     }
 
     try {
-      if (!(await prepareOutputTarget(target))) {
+      if (
+        !(await prepareOutputTarget(target)) ||
+        !(await prepareOutputTarget({
+          ...target,
+          path: target.cssPath,
+        }))
+      ) {
         records.push({
           diagnostic: cliDiagnostic(
             'HMX3006',
@@ -336,6 +354,7 @@ export async function runCli(
         continue
       }
       await writeFile(target.path, result.html, 'utf8')
+      await writeFile(target.cssPath, result.css, 'utf8')
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error)
       records.push({

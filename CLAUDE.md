@@ -28,12 +28,13 @@ production code only for edits smaller than the delegation overhead.
 
 ## Current state
 
-Phases 0-2 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
-directives to HTML at 652/652 CommonMark conformance, with schema-validated components,
-frontmatter, and a working trust boundary. Zero JavaScript in static output.
+Phases 0-3 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
+directives to styled HTML at 652/652 CommonMark conformance, with schema-validated
+components, frontmatter, scoped CSS, and a working trust boundary. Zero JavaScript in
+static output; CSS proportional to the components used.
 
-Phase 3 (styling) is next, followed by the "is this just Markdoc?" go/no-go gate — see
-`ROADMAP.md`.
+The "is this just Markdoc?" gate passed on 2026-08-12 — see `prototypes/interactivity/`.
+Phase 4 (expressions) is next.
 
 ## Naming
 

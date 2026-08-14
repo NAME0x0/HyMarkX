@@ -1,0 +1,73 @@
+{
+  "type": "root",
+  "hmxVersion": "0.0.0",
+  "children": [
+    {
+      "type": "html",
+      "value": "<style scoped>\n.hmx-note-title { letter-spacing: 0.01em; }\n</style>",
+      "position": {
+        "start": { "line": 1, "column": 1, "offset": 0 },
+        "end": { "line": 3, "column": 9, "offset": 67 }
+      }
+    },
+    {
+      "type": "containerDirective",
+      "name": "note",
+      "attributes": [
+        {
+          "name": "type",
+          "value": "warning",
+          "position": {
+            "start": { "line": 5, "column": 19, "offset": 87 },
+            "end": { "line": 5, "column": 31, "offset": 99 }
+          },
+          "nameSpan": {
+            "start": { "line": 5, "column": 19, "offset": 87 },
+            "end": { "line": 5, "column": 23, "offset": 91 }
+          },
+          "valueSpan": {
+            "start": { "line": 5, "column": 24, "offset": 92 },
+            "end": { "line": 5, "column": 31, "offset": 99 }
+          }
+        }
+      ],
+      "label": [
+        {
+          "type": "text",
+          "value": "Heads up",
+          "position": {
+            "start": { "line": 5, "column": 9, "offset": 77 },
+            "end": { "line": 5, "column": 17, "offset": 85 }
+          }
+        }
+      ],
+      "children": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "value": "Styled.",
+              "position": {
+                "start": { "line": 6, "column": 1, "offset": 101 },
+                "end": { "line": 6, "column": 8, "offset": 108 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 6, "column": 1, "offset": 101 },
+            "end": { "line": 6, "column": 8, "offset": 108 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 5, "column": 1, "offset": 69 },
+        "end": { "line": 7, "column": 4, "offset": 112 }
+      }
+    }
+  ],
+  "position": {
+    "start": { "line": 1, "column": 1, "offset": 0 },
+    "end": { "line": 8, "column": 1, "offset": 113 }
+  }
+}

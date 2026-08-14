@@ -114,6 +114,45 @@ describe('built hmx CLI', () => {
     expect(result.stderr).toContain('0 errors, 3 warnings in 1 file')
   })
 
+  it('writes proportional CSS beside HTML and inlines it for stdout builds', () => {
+    const outputDirectory = join(outputRoot, 'styled')
+    const result = spawnSync(
+      process.execPath,
+      [
+        cliPath,
+        'build',
+        'fixtures/markdown/styled-note/input.md',
+        '--out',
+        outputDirectory,
+        '--trust',
+        'app',
+      ],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )
+    const css = readFileSync(
+      join(outputDirectory, 'fixtures/markdown/styled-note/input.css'),
+      'utf8',
+    )
+    const html = readFileSync(
+      join(outputDirectory, 'fixtures/markdown/styled-note/input.html'),
+      'utf8',
+    )
+    const stdout = spawnSync(
+      process.execPath,
+      [cliPath, 'build', 'fixtures/markdown/styled-note/input.md', '--out', '-', '--trust', 'app'],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )
+
+    expect(result.status).toBe(0)
+    expect(css).toContain('.hmx-note')
+    expect(css).not.toContain('.hmx-grid')
+    expect(html).not.toContain('<style>')
+    expect(stdout.status).toBe(0)
+    expect(stdout.stdout.startsWith('<style>\n:where(:root)')).toBe(true)
+    expect(stdout.stdout).toContain('<aside class="hmx-note')
+    expect(stdout.stdout).not.toContain('<script')
+  })
+
   it('uses exit code 1 for document diagnostics and 2 for usage or I/O failures', () => {
     const unsupported = spawnSync(process.execPath, [cliPath, 'check', 'README.txt', '--json'], {
       cwd: repositoryRoot,

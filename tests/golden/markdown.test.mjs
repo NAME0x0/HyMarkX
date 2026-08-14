@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { compile } from '../../packages/compiler/src/index.js'
@@ -14,6 +14,7 @@ describe('Markdown HTML fixtures', () => {
     const fixtureDirectory = new URL(`../../fixtures/markdown/${fixtureName}/`, import.meta.url)
     const input = readFileSync(new URL('input.md', fixtureDirectory), 'utf8')
     const expected = readFileSync(new URL('expected.html', fixtureDirectory), 'utf8')
+    const expectedCssUrl = new URL('expected.css', fixtureDirectory)
     const result = compile(input, { from: `${fixtureName}/input.md`, trust: 'app' })
 
     if (fixtureName === 'components-invalid') {
@@ -36,5 +37,8 @@ describe('Markdown HTML fixtures', () => {
       expect(result.diagnostics).toEqual([])
     }
     expect(result.html).toBe(expected)
+    if (existsSync(expectedCssUrl)) {
+      expect(result.css).toBe(readFileSync(expectedCssUrl, 'utf8'))
+    }
   })
 })

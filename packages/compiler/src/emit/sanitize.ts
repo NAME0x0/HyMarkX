@@ -41,6 +41,17 @@ export const HTML_ALLOWLIST: Readonly<Record<string, readonly string[]>> = {
 const PROHIBITED_ELEMENTS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'form'])
 const VOID_ELEMENTS = new Set(['br', 'hr', 'img'])
 const URL_ATTRIBUTES = new Set(['href', 'src'])
+const RAW_TEXT_ELEMENTS = new Set([
+  'iframe',
+  'noembed',
+  'noframes',
+  'plaintext',
+  'script',
+  'style',
+  'textarea',
+  'title',
+  'xmp',
+])
 
 interface RawAttribute {
   readonly name: string
@@ -170,6 +181,47 @@ function scanTags(value: string): readonly RawTag[] {
   }
 
   return tags
+}
+
+/** Adds valueless attributes to app-mode raw HTML start tags without changing raw text. */
+export function addAttributesToRawHtml(value: string, attributeNames: readonly string[]): string {
+  if (attributeNames.length === 0) {
+    return value
+  }
+  const attributes = attributeNames.map((name) => ` ${name}`).join('')
+  const tags = scanTags(value)
+  let output = ''
+  let cursor = 0
+  let rawTextElement: string | undefined
+
+  for (const tag of tags) {
+    if (rawTextElement !== undefined) {
+      if (tag.closing && tag.name === rawTextElement) {
+        rawTextElement = undefined
+      }
+      continue
+    }
+    if (tag.closing || tag.name === null) {
+      continue
+    }
+
+    const raw = value.slice(tag.start, tag.end)
+    let insertion = raw.length - 1
+    while (insertion > 0 && /\s/.test(raw[insertion - 1] ?? '')) {
+      insertion -= 1
+    }
+    if (raw[insertion - 1] === '/') {
+      insertion -= 1
+    }
+    output += value.slice(cursor, tag.start)
+    output += `${raw.slice(0, insertion)}${attributes}${raw.slice(insertion)}`
+    cursor = tag.end
+    if (RAW_TEXT_ELEMENTS.has(tag.name)) {
+      rawTextElement = tag.name
+    }
+  }
+
+  return `${output}${value.slice(cursor)}`
 }
 
 function decodeSchemeEntities(value: string): string {

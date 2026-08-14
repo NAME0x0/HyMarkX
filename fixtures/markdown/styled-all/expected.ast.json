@@ -1,0 +1,288 @@
+{
+  "type": "root",
+  "hmxVersion": "0.0.0",
+  "children": [
+    {
+      "type": "html",
+      "value": "<style scoped>\n.dashboard > .hmx-card:hover,\n.hmx-note::before {\n  outline-color: var(--hmx-color-info);\n}\n@media (min-width: 48rem) {\n  .dashboard { align-items: start; }\n}\n@supports (text-wrap: balance) {\n  .hmx-card-title { text-wrap: balance; }\n}\n@keyframes reveal {\n  from { opacity: 0; }\n  50% { opacity: 0.5; }\n  to { opacity: 1; }\n}\n:global(body) .dashboard { margin-inline: auto; }\n</style>",
+      "position": {
+        "start": { "line": 1, "column": 1, "offset": 0 },
+        "end": { "line": 18, "column": 9, "offset": 399 }
+      }
+    },
+    {
+      "type": "heading",
+      "depth": 1,
+      "children": [
+        {
+          "type": "text",
+          "value": "Quarterly dashboard",
+          "position": {
+            "start": { "line": 20, "column": 3, "offset": 403 },
+            "end": { "line": 20, "column": 22, "offset": 422 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 20, "column": 1, "offset": 401 },
+        "end": { "line": 20, "column": 22, "offset": 422 }
+      }
+    },
+    {
+      "type": "containerDirective",
+      "name": "note",
+      "attributes": [
+        {
+          "name": "type",
+          "value": "warning",
+          "position": {
+            "start": { "line": 22, "column": 19, "offset": 442 },
+            "end": { "line": 22, "column": 31, "offset": 454 }
+          },
+          "nameSpan": {
+            "start": { "line": 22, "column": 19, "offset": 442 },
+            "end": { "line": 22, "column": 23, "offset": 446 }
+          },
+          "valueSpan": {
+            "start": { "line": 22, "column": 24, "offset": 447 },
+            "end": { "line": 22, "column": 31, "offset": 454 }
+          }
+        }
+      ],
+      "label": [
+        {
+          "type": "text",
+          "value": "Heads up",
+          "position": {
+            "start": { "line": 22, "column": 9, "offset": 432 },
+            "end": { "line": 22, "column": 17, "offset": 440 }
+          }
+        }
+      ],
+      "children": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "value": "Figures are preliminary.",
+              "position": {
+                "start": { "line": 23, "column": 1, "offset": 456 },
+                "end": { "line": 23, "column": 25, "offset": 480 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 23, "column": 1, "offset": 456 },
+            "end": { "line": 23, "column": 25, "offset": 480 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 22, "column": 1, "offset": 424 },
+        "end": { "line": 24, "column": 4, "offset": 484 }
+      }
+    },
+    {
+      "type": "containerDirective",
+      "name": "grid",
+      "attributes": [
+        {
+          "name": "columns",
+          "value": "2",
+          "position": {
+            "start": { "line": 26, "column": 10, "offset": 495 },
+            "end": { "line": 26, "column": 19, "offset": 504 }
+          },
+          "nameSpan": {
+            "start": { "line": 26, "column": 10, "offset": 495 },
+            "end": { "line": 26, "column": 17, "offset": 502 }
+          },
+          "valueSpan": {
+            "start": { "line": 26, "column": 18, "offset": 503 },
+            "end": { "line": 26, "column": 19, "offset": 504 }
+          }
+        },
+        {
+          "name": "gap",
+          "value": "6",
+          "position": {
+            "start": { "line": 26, "column": 20, "offset": 505 },
+            "end": { "line": 26, "column": 25, "offset": 510 }
+          },
+          "nameSpan": {
+            "start": { "line": 26, "column": 20, "offset": 505 },
+            "end": { "line": 26, "column": 23, "offset": 508 }
+          },
+          "valueSpan": {
+            "start": { "line": 26, "column": 24, "offset": 509 },
+            "end": { "line": 26, "column": 25, "offset": 510 }
+          }
+        },
+        {
+          "name": "class",
+          "value": "dashboard",
+          "position": {
+            "start": { "line": 26, "column": 26, "offset": 511 },
+            "end": { "line": 26, "column": 36, "offset": 521 }
+          },
+          "nameSpan": {
+            "start": { "line": 26, "column": 26, "offset": 511 },
+            "end": { "line": 26, "column": 36, "offset": 521 }
+          },
+          "valueSpan": {
+            "start": { "line": 26, "column": 27, "offset": 512 },
+            "end": { "line": 26, "column": 36, "offset": 521 }
+          }
+        }
+      ],
+      "children": [
+        {
+          "type": "containerDirective",
+          "name": "card",
+          "attributes": [],
+          "label": [
+            {
+              "type": "text",
+              "value": "Revenue",
+              "position": {
+                "start": { "line": 27, "column": 9, "offset": 531 },
+                "end": { "line": 27, "column": 16, "offset": 538 }
+              }
+            }
+          ],
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Card detail.",
+                  "position": {
+                    "start": { "line": 28, "column": 1, "offset": 540 },
+                    "end": { "line": 28, "column": 13, "offset": 552 }
+                  }
+                }
+              ],
+              "position": {
+                "start": { "line": 28, "column": 1, "offset": 540 },
+                "end": { "line": 28, "column": 13, "offset": 552 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 27, "column": 1, "offset": 523 },
+            "end": { "line": 29, "column": 4, "offset": 556 }
+          }
+        },
+        {
+          "type": "containerDirective",
+          "name": "metric",
+          "attributes": [],
+          "label": [
+            {
+              "type": "text",
+              "value": "ARR",
+              "position": {
+                "start": { "line": 31, "column": 11, "offset": 568 },
+                "end": { "line": 31, "column": 14, "offset": 571 }
+              }
+            }
+          ],
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "$1.2M",
+                  "position": {
+                    "start": { "line": 32, "column": 1, "offset": 573 },
+                    "end": { "line": 32, "column": 6, "offset": 578 }
+                  }
+                }
+              ],
+              "position": {
+                "start": { "line": 32, "column": 1, "offset": 573 },
+                "end": { "line": 32, "column": 6, "offset": 578 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 31, "column": 1, "offset": 558 },
+            "end": { "line": 33, "column": 4, "offset": 582 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 26, "column": 1, "offset": 486 },
+        "end": { "line": 34, "column": 5, "offset": 587 }
+      }
+    },
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "Status: ",
+          "position": {
+            "start": { "line": 36, "column": 1, "offset": 589 },
+            "end": { "line": 36, "column": 9, "offset": 597 }
+          }
+        },
+        {
+          "type": "textDirective",
+          "name": "badge",
+          "attributes": [
+            {
+              "name": "kind",
+              "value": "success",
+              "position": {
+                "start": { "line": 36, "column": 25, "offset": 613 },
+                "end": { "line": 36, "column": 37, "offset": 625 }
+              },
+              "nameSpan": {
+                "start": { "line": 36, "column": 25, "offset": 613 },
+                "end": { "line": 36, "column": 29, "offset": 617 }
+              },
+              "valueSpan": {
+                "start": { "line": 36, "column": 30, "offset": 618 },
+                "end": { "line": 36, "column": 37, "offset": 625 }
+              }
+            }
+          ],
+          "children": [
+            {
+              "type": "text",
+              "value": "healthy",
+              "position": {
+                "start": { "line": 36, "column": 16, "offset": 604 },
+                "end": { "line": 36, "column": 23, "offset": 611 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 36, "column": 9, "offset": 597 },
+            "end": { "line": 36, "column": 38, "offset": 626 }
+          }
+        },
+        {
+          "type": "text",
+          "value": ".",
+          "position": {
+            "start": { "line": 36, "column": 38, "offset": 626 },
+            "end": { "line": 36, "column": 39, "offset": 627 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 36, "column": 1, "offset": 589 },
+        "end": { "line": 36, "column": 39, "offset": 627 }
+      }
+    }
+  ],
+  "position": {
+    "start": { "line": 1, "column": 1, "offset": 0 },
+    "end": { "line": 37, "column": 1, "offset": 628 }
+  }
+}
