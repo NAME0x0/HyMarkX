@@ -81,6 +81,22 @@ gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
 
 ## Research
 
+- **Applied code fences — `` ```css apply ``, `` ```js run ``.** Literate-programming style
+  cells, the Jupyter/Quarto/R Markdown pattern. Verified 2026-08-14: `Code.meta` already
+  captures the flag (`lang="css"`, `meta="apply"`), and **0 of 652** conformance examples use
+  fenced `css`/`js`/`html`, so there is no collision.
+  Attractive because it is valid CommonMark, requires no new parsing, and degrades
+  *meaningfully* — a plain renderer shows the code as a sample rather than breaking.
+  `` ```css apply show `` (apply *and* display) is the design-system documentation case that
+  MDX and Markdoc both handle badly.
+  **The bare fence must never be applied implicitly.** A plain `` ```css `` block is pure
+  CommonMark, so auto-applying would violate SPEC §3 and turn every document that *shows*
+  CSS into one that *uses* it — and `` ```js `` executing untrusted Markdown would break the
+  core security invariant. The flag is the whole design.
+  Trust rules follow the existing ones: `run` is `app`-mode only like `<script>`; `apply`
+  follows the `<style>` rule. Needs an ADR when scheduled, including whether it supersedes
+  the `<style>`/`<script>` HTML forms rather than duplicating them.
+
 - **Grammar-constrained generation export.** Emit the component schemas and HMX grammar as
   JSON Schema plus a GBNF/EBNF grammar, so any language model generating `.hmx` can be
   constrained to structurally valid output rather than validated after the fact. Follows
