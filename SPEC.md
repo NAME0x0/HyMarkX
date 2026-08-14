@@ -162,12 +162,46 @@ disabled, and string-only keys. See `SECURITY.md` threats T11–T13.
 Reserved keys at this version: `title`, `description`, `layout`, `lang`, `draft`.
 Unknown keys are preserved and exposed to backends; they MUST NOT error.
 
-### 4.4 Styles *(Phase 3 — not yet specified)*
+### 4.4 Styles *(Phase 3)*
+
+Authors write CSS. There is no native style shorthand (ADR-0011).
+
+A `<style>` block is permitted in `app` mode only; in `document` mode it MUST be rejected
+with `HMX3001` and its content MUST NOT reach the output or the returned stylesheet.
+
+A processor MUST return the document's stylesheet separately from its HTML, because HMX
+emits fragments and the host decides where styles belong. It MAY offer inlining as an
+option.
+
+`<style scoped>` restricts its rules to the document that declared them. A conforming
+processor MUST:
+
+- add a generated attribute of the form `data-hmx-s-<hash>` to every element it emits for
+  that document, and rewrite each selector so it requires that attribute;
+- derive the hash deterministically from document identity, so identical input produces
+  identical output (§5);
+- scope each selector in a selector list independently, attaching the attribute to the
+  final compound selector, before any pseudo-class or pseudo-element;
+- scope the rules **inside** conditional at-rules such as `@media` and `@supports`, not the
+  at-rule itself;
+- **not** scope `@keyframes` selectors (`from`, `to`, percentages);
+- emit `sel` unscoped for `:global(sel)`.
+
+A processor MUST emit style rules only for the components a document actually uses.
+
+Diagnostics: `HMX2030` (error) for a CSS syntax error, whose span MUST point into the
+document rather than to the start of the style block; `HMX2031` (warning) for a scoped
+block in a document with nothing to scope.
+
+Styling of untrusted documents by their authors is **not** available at this version. It
+requires a CSS threat model covering `@import`, `url()` exfiltration, overlay attacks, and
+attribute-selector data leaks, and is deliberately deferred rather than partly implemented.
+
 ### 4.5 Expressions *(Phase 4 — see ADR-0004 for the decided direction)*
 ### 4.6 Components *(Phase 5 — not yet specified)*
 ### 4.7 State and events *(Phase 6 — not yet specified)*
 
-Sections 4.4–4.7 are placeholders. Implementing syntax for them before this document
+Sections 4.5–4.7 are placeholders. Implementing syntax for them before this document
 specifies them is a process violation (see `CONTRIBUTING.md`, "Change control").
 
 ## 5. Rendering
@@ -210,6 +244,7 @@ compiler-assisted migration diagnostics for breaking changes.
 
 ## Appendix A — Reserved syntax *(informative)*
 
-The following are reserved for future use and SHOULD NOT be relied upon as literal
-content: a line beginning with `@` followed by an identifier and whitespace; the
-attribute-value form `{ident={...}}`; `<script>`, `<style>` at block level.
+The following are reserved and SHOULD NOT be relied upon as literal content: a line
+beginning with `@` followed by an identifier and whitespace; the attribute-value form
+`{ident={...}}`; the interpolation sigil `{{` (escape it as `\{{`); `<script>` and
+`<style>` at block level.

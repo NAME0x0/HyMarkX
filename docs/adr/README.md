@@ -17,6 +17,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0009](0009-implementation-language.md) | TypeScript 7, ESM only, Node ≥ 22.12 | Accepted |
 | [0010](0010-licensing.md) | Dual licence `MIT OR Apache-2.0` + trademark policy | Accepted |
 | [0011](0011-styling-model.md) | CSS with attribute scoping; no native style shorthand | Accepted |
+| [0012](0012-interpolation-syntax.md) | Text interpolation is `{{ expr }}`, evaluated at compile time | Accepted |
 
 ## Decisions still open
 
