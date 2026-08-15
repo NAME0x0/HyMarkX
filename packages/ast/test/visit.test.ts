@@ -6,6 +6,7 @@ import {
   containerDirective,
   emphasis,
   heading,
+  interpolation,
   paragraph,
   root,
   text,
@@ -13,7 +14,7 @@ import {
   visitOf,
   yaml,
 } from '../src/index.js'
-import type { BlockContent, Heading, Node, Yaml } from '../src/index.js'
+import type { BlockContent, Heading, Interpolation, Node, Yaml } from '../src/index.js'
 
 function describeNode(node: Node): string {
   return node.type === 'text' ? `text:${node.value}` : node.type
@@ -22,7 +23,7 @@ function describeNode(node: Node): string {
 function mixedTree(): Node {
   return root('0.0.0', [
     yaml('title: metadata'),
-    heading(1, [text('title')]),
+    heading(1, [text('title'), interpolation('subtitle')]),
     blockquote([paragraph([text('before'), emphasis([text('inside')]), text('after')])]),
     containerDirective('card', [], [text('label')], [paragraph([text('body')])]),
   ])
@@ -41,6 +42,7 @@ describe('visit', () => {
       'yaml',
       'heading',
       'text:title',
+      'interpolation',
       'blockquote',
       'paragraph',
       'text:before',
@@ -83,6 +85,7 @@ describe('visit', () => {
       'yaml',
       'heading',
       'text:title',
+      'interpolation',
       'blockquote',
       'containerDirective',
       'text:label',
@@ -120,6 +123,7 @@ describe('visit', () => {
       'yaml',
       'heading',
       'text:title',
+      'interpolation',
       'blockquote',
       'paragraph',
       'text:before',
@@ -141,7 +145,7 @@ describe('visit', () => {
       },
     )
 
-    expect(exits).toEqual(['yaml', 'text:title', 'heading'])
+    expect(exits).toEqual(['yaml', 'text:title', 'interpolation', 'heading'])
   })
 
   it('visitOf narrows the selected node type', () => {
@@ -164,6 +168,17 @@ describe('visit', () => {
     })
 
     expect(values).toEqual(['title: metadata'])
+  })
+
+  it('visits interpolation as a typed leaf node', () => {
+    const values: string[] = []
+
+    visitOf(mixedTree(), 'interpolation', (node) => {
+      expectTypeOf(node).toEqualTypeOf<Interpolation>()
+      values.push(node.value)
+    })
+
+    expect(values).toEqual(['subtitle'])
   })
 
   it('traverses a 10,000-deep tree without overflowing the call stack', () => {

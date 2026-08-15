@@ -1,6 +1,8 @@
 import { createDiagnostic } from '@hymarkx/ast'
 import type { Attribute, Diagnostic, Span } from '@hymarkx/ast'
 import { isAllowedDocumentUrl } from '../emit/sanitize.js'
+import type { ExpressionEvaluation, ExpressionValue } from '../expression.js'
+import { nearestSuggestion } from '../suggestions.js'
 import type { TrustMode } from '../types.js'
 import type {
   AttributeSchema,
@@ -27,43 +29,6 @@ export interface AnalyzedComponent {
   readonly renderer: ComponentRenderer
   readonly attributes: ResolvedAttributes
   readonly kindAllowed: boolean
-}
-
-function levenshtein(left: string, right: string): number {
-  const previous = Array.from({ length: right.length + 1 }, (_, index) => index)
-  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
-    let diagonal = previous[0] ?? 0
-    previous[0] = leftIndex
-    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
-      const above = previous[rightIndex] ?? 0
-      const next = Math.min(
-        above + 1,
-        (previous[rightIndex - 1] ?? 0) + 1,
-        diagonal + (left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1),
-      )
-      diagonal = above
-      previous[rightIndex] = next
-    }
-  }
-  return previous[right.length] ?? 0
-}
-
-/** Returns the single closest case-insensitive candidate within edit distance two. */
-export function nearestSuggestion(
-  value: string,
-  candidates: readonly string[],
-): string | undefined {
-  let closest: string | undefined
-  let closestDistance = 3
-  const normalized = value.toLowerCase()
-  for (const candidate of candidates) {
-    const distance = levenshtein(normalized, candidate.toLowerCase())
-    if (distance < closestDistance) {
-      closest = candidate
-      closestDistance = distance
-    }
-  }
-  return closest
 }
 
 function suggestion(replacement: string | undefined, span: Span) {
@@ -101,12 +66,43 @@ function contentOf(node: DirectiveNode): readonly { readonly position: Span }[] 
 }
 
 function validateValue(
-  value: string | null,
+  value: string | null | ExpressionValue,
   schema: AttributeSchema,
   trust: TrustMode,
+  expression: boolean,
 ): ResolvedAttribute | undefined {
+  if (expression) {
+    switch (schema.type) {
+      case 'string':
+        return typeof value === 'string' ? value : undefined
+      case 'number':
+        return typeof value === 'number' &&
+          Number.isFinite(value) &&
+          Number.isInteger(value) &&
+          (schema.min === undefined || value >= schema.min) &&
+          (schema.max === undefined || value <= schema.max)
+          ? value
+          : undefined
+      case 'boolean':
+        return typeof value === 'boolean' ? value : undefined
+      case 'enum':
+        return typeof value === 'string' && schema.values?.includes(value) === true
+          ? value
+          : undefined
+      case 'identifier':
+        return typeof value === 'string' && IDENTIFIER.test(value) ? value : undefined
+      case 'url':
+        return typeof value === 'string' && (trust === 'app' || isAllowedDocumentUrl(value))
+          ? value
+          : undefined
+    }
+  }
+
   if (value === null) {
     return schema.type === 'boolean' ? true : undefined
+  }
+  if (typeof value !== 'string') {
+    return undefined
   }
   switch (schema.type) {
     case 'string':
@@ -131,8 +127,26 @@ function validateValue(
   }
 }
 
-function invalidValueMessage(name: string, value: string | null, schema: AttributeSchema): string {
-  const shown = value === null ? 'bare' : `"${value}"`
+function shownValue(value: string | null | ExpressionValue, expression: boolean): string {
+  if (!expression) {
+    return value === null ? 'bare' : `"${String(value)}"`
+  }
+  if (typeof value === 'string') {
+    return `"${value}"`
+  }
+  if (value === null || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value)
+  }
+  return Array.isArray(value) ? 'an array' : 'an object'
+}
+
+function invalidValueMessage(
+  name: string,
+  value: string | null | ExpressionValue,
+  schema: AttributeSchema,
+  expression: boolean,
+): string {
+  const shown = shownValue(value, expression)
   if (schema.type === 'number') {
     const bounds = [
       ...(schema.min === undefined ? [] : [`at least ${schema.min}`]),
@@ -152,9 +166,32 @@ function invalidValueMessage(name: string, value: string | null, schema: Attribu
   return `Attribute "${name}" must be a ${schema.type} value; received ${shown}.`
 }
 
-function validateClass(attribute: Attribute, diagnostics: Diagnostic[]): string | undefined {
-  if (attribute.value !== null && CLASS_NAMES.test(attribute.value)) {
-    return attribute.value
+interface AttributeInput {
+  readonly value: string | null | ExpressionValue
+  readonly expression: boolean
+}
+
+function attributeInput(
+  attribute: Attribute,
+  expressions: ReadonlyMap<Attribute, ExpressionEvaluation>,
+): AttributeInput | undefined {
+  if (!expressions.has(attribute)) {
+    return { value: attribute.value, expression: false }
+  }
+  const evaluation = expressions.get(attribute)
+  return evaluation?.ok === true ? { value: evaluation.value, expression: true } : undefined
+}
+
+function validateClass(
+  attribute: Attribute,
+  input: AttributeInput | undefined,
+  diagnostics: Diagnostic[],
+): string | undefined {
+  if (input === undefined) {
+    return undefined
+  }
+  if (typeof input.value === 'string' && CLASS_NAMES.test(input.value)) {
+    return input.value
   }
   diagnostics.push(
     createDiagnostic({
@@ -174,6 +211,7 @@ export function validateComponent(
   schema: ComponentSchema,
   renderer: ComponentRenderer,
   trust: TrustMode,
+  expressionValues: ReadonlyMap<Attribute, ExpressionEvaluation>,
   diagnostics: Diagnostic[],
 ): AnalyzedComponent {
   const resolved = Object.create(null) as Record<string, ResolvedAttribute>
@@ -216,7 +254,9 @@ export function validateComponent(
 
   const classAttributes = occurrences.get('class') ?? []
   const classes = classAttributes
-    .map((attribute) => validateClass(attribute, diagnostics))
+    .map((attribute) =>
+      validateClass(attribute, attributeInput(attribute, expressionValues), diagnostics),
+    )
     .filter((value): value is string => value !== undefined && value.length > 0)
   if (classes.length > 0) {
     resolved.class = classes.join(' ')
@@ -233,7 +273,7 @@ export function validateComponent(
     const attributes = occurrences.get(name) ?? []
     if (attributes.length === 0) {
       if (attributeSchema.default !== undefined) {
-        const defaultValue = validateValue(attributeSchema.default, attributeSchema, trust)
+        const defaultValue = validateValue(attributeSchema.default, attributeSchema, trust, false)
         if (defaultValue !== undefined) {
           resolved[name] = defaultValue
         }
@@ -251,13 +291,17 @@ export function validateComponent(
     }
 
     for (const [index, attribute] of attributes.entries()) {
-      const value = validateValue(attribute.value, attributeSchema, trust)
+      const input = attributeInput(attribute, expressionValues)
+      if (input === undefined) {
+        continue
+      }
+      const value = validateValue(input.value, attributeSchema, trust, input.expression)
       if (value === undefined) {
         const span = attribute.valueSpan ?? attribute.nameSpan
         if (attributeSchema.type === 'enum') {
           const values = attributeSchema.values ?? []
           const replacement =
-            attribute.value === null ? undefined : nearestSuggestion(attribute.value, values)
+            typeof input.value === 'string' ? nearestSuggestion(input.value, values) : undefined
           diagnostics.push(
             createDiagnostic({
               code: 'HMX2004',
@@ -272,7 +316,7 @@ export function validateComponent(
             createDiagnostic({
               code: 'HMX2005',
               severity: 'error',
-              message: invalidValueMessage(name, attribute.value, attributeSchema),
+              message: invalidValueMessage(name, input.value, attributeSchema, input.expression),
               span,
             }),
           )

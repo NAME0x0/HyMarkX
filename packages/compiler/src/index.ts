@@ -51,6 +51,8 @@ export function compileAst(
   const analyzed = analyze(root, {
     components: mergeComponentRegistries(options.components),
     trust,
+    source,
+    ...(frontmatter.value === undefined ? {} : { frontmatter: frontmatter.value }),
   })
   const styles = prepareStyles(analyzed, source, {
     ...(options.from === undefined ? {} : { from: options.from }),

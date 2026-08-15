@@ -12,6 +12,7 @@ import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item'
 import { directiveFromMarkdown, directiveTokenizer } from './directives.js'
 import { frontmatterFromMarkdown, frontmatterTokenizer } from './frontmatter.js'
 import { fromMdast } from './from-mdast.js'
+import { interpolationFromMarkdown, interpolationTokenizer } from './interpolation.js'
 import { ParserInternalError } from './internal-error.js'
 import { SourcePositions } from './positions.js'
 import { HMX_VERSION } from './version.js'
@@ -51,6 +52,7 @@ const gfmExtensions = [gfmAutolinkLiteral(), gfmStrikethrough(), gfmTable(), gfm
 
 const directiveExtension = directiveTokenizer()
 const frontmatterExtension = frontmatterTokenizer()
+const interpolationExtension = interpolationTokenizer()
 
 const gfmMdastExtensions = [
   gfmAutolinkLiteralFromMarkdown(),
@@ -105,11 +107,13 @@ export function parse(source: string, options: ParseOptions = {}): ParseResult {
       extensions: [
         ...(options.frontmatter === false ? [] : [frontmatterExtension]),
         directiveExtension,
+        interpolationExtension,
         ...(options.gfm === false ? [] : gfmExtensions),
       ],
       mdastExtensions: [
         ...(options.frontmatter === false ? [] : [frontmatterFromMarkdown(positions)]),
         directiveFromMarkdown(diagnostics, positions),
+        interpolationFromMarkdown(diagnostics, positions),
         ...(options.gfm === false ? [] : gfmMdastExtensions),
       ],
     })

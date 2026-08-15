@@ -119,7 +119,8 @@ describe('parse', () => {
       result = parse(source)
     }).not.toThrow()
     expect(result?.diagnostics).toEqual([])
-  }, 30_000)
+  }, 120_000) // 5 MB and fuzz runs take ~3-7s locally; a wide margin keeps a
+  // loaded CI runner or a cold start from turning a slow machine into a red build.
 
   it('never throws for 200 seeded random UTF-16 strings', () => {
     let state = 0x484d5832

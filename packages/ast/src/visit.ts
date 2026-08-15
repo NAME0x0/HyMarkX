@@ -49,6 +49,7 @@ function childrenOf(node: Node): readonly Node[] | undefined {
     case 'code':
     case 'html':
     case 'text':
+    case 'interpolation':
     case 'inlineCode':
     case 'break':
     case 'image':

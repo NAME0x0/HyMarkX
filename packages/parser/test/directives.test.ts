@@ -306,18 +306,29 @@ describe('directives', () => {
     })
   })
 
-  it('rejects expression attributes until their language phase', () => {
-    const result = parse(':x[label]{title={user.name}}')
+  it.each([
+    [':x[label]{title={user.name}}', 'textDirective'],
+    ['::x[label]{title={user.name}}\n', 'leafDirective'],
+    [':::x[label]{title={user.name}}\n:::\n', 'containerDirective'],
+  ])('retains an expression attribute on a %s', (source, type) => {
+    const result = parse(source)
+    const serialized = JSON.stringify(result.root)
 
-    expect(result.diagnostics).toEqual([
-      expect.objectContaining({ code: 'HMX1010', severity: 'error' }),
-    ])
-    expect(result.root.children[0]).toMatchObject({
-      type: 'paragraph',
-      children: [
-        { type: 'textDirective', attributes: [] },
-        { type: 'text', value: '}' },
-      ],
+    expect(result.diagnostics).toEqual([])
+    expect(serialized).not.toContain('"value":"}"')
+    expect(serialized).toContain(`"type":"${type}"`)
+    expect(serialized).toContain('"name":"title","value":"user.name"')
+  })
+
+  it('balances nested object braces and quoted braces in expression attributes', () => {
+    const result = parse(':x[label]{value={{nested: {text: "}"}}}}')
+    const paragraph = result.root.children[0]
+    const directive = paragraph?.type === 'paragraph' ? paragraph.children[0] : undefined
+
+    expect(result.diagnostics).toEqual([])
+    expect(directive).toMatchObject({
+      type: 'textDirective',
+      attributes: [{ name: 'value', value: '{nested: {text: "}"}}' }],
     })
   })
 

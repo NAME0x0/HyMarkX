@@ -284,6 +284,12 @@ function createNode(node: MdastNode, positions: SourcePositions): Node {
         value: requiredString(node.value, 'value', node.type, positions),
         position,
       }
+    case 'interpolation':
+      return {
+        type: 'interpolation',
+        value: requiredString(node.value, 'value', node.type, positions),
+        position,
+      }
     case 'emphasis':
       return { type: 'emphasis', children: [], position }
     case 'strong':
@@ -436,6 +442,7 @@ function childrenOf(node: MdastNode, positions: SourcePositions): readonly unkno
     case 'code':
     case 'html':
     case 'text':
+    case 'interpolation':
     case 'inlineCode':
     case 'break':
     case 'image':
@@ -488,6 +495,7 @@ function isPhrasingContent(node: Node): node is PhrasingContent {
     node.type === 'image' ||
     node.type === 'imageReference' ||
     node.type === 'inlineCode' ||
+    node.type === 'interpolation' ||
     node.type === 'link' ||
     node.type === 'linkReference' ||
     node.type === 'strong' ||
@@ -564,6 +572,7 @@ function appendChild(parent: Node, child: Node, positions: SourcePositions): voi
     case 'code':
     case 'html':
     case 'text':
+    case 'interpolation':
     case 'inlineCode':
     case 'break':
     case 'image':

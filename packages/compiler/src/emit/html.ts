@@ -370,6 +370,9 @@ function emitHtml(document: AnalyzedDocument, options: HtmlOptions): EmitResult 
       case 'text':
         chunks.push(escapeHtml(node.value))
         break
+      case 'interpolation':
+        chunks.push(escapeHtml(document.interpolations.get(node) ?? ''))
+        break
       case 'emphasis':
         pushInOrder(stack, [
           write(`<em${scope}>`),

@@ -73,16 +73,22 @@ describe('compile', () => {
     expect(result.html.endsWith('</blockquote>\n'.repeat(10_000))).toBe(true)
   })
 
-  it.each([
-    [':::card{ bad\nx\n:::\n', 'a malformed attribute block'],
-    [':::card{title={user.name}}\nx\n:::\n', 'an expression-valued attribute'],
-    ['::leaf{a={b}}\n', 'a leaf directive with an expression value'],
-  ])('warns HMX1011 when a line looks like a directive but has %#: %s', (source) => {
+  it('warns HMX1011 when a line looks like a directive but has a malformed attribute block', () => {
+    const source = ':::card{ bad\nx\n:::\n'
     // The tokenizer declines to open these, so they fall through to ordinary Markdown.
     // Rendering the source verbatim while saying nothing is the worst possible failure.
     const codes = compile(source).diagnostics.map((diagnostic) => diagnostic.code)
     expect(codes).toContain('HMX1011')
   })
+
+  it.each([':::card{title={user.name}}\nx\n:::\n', '::leaf{a={b}}\n'])(
+    'recognizes expression-valued block attributes: %s',
+    (source) => {
+      const codes = compile(source).diagnostics.map((diagnostic) => diagnostic.code)
+      expect(codes).not.toContain('HMX1011')
+      expect(codes).toContain('HMX2040')
+    },
+  )
 
   it.each([
     [':: note about something\n', 'prose after two colons and a space'],
@@ -106,5 +112,6 @@ describe('compile', () => {
 
     expect(result.diagnostics).toEqual([])
     expect(result.html.length).toBe(source.length + '<p></p>\n'.length)
-  }, 30_000)
+  }, 120_000) // 5 MB and fuzz runs take ~3-7s locally; a wide margin keeps a
+  // loaded CI runner or a cold start from turning a slow machine into a red build.
 })

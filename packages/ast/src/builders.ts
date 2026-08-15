@@ -14,6 +14,7 @@ import type {
   Image,
   ImageReference,
   InlineCode,
+  Interpolation,
   LeafDirective,
   Link,
   LinkReference,
@@ -113,6 +114,11 @@ export function html(value: string, position: Span = SYNTHETIC_SPAN): Html {
 /** Creates a plain-text node. */
 export function text(value: string, position: Span = SYNTHETIC_SPAN): Text {
   return { type: 'text', value, position }
+}
+
+/** Creates a raw compile-time interpolation node. */
+export function interpolation(value: string, position: Span = SYNTHETIC_SPAN): Interpolation {
+  return { type: 'interpolation', value, position }
 }
 
 /** Creates an emphasis node. */

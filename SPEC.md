@@ -84,16 +84,12 @@ Attribute syntax follows HTML conventions inside `{}`:
 
 - Multiple `.class` shorthands MUST combine. Multiple `#id` shorthands: the last wins,
   and the processor SHOULD emit warning `HMX2010`.
-- Attribute values are **strings** at this language version. Expression-valued
-  attributes (`{title={user.name}}`) are specified in Phase 4. Until then a processor
-  MUST NOT treat them as literal string values.
-  - In a **text** directive the construct is recognized and MUST be rejected with
-    `HMX1010`.
-  - In a **leaf or container** directive the tokenizer does not recognize the line as a
-    directive at all, and it degrades to ordinary Markdown text. A processor MUST then
-    emit `HMX1011` (warning) for any paragraph whose first line matches `:{2,}[A-Za-z0-9]`,
-    so that the failure is reported rather than silent. The same rule catches ordinary
-    malformed attribute blocks such as `:::card{ bad`.
+- Attribute values are literal strings or Phase 4 expressions written as a nested brace
+  value (`{title={user.name}}`). Expressions resolve against frontmatter at compile time;
+  their result is validated against the declared attribute schema without string coercion.
+- A processor MUST emit `HMX1011` (warning) for any paragraph whose first line matches
+  `:{2,}[A-Za-z0-9]`, so malformed block directives such as `:::card{ bad` are reported
+  rather than silently rendered as prose.
 - Unknown attributes on a known component MUST produce warning `HMX2001` — never a
   silent drop.
 
@@ -197,7 +193,18 @@ Styling of untrusted documents by their authors is **not** available at this ver
 requires a CSS threat model covering `@import`, `url()` exfiltration, overlay attacks, and
 attribute-selector data leaks, and is deliberately deferred rather than partly implemented.
 
-### 4.5 Expressions *(Phase 4 — see ADR-0004 for the decided direction)*
+### 4.5 Expressions *(Phase 4 — see ADR-0004 and ADR-0012)*
+
+Text interpolation uses `{{ expression }}` and is evaluated at compile time against the
+document frontmatter mapping only. `\{{` produces literal `{{`; interpolation syntax is
+not recognized inside inline code, fenced code blocks, or indented code blocks.
+
+The Phase 4 expression subset contains literals, identifiers, member and index access,
+`! - +`, arithmetic and comparison operators, `&& || ??`, ternaries, optional chaining,
+parentheses, arrays, and objects. Function calls and every construct capable of mutation,
+host access, or executable code creation are prohibited. Unknown identifiers and missing
+unguarded properties are compile errors. Compilation writes escaped scalar results into
+HTML and emits no expression runtime or script.
 ### 4.6 Components *(Phase 5 — not yet specified)*
 ### 4.7 State and events *(Phase 6 — not yet specified)*
 

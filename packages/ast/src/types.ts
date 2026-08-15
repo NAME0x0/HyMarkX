@@ -95,6 +95,13 @@ export interface Text extends NodeBase {
   value: string
 }
 
+/** A `{{ expr }}` interpolation. The expression is unparsed at this stage. */
+export interface Interpolation extends NodeBase {
+  type: 'interpolation'
+  /** Raw expression text between the braces, trimmed. */
+  value: string
+}
+
 /** Emphasized phrasing content. */
 export interface Emphasis extends NodeBase {
   type: 'emphasis'
@@ -246,6 +253,7 @@ export type PhrasingContent =
   | Image
   | ImageReference
   | InlineCode
+  | Interpolation
   | Link
   | LinkReference
   | Strong

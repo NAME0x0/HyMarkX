@@ -105,7 +105,7 @@ throwaway prototype of the Phase 6 counter example is the evidence. If the answe
 the honest outcomes are to redesign or to stop — not to continue into Phases 4–8 on
 momentum.
 
-## Phase 4 — Expressions
+## Phase 4 — Expressions ✅
 
 Implement the restricted expression language from ADR-0004: grammar, evaluator, static
 checker, diagnostics. Expression-valued attributes become legal. Exit: expressions are

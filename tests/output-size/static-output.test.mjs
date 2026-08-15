@@ -35,4 +35,28 @@ describe('static output proportionality', () => {
     expect(javascriptBytes).toBe(0)
     expect(Object.hasOwn(result, 'js')).toBe(false)
   })
+
+  it('emits frontmatter expressions as deterministic static HTML with zero JavaScript', () => {
+    const source = [
+      '---',
+      'title: Expression page',
+      '---',
+      '# {{ title }}',
+      '',
+      ':::card{title={title}}',
+      'Body',
+      ':::',
+      '',
+    ].join('\n')
+    const first = compile(source)
+    const second = compile(source)
+
+    expect(first).toEqual(second)
+    expect(first.diagnostics).toEqual([])
+    expect(first.html).toContain('<h1>Expression page</h1>')
+    expect(first.html).toContain('title="Expression page"')
+    expect(first.html.includes('<script')).toBe(false)
+    expect(first.html.toLowerCase()).not.toContain('hmx-runtime')
+    expect(Object.hasOwn(first, 'js')).toBe(false)
+  })
 })

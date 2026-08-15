@@ -9,6 +9,7 @@
     "build": "tsc -b --pretty false",
     "typecheck": "tsc -p tsconfig.test.json --pretty false",
     "test": "vitest run",
+    "test:fuzz": "vitest run packages/compiler/test/expression-fuzz.test.ts --reporter=verbose",
     "test:watch": "vitest",
     "lint": "oxlint --deny-warnings packages",
     "format": "prettier --write .",

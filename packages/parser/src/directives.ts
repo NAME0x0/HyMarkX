@@ -4,6 +4,7 @@ import type { CompileContext, Extension, Handle, Token } from 'mdast-util-from-m
 import { directive } from 'micromark-extension-directive'
 import { decodeString } from 'micromark-util-decode-string'
 import type { Construct, Effects, State } from 'micromark-util-types'
+import { directiveAttributes, directiveAttributeTokenTypes } from './directive-attributes.js'
 import { SourcePositions } from './positions.js'
 
 type MdastCompatibleNode = Parameters<CompileContext['enter']>[0]
@@ -44,7 +45,11 @@ interface ContainerCapture {
 const directiveNameToken = /^directive(?:Container|Leaf|Text)Name$/
 const directiveNamePrefixToken = /^directive(?:ContainerSequence|LeafSequence|TextMarker)$/
 
-function guardDirectiveName(construct: Construct): Construct {
+function guardDirectiveName(construct: Construct, type: DirectiveType): Construct {
+  const expressionAttributes = directiveAttributes(
+    directiveAttributeTokenTypes(type),
+    type !== 'textDirective',
+  )
   return {
     ...construct,
     tokenize(effects, ok, nok) {
@@ -52,6 +57,13 @@ function guardDirectiveName(construct: Construct): Construct {
       let beforeDirectiveName = false
       const guardedEffects: Effects = {
         ...effects,
+        attempt(candidate, attemptOk, attemptNok) {
+          const original = effects.attempt(candidate, attemptOk, attemptNok)
+          return (code) =>
+            code === 123
+              ? effects.attempt(expressionAttributes, attemptOk, attemptNok)(code)
+              : original(code)
+        },
         enter(type, fields) {
           if (directiveNameToken.test(type)) {
             inDirectiveName = true
@@ -103,11 +115,16 @@ export function directiveTokenizer(): ReturnType<typeof directive> {
     throw new TypeError('Unexpected micromark directive text tokenizer shape')
   }
 
-  const guardedTextColon = guardDirectiveName(textColon)
+  const guardedTextColon = guardDirectiveName(textColon, 'textDirective')
 
   return {
     ...extension,
-    flow: { ...extension.flow, 58: flowColon.map(guardDirectiveName) },
+    flow: {
+      ...extension.flow,
+      58: flowColon.map((construct, index) =>
+        guardDirectiveName(construct, index === 0 ? 'containerDirective' : 'leafDirective'),
+      ),
+    },
     text: {
       ...extension.text,
       58: {
@@ -215,16 +232,6 @@ function containerCapture(context: CompileContext): ContainerCapture {
     throw new TypeError('Expected an open container directive')
   }
   return capture
-}
-
-function expressionDiagnostic(span: Span): Diagnostic {
-  return createDiagnostic({
-    code: 'HMX1010',
-    severity: 'error',
-    message: 'Expression-valued directive attributes are not supported in this language version.',
-    span,
-    expected: 'a string attribute value',
-  })
 }
 
 function forbiddenAttributeDiagnostic(name: string, span: Span): Diagnostic {
@@ -360,11 +367,7 @@ export function directiveFromMarkdown(
 
     const position = attributeSpan(token, positions)
     const value = pending.value ?? (pending.hasInitializer ? '' : null)
-    const isExpression = !pending.quoted && typeof value === 'string' && value.startsWith('{')
-
-    if (isExpression) {
-      diagnostics.push(expressionDiagnostic(pending.valueSpan ?? position))
-    } else if (isForbiddenAttributeName(pending.name)) {
+    if (isForbiddenAttributeName(pending.name)) {
       diagnostics.push(forbiddenAttributeDiagnostic(pending.name, pending.nameSpan))
     } else {
       capture.attributes.push({
@@ -413,8 +416,14 @@ export function directiveFromMarkdown(
 
   const exitValue: Handle = function (token) {
     const pending = pendingAttribute(this)
-    pending.value = decodeString(this.sliceSerialize(token))
-    pending.valueSpan = tokenSpan(token, positions)
+    const serialized = this.sliceSerialize(token)
+    if (!pending.quoted && serialized.startsWith('{') && serialized.endsWith('}')) {
+      pending.value = serialized.slice(1, -1).trim()
+      pending.valueSpan = offsetSpan(token.start.offset + 1, token.end.offset - 1, positions)
+    } else {
+      pending.value = decodeString(serialized)
+      pending.valueSpan = tokenSpan(token, positions)
+    }
   }
 
   const enterContainerFence: Handle = function () {

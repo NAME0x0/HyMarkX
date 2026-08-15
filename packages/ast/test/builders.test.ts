@@ -13,6 +13,7 @@ import {
   image,
   imageReference,
   inlineCode,
+  interpolation,
   leafDirective,
   link,
   linkReference,
@@ -110,6 +111,11 @@ describe('node builders', () => {
       name: 'text',
       actual: text('plain'),
       expected: { type: 'text', value: 'plain', position: SYNTHETIC_SPAN },
+    },
+    {
+      name: 'interpolation',
+      actual: interpolation('title'),
+      expected: { type: 'interpolation', value: 'title', position: SYNTHETIC_SPAN },
     },
     {
       name: 'emphasis',
