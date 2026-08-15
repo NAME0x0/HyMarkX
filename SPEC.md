@@ -205,7 +205,36 @@ parentheses, arrays, and objects. Function calls and every construct capable of 
 host access, or executable code creation are prohibited. Unknown identifiers and missing
 unguarded properties are compile errors. Compilation writes escaped scalar results into
 HTML and emits no expression runtime or script.
-### 4.6 Components *(Phase 5 — not yet specified)*
+### 4.6 Authored components *(Phase 5)*
+
+A **component** MAY be authored as an HMX document (ADR-0013). Such a document declares its
+accepted properties under the reserved frontmatter key `props`, whose value MUST be a
+mapping of property name to the same attribute-schema shape defined in §4.2.1.
+
+A processor MUST:
+
+- register an authored component under its file basename, matched **case-sensitively**, and
+  SHOULD adopt the convention that capitalised names denote authored components while
+  lowercase names denote those the processor provides;
+- report `HMX2050` (warning) when an authored component shadows a provided one;
+- expose the component's resolved properties, **and nothing else**, as the scope for
+  expressions inside it (§4.5). A component MUST NOT observe the calling document's
+  frontmatter, the caller's properties, or any ambient value;
+- validate supplied attributes against the declared `props` exactly as §4.2.1 requires,
+  producing the same diagnostics;
+- render the caller's content at the position of a `::children` leaf directive, and report
+  `HMX2053` (error) if more than one appears;
+- detect expansion cycles and report `HMX2054` (error) naming the cycle, and cap expansion
+  depth with `HMX2055` (error). Unbounded expansion is a build-time denial of service.
+
+Component resolution — locating component sources — is a **host** responsibility. A
+conforming processor MUST accept components as data and MUST NOT require filesystem access.
+
+At this version an authored component MAY contain scoped styles (§4.4) and MUST NOT contain
+state, event handlers, or scripts. Expansion happens entirely at compile time; a document
+using authored components MUST still emit zero HMX JavaScript.
+
+Named slots are not specified at this version.
 ### 4.7 State and events *(Phase 6 — not yet specified)*
 
 Sections 4.5–4.7 are placeholders. Implementing syntax for them before this document

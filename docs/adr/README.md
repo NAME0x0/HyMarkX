@@ -18,13 +18,14 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0010](0010-licensing.md) | Dual licence `MIT OR Apache-2.0` + trademark policy | Accepted |
 | [0011](0011-styling-model.md) | CSS with attribute scoping; no native style shorthand | Accepted |
 | [0012](0012-interpolation-syntax.md) | Text interpolation is `{{ expr }}`, evaluated at compile time | Accepted |
+| [0013](0013-component-model.md) | Authored components are `.hmx` files with props in frontmatter | Accepted |
 
 ## Decisions still open
 
 | Topic | Blocked until | Notes |
 |---|---|---|
 | `@`-statement family vs directive-only control flow | Phase 4 | evidence from real documents; see ADR-0002 |
-| Component contract (props, slots, scope, typing) | Phase 5 | every question in charter §41 answered first |
+| Named slots for authored components | evidence from real documents | ADR-0013 defers them; caller-side syntax is where they turn verbose |
 | CLA vs DCO for outside contributions | before the first external PR | ADR-0010: a DCO does not grant relicensing rights |
 | State and reactivity model | Phase 6 | lifecycle specified before syntax |
 | Runtime/hydration strategy (islands granularity) | Phase 6 | |
