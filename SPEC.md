@@ -235,7 +235,39 @@ state, event handlers, or scripts. Expansion happens entirely at compile time; a
 using authored components MUST still emit zero HMX JavaScript.
 
 Named slots are not specified at this version.
-### 4.7 State and events *(Phase 6 — not yet specified)*
+### 4.7 State and events *(Phase 6)*
+
+A document or authored component MAY declare reactive state with a `::state` leaf directive
+whose attributes name the state values (ADR-0014). Declared names join the expression scope
+(§4.5) alongside props.
+
+Normative rules:
+
+- State is **component-local**. Each expansion of a component owns its own state; two uses of
+  the same component MUST NOT share it. The page document is the outermost component.
+- State MUST NOT be visible to child components. Values reach a child only as props.
+- State values are the scalars expressions already support: string, number, boolean, null.
+- A processor MUST compile the dependency between each state name and the text or attribute
+  positions that read it, and MUST update only those positions when the value changes. It
+  MUST NOT re-render the document or diff a tree.
+- Initial values MUST be rendered into the HTML, so the document is correct before any script
+  runs.
+- Named derived state is **not** specified at this version.
+
+Event handlers are declared with allowlisted attributes: `on-click`, `on-input`,
+`on-change`, `on-submit`, `on-focus`, `on-blur`, `on-keydown`. A processor MUST reject any
+other `on-` attribute (`HMX2060`).
+
+Inside a handler — and **only** inside a handler — an expression MAY assign to a declared
+state name, which is the single exception to the prohibition in §4.5. Assignment to any
+other name is an error (`HMX2061`).
+
+Interactive documents are permitted in **both** trust modes. A handler MUST be able to read
+and assign declared state and to do nothing else: a conforming runtime MUST NOT expose the
+DOM, network, storage, or any host global. This is what makes untrusted interactivity safe,
+and a processor that weakens it is non-conforming.
+
+A document containing no interactive construct MUST emit zero bytes of runtime.
 
 Sections 4.5–4.7 are placeholders. Implementing syntax for them before this document
 specifies them is a process violation (see `CONTRIBUTING.md`, "Change control").
@@ -280,7 +312,9 @@ compiler-assisted migration diagnostics for breaking changes.
 
 ## Appendix A — Reserved syntax *(informative)*
 
-The following are reserved and SHOULD NOT be relied upon as literal content: a line
-beginning with `@` followed by an identifier and whitespace; the attribute-value form
-`{ident={...}}`; the interpolation sigil `{{` (escape it as `\{{`); `<script>` and
-`<style>` at block level.
+The following are reserved and SHOULD NOT be relied upon as literal content: the
+attribute-value form `{ident={...}}`; the interpolation sigil `{{` (escape it as `\{{`);
+`<script>` and `<style>` at block level.
+
+A leading `@` is **no longer reserved**. ADR-0014 rejects the `@`-statement family, so a
+line beginning with `@` is ordinary text and will stay that way.

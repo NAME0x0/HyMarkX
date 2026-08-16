@@ -19,14 +19,15 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0011](0011-styling-model.md) | CSS with attribute scoping; no native style shorthand | Accepted |
 | [0012](0012-interpolation-syntax.md) | Text interpolation is `{{ expr }}`, evaluated at compile time | Accepted |
 | [0013](0013-component-model.md) | Authored components are `.hmx` files with props in frontmatter | Accepted |
+| [0014](0014-state-and-events.md) | Component-local state, compiled reactivity, `@` family rejected | Accepted |
 
 ## Decisions still open
 
 | Topic | Blocked until | Notes |
 |---|---|---|
-| `@`-statement family vs directive-only control flow | Phase 4 | evidence from real documents; see ADR-0002 |
+| Named derived state (state→state edges) | after Phase 6 ships | ADR-0014 defers it deliberately — it is where ordering, batching and cycles live |
+| Sharing state between sibling components | first real complaint | ADR-0014 has no ambient store by design; needs its own ADR |
 | Named slots for authored components | evidence from real documents | ADR-0013 defers them; caller-side syntax is where they turn verbose |
+| A declared `title` prop also emitting an HTML tooltip | needs an ADR | see `BACKLOG.md`; accessibility concern against specified behaviour |
 | CLA vs DCO for outside contributions | before the first external PR | ADR-0010: a DCO does not grant relicensing rights |
-| State and reactivity model | Phase 6 | lifecycle specified before syntax |
-| Runtime/hydration strategy (islands granularity) | Phase 6 | |
 | TSX interoperability direction | Phase 8 | |
