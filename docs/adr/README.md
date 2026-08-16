@@ -20,6 +20,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0012](0012-interpolation-syntax.md) | Text interpolation is `{{ expr }}`, evaluated at compile time | Accepted |
 | [0013](0013-component-model.md) | Authored components are `.hmx` files with props in frontmatter | Accepted |
 | [0014](0014-state-and-events.md) | Component-local state, compiled reactivity, `@` family rejected | Accepted |
+| [0015](0015-developer-experience.md) | Conservative formatter, full-reparse language server | Accepted |
 
 ## Decisions still open
 
