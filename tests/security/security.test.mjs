@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -142,6 +142,65 @@ describe('CLI path confinement', () => {
     const stdout = []
     const stderr = []
     const exitCode = await runCli(['build', '../outside.md', '--out', 'dist', '--json'], {
+      cwd,
+      stdout: { write: (value) => stdout.push(value) },
+      stderr: { write: (value) => stderr.push(value) },
+      color: false,
+    })
+    const payload = JSON.parse(stdout.join(''))
+
+    expect(exitCode).toBe(1)
+    expect(payload.diagnostics.map((diagnostic) => diagnostic.code)).toContain('HMX3006')
+    expect(stderr).toEqual([])
+  })
+
+  it('rejects an explicit component path outside the project root', async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'hmx-security-'))
+    temporaryDirectories.push(cwd)
+    await writeFile(
+      join(cwd, 'input.hmx'),
+      [
+        '---',
+        'components:',
+        '  Outside: ../outside/Outside.hmx',
+        '---',
+        ':::Outside',
+        ':::',
+        '',
+      ].join('\n'),
+    )
+    const stdout = []
+    const stderr = []
+    const exitCode = await runCli(['check', 'input.hmx', '--json'], {
+      cwd,
+      stdout: { write: (value) => stdout.push(value) },
+      stderr: { write: (value) => stderr.push(value) },
+      color: false,
+    })
+    const payload = JSON.parse(stdout.join(''))
+
+    expect(exitCode).toBe(1)
+    expect(payload.diagnostics.map((diagnostic) => diagnostic.code)).toContain('HMX3006')
+    expect(
+      payload.diagnostics.find((diagnostic) => diagnostic.code === 'HMX3006').message,
+    ).toContain('Outside.hmx')
+    expect(stderr).toEqual([])
+  })
+
+  it('rejects a discovered component directory whose real path escapes the project root', async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'hmx-security-'))
+    const outside = await mkdtemp(join(tmpdir(), 'hmx-component-outside-'))
+    temporaryDirectories.push(cwd, outside)
+    await writeFile(join(cwd, 'input.hmx'), ':::Card\n:::\n')
+    await writeFile(join(outside, 'Card.hmx'), '# Outside\n')
+    await symlink(
+      outside,
+      join(cwd, 'components'),
+      process.platform === 'win32' ? 'junction' : 'dir',
+    )
+    const stdout = []
+    const stderr = []
+    const exitCode = await runCli(['check', 'input.hmx', '--json'], {
       cwd,
       stdout: { write: (value) => stdout.push(value) },
       stderr: { write: (value) => stderr.push(value) },

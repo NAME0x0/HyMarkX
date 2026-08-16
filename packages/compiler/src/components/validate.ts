@@ -257,16 +257,61 @@ export function validateComponent(
     .map((attribute) =>
       validateClass(attribute, attributeInput(attribute, expressionValues), diagnostics),
     )
-    .filter((value): value is string => value !== undefined && value.length > 0)
+    .filter((value): value is string => value !== undefined)
   if (classes.length > 0) {
     resolved.class = classes.join(' ')
+  } else if (classAttributes.length === 0) {
+    const classSchema = schema.attributes.class
+    if (classSchema?.default !== undefined) {
+      const defaultValue = validateValue(classSchema.default, classSchema, trust, false)
+      if (typeof defaultValue === 'string' && CLASS_NAMES.test(defaultValue)) {
+        resolved.class = defaultValue
+      }
+    } else if (classSchema?.required === true) {
+      diagnostics.push(
+        createDiagnostic({
+          code: 'HMX2003',
+          severity: 'error',
+          message: `Required attribute "class" is missing. ${classSchema.description}`,
+          span: node.position,
+        }),
+      )
+    }
+  }
+
+  const declaredClass = schema.attributes.class
+  if (declaredClass !== undefined && typeof resolved.class === 'string') {
+    const value = validateValue(resolved.class, declaredClass, trust, false)
+    if (value === undefined) {
+      const span =
+        classAttributes.at(-1)?.valueSpan ?? classAttributes.at(-1)?.nameSpan ?? node.position
+      if (declaredClass.type === 'enum') {
+        diagnostics.push(
+          createDiagnostic({
+            code: 'HMX2004',
+            severity: 'error',
+            message: `Attribute "class" must be one of: ${(declaredClass.values ?? []).join(', ')}.`,
+            span,
+          }),
+        )
+      } else {
+        diagnostics.push(
+          createDiagnostic({
+            code: 'HMX2005',
+            severity: 'error',
+            message: invalidValueMessage('class', resolved.class, declaredClass, false),
+            span,
+          }),
+        )
+      }
+      delete resolved.class
+    }
   }
 
   for (const [name, attributeSchema] of Object.entries({
+    ...universalAttributes,
     ...schema.attributes,
-    id: universalAttributes.id,
-    title: universalAttributes.title,
-  })) {
+  }).filter(([name]) => name !== 'class')) {
     if (attributeSchema === undefined) {
       continue
     }
@@ -325,6 +370,28 @@ export function validateComponent(
         resolved[name] = value
       }
     }
+  }
+
+  for (const name of ['id', 'title'] as const) {
+    const value = resolved[name]
+    const universal = universalAttributes[name]
+    if (
+      value === undefined ||
+      universal === undefined ||
+      validateValue(value, universal, trust, true) !== undefined
+    ) {
+      continue
+    }
+    const attribute = occurrences.get(name)?.at(-1)
+    diagnostics.push(
+      createDiagnostic({
+        code: 'HMX2005',
+        severity: 'error',
+        message: invalidValueMessage(name, value, universal, true),
+        span: attribute?.valueSpan ?? attribute?.nameSpan ?? node.position,
+      }),
+    )
+    delete resolved[name]
   }
 
   const kind = kindOf(node)

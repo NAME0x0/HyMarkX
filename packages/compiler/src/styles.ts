@@ -6,6 +6,7 @@ import selectorParser from 'postcss-selector-parser'
 import type { AnalyzedDocument } from './analyze/index.js'
 import { builtinComponents } from './components/builtins.js'
 import { builtinStylesFor } from './components/styles.js'
+import { setDiagnosticOrigin } from './diagnostic-origin.js'
 
 interface StyleBlock {
   readonly node: Html
@@ -19,16 +20,25 @@ interface StyleBlock {
 export interface PreparedStyles {
   readonly css: string
   readonly diagnostics: readonly Diagnostic[]
-  readonly omittedNodes: ReadonlySet<Html>
-  readonly scopeAttributes: readonly string[]
-  readonly scopedBlocks: readonly StyleBlock[]
+  readonly omittedNodes: ReadonlyMap<AnalyzedDocument, ReadonlySet<Html>>
+  readonly rootScopeAttributes: readonly string[]
+  readonly componentScopeAttributes: ReadonlyMap<AnalyzedDocument, readonly string[]>
+  readonly scopedBlocks: readonly PreparedScopedBlock[]
+}
+
+interface PreparedScopedBlock {
+  readonly block: StyleBlock
+  readonly attribute: string
+  readonly source: string
+  readonly from?: string
 }
 
 const EMPTY_STYLES: PreparedStyles = {
   css: '',
   diagnostics: [],
-  omittedNodes: new Set(),
-  scopeAttributes: [],
+  omittedNodes: new Map(),
+  rootScopeAttributes: [],
+  componentScopeAttributes: new Map(),
   scopedBlocks: [],
 }
 
@@ -78,6 +88,18 @@ function hashScope(identity: string): string {
     hash = Math.imul(hash, 0x01000193)
   }
   return (hash >>> 0).toString(16).padStart(8, '0')
+}
+
+function authoredScopeAttribute(identity: string, used: Set<string>): string {
+  const base = `data-hmx-s-${hashScope(identity)}-${hashScope(`authored\0${identity}`)}`
+  let attribute = base
+  let collision = 1
+  while (used.has(attribute)) {
+    collision += 1
+    attribute = `${base}-${collision}`
+  }
+  used.add(attribute)
+  return attribute
 }
 
 function isInsideKeyframes(rule: Rule): boolean {
@@ -265,15 +287,39 @@ function compileStyleBlock(
   }
 }
 
-function usedBuiltinComponents(document: AnalyzedDocument): ReadonlySet<string> {
+function analyzedDocuments(root: AnalyzedDocument): readonly AnalyzedDocument[] {
+  const documents: AnalyzedDocument[] = []
+  const seen = new Set<AnalyzedDocument>()
+  const stack = [root]
+  while (stack.length > 0) {
+    const document = stack.pop()
+    if (document === undefined || seen.has(document)) {
+      continue
+    }
+    seen.add(document)
+    documents.push(document)
+    const nested = [...document.expansions.values()].map((expansion) => expansion.document)
+    for (let index = nested.length - 1; index >= 0; index -= 1) {
+      const child = nested[index]
+      if (child !== undefined) {
+        stack.push(child)
+      }
+    }
+  }
+  return documents
+}
+
+function usedBuiltinComponents(documents: readonly AnalyzedDocument[]): ReadonlySet<string> {
   const used = new Set<string>()
-  for (const [node, component] of document.components) {
-    if (
-      component.kindAllowed &&
-      component.schema === builtinComponents.schemas[node.name] &&
-      component.renderer === builtinComponents.renderers[node.name]
-    ) {
-      used.add(node.name)
+  for (const document of documents) {
+    for (const [node, component] of document.components) {
+      if (
+        component.kindAllowed &&
+        component.schema === builtinComponents.schemas[node.name] &&
+        component.renderer === builtinComponents.renderers[node.name]
+      ) {
+        used.add(node.name)
+      }
     }
   }
   return used
@@ -285,58 +331,129 @@ export function prepareStyles(
   source: string,
   options: { readonly from?: string; readonly collectAuthorStyles: boolean },
 ): PreparedStyles {
-  const builtins = builtinStylesFor(usedBuiltinComponents(document))
-  if (!options.collectAuthorStyles) {
-    return builtins === '' ? EMPTY_STYLES : { ...EMPTY_STYLES, css: builtins }
-  }
-
-  const blocks = collectStyleBlocks(document)
-  const omittedNodes = new Set(blocks.map((block) => block.node))
-  const scopeAttributes: string[] = []
-  const scopedBlocks: StyleBlock[] = []
+  const documents = analyzedDocuments(document)
+  const builtins = builtinStylesFor(usedBuiltinComponents(documents))
+  const omittedNodes = new Map<AnalyzedDocument, ReadonlySet<Html>>()
+  const rootScopeAttributes: string[] = []
+  const componentScopeAttributes = new Map<AnalyzedDocument, readonly string[]>()
+  const scopedBlocks: PreparedScopedBlock[] = []
   const diagnostics: Diagnostic[] = []
   const authorCss: string[] = []
+  const usedComponentScopeAttributes = new Set<string>()
 
-  for (const block of blocks) {
-    const attributeName = block.scoped
-      ? `data-hmx-s-${hashScope(`${options.from ?? ''}\0${source}\0${block.index}`)}`
-      : undefined
-    const compiled = compileStyleBlock(block, attributeName, source, options.from)
-    if (compiled.diagnostic !== undefined) {
-      diagnostics.push(compiled.diagnostic)
+  if (options.collectAuthorStyles) {
+    const blocks = collectStyleBlocks(document)
+    omittedNodes.set(document, new Set(blocks.map((block) => block.node)))
+    for (const block of blocks) {
+      const attributeName = block.scoped
+        ? `data-hmx-s-${hashScope(`${options.from ?? ''}\0${source}\0${block.index}`)}`
+        : undefined
+      const compiled = compileStyleBlock(block, attributeName, source, options.from)
+      if (compiled.diagnostic !== undefined) {
+        diagnostics.push(compiled.diagnostic)
+        continue
+      }
+      if (compiled.css !== '') {
+        authorCss.push(compiled.css)
+      }
+      if (attributeName !== undefined) {
+        rootScopeAttributes.push(attributeName)
+        scopedBlocks.push({
+          block,
+          attribute: attributeName,
+          source,
+          ...(options.from === undefined ? {} : { from: options.from }),
+        })
+      }
+    }
+  }
+
+  const componentDocuments = new Map<
+    NonNullable<AnalyzedDocument['authored']>,
+    AnalyzedDocument[]
+  >()
+  for (const owner of documents) {
+    if (owner.authored === undefined) {
       continue
     }
-    if (compiled.css !== '') {
-      authorCss.push(compiled.css)
+    const instances = componentDocuments.get(owner.authored) ?? []
+    instances.push(owner)
+    componentDocuments.set(owner.authored, instances)
+  }
+
+  for (const [definition, instances] of componentDocuments) {
+    const representative = instances[0]
+    if (representative === undefined) {
+      continue
     }
-    if (attributeName !== undefined) {
-      scopeAttributes.push(attributeName)
-      scopedBlocks.push(block)
+    const blocks = collectStyleBlocks(representative)
+    const omitted = new Set(blocks.map((block) => block.node))
+    for (const instance of instances) {
+      omittedNodes.set(instance, omitted)
     }
+    const attributes: string[] = []
+    for (const block of blocks) {
+      if (!block.scoped || /<\s*script\b/i.test(block.css)) {
+        continue
+      }
+      const identity = `${definition.name}\0${definition.from ?? ''}\0${definition.source}\0${block.index}`
+      const attributeName = authoredScopeAttribute(identity, usedComponentScopeAttributes)
+      const compiled = compileStyleBlock(block, attributeName, definition.source, definition.from)
+      if (compiled.diagnostic !== undefined) {
+        setDiagnosticOrigin(compiled.diagnostic, definition.source, definition.from)
+        diagnostics.push(compiled.diagnostic)
+        continue
+      }
+      if (compiled.css !== '') {
+        authorCss.push(compiled.css)
+      }
+      attributes.push(attributeName)
+      scopedBlocks.push({
+        block,
+        attribute: attributeName,
+        source: definition.source,
+        ...(definition.from === undefined ? {} : { from: definition.from }),
+      })
+    }
+    for (const instance of instances) {
+      componentScopeAttributes.set(instance, attributes)
+    }
+  }
+
+  if (
+    builtins === '' &&
+    authorCss.length === 0 &&
+    diagnostics.length === 0 &&
+    omittedNodes.size === 0
+  ) {
+    return EMPTY_STYLES
   }
 
   return {
     css: [builtins, ...authorCss].filter((value) => value !== '').join('\n'),
     diagnostics,
     omittedNodes,
-    scopeAttributes,
+    rootScopeAttributes,
+    componentScopeAttributes,
     scopedBlocks,
   }
 }
 
 /** Warns for valid scoped blocks when no generated element received their scope attribute. */
 export function emptyScopeDiagnostics(styles: PreparedStyles, html: string): readonly Diagnostic[] {
-  return styles.scopedBlocks.flatMap((block, index) => {
-    const attribute = styles.scopeAttributes[index]
-    return attribute !== undefined && !html.includes(` ${attribute}`)
-      ? [
-          createDiagnostic({
-            code: 'HMX2031',
-            severity: 'warning',
-            message: 'Scoped style has no emitted elements to scope.',
-            span: block.node.position,
-          }),
-        ]
-      : []
-  })
+  const diagnostics: Diagnostic[] = []
+  for (const { block, attribute, source, from } of styles.scopedBlocks) {
+    if (html.includes(` ${attribute}`)) {
+      continue
+    }
+    const diagnostic = createDiagnostic({
+      code: 'HMX2031',
+      severity: 'warning',
+      message: 'Scoped style has no emitted elements to scope.',
+      span: block.node.position,
+    })
+    setDiagnosticOrigin(diagnostic, source, from)
+    diagnostics.push(diagnostic)
+  }
+  return diagnostics
 }

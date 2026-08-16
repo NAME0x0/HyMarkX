@@ -28,13 +28,13 @@ production code only for edits smaller than the delegation overhead.
 
 ## Current state
 
-Phases 0-4 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
+Phases 0-5 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
 directives to styled HTML at 652/652 CommonMark conformance, with schema-validated
-components, frontmatter, scoped CSS, and {{ }} expressions evaluated at compile time
-against frontmatter. Zero JavaScript in static output; CSS proportional to components used.
+components, frontmatter, scoped CSS, {{ }} expressions evaluated at compile time, and
+reusable components authored as .hmx files. Zero JavaScript in static output.
 
 The "is this just Markdoc?" gate passed on 2026-08-12 — see `prototypes/interactivity/`.
-Phase 5 (HMX-authored components) is next.
+Phase 6 (state, events, minimal runtime) is next and is the hardest phase in the project.
 
 ## Naming
 

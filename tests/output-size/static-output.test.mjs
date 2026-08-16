@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compile } from '../../packages/compiler/src/index.js'
+import { compile, compileComponents } from '../../packages/compiler/src/index.js'
 
 const STATIC_HTML_BYTE_BUDGET = 512
 
@@ -58,5 +58,48 @@ describe('static output proportionality', () => {
     expect(first.html.includes('<script')).toBe(false)
     expect(first.html.toLowerCase()).not.toContain('hmx-runtime')
     expect(Object.hasOwn(first, 'js')).toBe(false)
+  })
+
+  it('expands authored components with zero JavaScript artifacts', () => {
+    const registered = compileComponents([
+      {
+        name: 'Card',
+        from: 'components/Card.hmx',
+        source:
+          '---\nprops:\n  title: { type: string, required: true }\n---\n<style scoped>\n.card { color: inherit; }\n</style>\n\n:::card{class=card}\n## {{ title }}\n::children\n:::\n',
+      },
+    ])
+    const result = compile(
+      ':::Card{title=One}\nFirst.\n:::\n\n:::Card{title=Two}\nSecond.\n:::\n',
+      { components: registered.registry },
+    )
+    const emitted = `${result.html}${result.css}`
+
+    expect(registered.diagnostics).toEqual([])
+    expect(result.diagnostics).toEqual([])
+    expect(emitted.includes('<script')).toBe(false)
+    expect(emitted.toLowerCase()).not.toContain('hmx-runtime')
+    expect(Object.hasOwn(result, 'js')).toBe(false)
+  })
+
+  it('never emits script markup hidden inside authored raw HTML', () => {
+    const registered = compileComponents([
+      {
+        name: 'Unsafe',
+        from: 'components/Unsafe.hmx',
+        source:
+          '<style scoped>\n.x::before { content: "<script"; }\n</style>\n\n<iframe srcdoc="<script>alert(1)</script>"></iframe>\n',
+      },
+    ])
+    const result = compile(':::Unsafe\n:::\n', {
+      components: registered.registry,
+      trust: 'app',
+    })
+    const emitted = `${result.html}${result.css}`
+
+    expect(registered.diagnostics.map(({ code }) => code)).toContain('HMX3001')
+    expect(emitted.toLowerCase()).not.toContain('<script')
+    expect(emitted.toLowerCase()).not.toContain('srcdoc')
+    expect(Object.hasOwn(result, 'js')).toBe(false)
   })
 })

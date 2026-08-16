@@ -1,0 +1,175 @@
+{
+  "type": "root",
+  "hmxVersion": "0.0.0",
+  "children": [
+    {
+      "type": "heading",
+      "depth": 1,
+      "children": [
+        {
+          "type": "text",
+          "value": "Authored components",
+          "position": {
+            "start": { "line": 1, "column": 3, "offset": 2 },
+            "end": { "line": 1, "column": 22, "offset": 21 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 1, "column": 1, "offset": 0 },
+        "end": { "line": 1, "column": 22, "offset": 21 }
+      }
+    },
+    {
+      "type": "containerDirective",
+      "name": "Card",
+      "attributes": [
+        {
+          "name": "title",
+          "value": "First card",
+          "position": {
+            "start": { "line": 3, "column": 9, "offset": 31 },
+            "end": { "line": 3, "column": 27, "offset": 49 }
+          },
+          "nameSpan": {
+            "start": { "line": 3, "column": 9, "offset": 31 },
+            "end": { "line": 3, "column": 14, "offset": 36 }
+          },
+          "valueSpan": {
+            "start": { "line": 3, "column": 16, "offset": 38 },
+            "end": { "line": 3, "column": 26, "offset": 48 }
+          }
+        },
+        {
+          "name": "tone",
+          "value": "info",
+          "position": {
+            "start": { "line": 3, "column": 28, "offset": 50 },
+            "end": { "line": 3, "column": 37, "offset": 59 }
+          },
+          "nameSpan": {
+            "start": { "line": 3, "column": 28, "offset": 50 },
+            "end": { "line": 3, "column": 32, "offset": 54 }
+          },
+          "valueSpan": {
+            "start": { "line": 3, "column": 33, "offset": 55 },
+            "end": { "line": 3, "column": 37, "offset": 59 }
+          }
+        }
+      ],
+      "children": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "value": "First ",
+              "position": {
+                "start": { "line": 4, "column": 1, "offset": 61 },
+                "end": { "line": 4, "column": 7, "offset": 67 }
+              }
+            },
+            {
+              "type": "strong",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "body",
+                  "position": {
+                    "start": { "line": 4, "column": 9, "offset": 69 },
+                    "end": { "line": 4, "column": 13, "offset": 73 }
+                  }
+                }
+              ],
+              "position": {
+                "start": { "line": 4, "column": 7, "offset": 67 },
+                "end": { "line": 4, "column": 15, "offset": 75 }
+              }
+            },
+            {
+              "type": "text",
+              "value": ".",
+              "position": {
+                "start": { "line": 4, "column": 15, "offset": 75 },
+                "end": { "line": 4, "column": 16, "offset": 76 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 4, "column": 1, "offset": 61 },
+            "end": { "line": 4, "column": 16, "offset": 76 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 3, "column": 1, "offset": 23 },
+        "end": { "line": 5, "column": 4, "offset": 80 }
+      }
+    },
+    {
+      "type": "containerDirective",
+      "name": "Card",
+      "attributes": [
+        {
+          "name": "title",
+          "value": "Second card",
+          "position": {
+            "start": { "line": 7, "column": 9, "offset": 90 },
+            "end": { "line": 7, "column": 28, "offset": 109 }
+          },
+          "nameSpan": {
+            "start": { "line": 7, "column": 9, "offset": 90 },
+            "end": { "line": 7, "column": 14, "offset": 95 }
+          },
+          "valueSpan": {
+            "start": { "line": 7, "column": 16, "offset": 97 },
+            "end": { "line": 7, "column": 27, "offset": 108 }
+          }
+        },
+        {
+          "name": "tone",
+          "value": "warning",
+          "position": {
+            "start": { "line": 7, "column": 29, "offset": 110 },
+            "end": { "line": 7, "column": 41, "offset": 122 }
+          },
+          "nameSpan": {
+            "start": { "line": 7, "column": 29, "offset": 110 },
+            "end": { "line": 7, "column": 33, "offset": 114 }
+          },
+          "valueSpan": {
+            "start": { "line": 7, "column": 34, "offset": 115 },
+            "end": { "line": 7, "column": 41, "offset": 122 }
+          }
+        }
+      ],
+      "children": [
+        {
+          "type": "paragraph",
+          "children": [
+            {
+              "type": "text",
+              "value": "Second body.",
+              "position": {
+                "start": { "line": 8, "column": 1, "offset": 124 },
+                "end": { "line": 8, "column": 13, "offset": 136 }
+              }
+            }
+          ],
+          "position": {
+            "start": { "line": 8, "column": 1, "offset": 124 },
+            "end": { "line": 8, "column": 13, "offset": 136 }
+          }
+        }
+      ],
+      "position": {
+        "start": { "line": 7, "column": 1, "offset": 82 },
+        "end": { "line": 9, "column": 4, "offset": 140 }
+      }
+    }
+  ],
+  "position": {
+    "start": { "line": 1, "column": 1, "offset": 0 },
+    "end": { "line": 10, "column": 1, "offset": 141 }
+  }
+}

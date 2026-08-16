@@ -1,0 +1,16 @@
+---
+props:
+  title: { type: string, required: true }
+  tone: { type: enum, values: [info, warning], default: info }
+---
+<style scoped>
+.authored-card { border-color: currentColor; }
+</style>
+
+:::card{class=authored-card title={title}}
+## {{ title }}
+
+Tone: {{ tone }}
+
+::children
+:::

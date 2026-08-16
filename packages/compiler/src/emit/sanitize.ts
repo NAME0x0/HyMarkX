@@ -40,7 +40,15 @@ export const HTML_ALLOWLIST: Readonly<Record<string, readonly string[]>> = {
 
 const PROHIBITED_ELEMENTS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'form'])
 const VOID_ELEMENTS = new Set(['br', 'hr', 'img'])
-const URL_ATTRIBUTES = new Set(['href', 'src'])
+const URL_ATTRIBUTES = new Set([
+  'action',
+  'data',
+  'formaction',
+  'href',
+  'poster',
+  'src',
+  'xlink:href',
+])
 const RAW_TEXT_ELEMENTS = new Set([
   'iframe',
   'noembed',
@@ -56,6 +64,8 @@ const RAW_TEXT_ELEMENTS = new Set([
 interface RawAttribute {
   readonly name: string
   readonly value: string | null
+  readonly start: number
+  readonly end: number
 }
 
 interface RawTag {
@@ -94,6 +104,7 @@ function parseAttributes(raw: string, offset: number): readonly RawAttribute[] {
   let index = offset
 
   while (index < raw.length) {
+    const attributeStart = index
     while (/\s/.test(raw[index] ?? '')) {
       index += 1
     }
@@ -115,7 +126,7 @@ function parseAttributes(raw: string, offset: number): readonly RawAttribute[] {
       index += 1
     }
     if (raw[index] !== '=') {
-      attributes.push({ name, value: null })
+      attributes.push({ name, value: null, start: attributeStart, end: index })
       continue
     }
 
@@ -130,10 +141,11 @@ function parseAttributes(raw: string, offset: number): readonly RawAttribute[] {
       while (index < raw.length && raw[index] !== quote) {
         index += 1
       }
-      attributes.push({ name, value: raw.slice(valueStart, index) })
+      const value = raw.slice(valueStart, index)
       if (raw[index] === quote) {
         index += 1
       }
+      attributes.push({ name, value, start: attributeStart, end: index })
       continue
     }
 
@@ -141,7 +153,12 @@ function parseAttributes(raw: string, offset: number): readonly RawAttribute[] {
     while (index < raw.length && !/[\s>]/.test(raw[index] ?? '')) {
       index += 1
     }
-    attributes.push({ name, value: raw.slice(valueStart, index) })
+    attributes.push({
+      name,
+      value: raw.slice(valueStart, index),
+      start: attributeStart,
+      end: index,
+    })
   }
 
   return attributes
@@ -224,6 +241,60 @@ export function addAttributesToRawHtml(value: string, attributeNames: readonly s
   return `${output}${value.slice(cursor)}`
 }
 
+function insertionOffset(raw: string): number {
+  let insertion = raw.length - 1
+  while (insertion > 0 && /\s/.test(raw[insertion - 1] ?? '')) {
+    insertion -= 1
+  }
+  return raw[insertion - 1] === '/' ? insertion - 1 : insertion
+}
+
+/** Applies universal component attributes to the first emitted element. */
+export function addUniversalAttributesToFirstElement(
+  value: string,
+  attributes: Readonly<Record<string, unknown>>,
+): string | undefined {
+  const tag = scanTags(value).find((candidate) => !candidate.closing && candidate.name !== null)
+  if (tag === undefined) {
+    return undefined
+  }
+
+  const authorClass = typeof attributes.class === 'string' ? attributes.class : undefined
+  const existingClasses = tag.attributes
+    .filter((attribute) => attribute.name === 'class' && attribute.value !== null)
+    .flatMap((attribute) => (attribute.value ?? '').split(/\s+/))
+  const mergedClasses = [...existingClasses, ...(authorClass?.split(/\s+/) ?? [])].filter(
+    (name, index, all) => name !== '' && all.indexOf(name) === index,
+  )
+  const replacements = {
+    ...(mergedClasses.length === 0 ? {} : { class: mergedClasses.join(' ') }),
+    ...(typeof attributes.id === 'string' ? { id: attributes.id } : {}),
+    ...(typeof attributes.title === 'string' ? { title: attributes.title } : {}),
+  }
+  if (Object.keys(replacements).length === 0) {
+    return value
+  }
+
+  const raw = value.slice(tag.start, tag.end)
+  const replacedNames = new Set(Object.keys(replacements))
+  let cleaned = ''
+  let cursor = 0
+  for (const attribute of tag.attributes) {
+    if (!replacedNames.has(attribute.name)) {
+      continue
+    }
+    cleaned += raw.slice(cursor, attribute.start)
+    cursor = attribute.end
+  }
+  cleaned += raw.slice(cursor)
+  const insertion = insertionOffset(cleaned)
+  const serialized = Object.entries(replacements)
+    .map(([name, replacement]) => ` ${name}="${escapeHtml(replacement)}"`)
+    .join('')
+  const opening = `${cleaned.slice(0, insertion)}${serialized}${cleaned.slice(insertion)}`
+  return `${value.slice(0, tag.start)}${opening}${value.slice(tag.end)}`
+}
+
 function decodeSchemeEntities(value: string): string {
   return value
     .replace(/&#(?:x([0-9a-f]+)|(\d+));?/gi, (entity, hexadecimal: string, decimal: string) => {
@@ -268,6 +339,68 @@ function diagnostic(
   span: Span,
 ): Diagnostic {
   return createDiagnostic({ code, severity: 'error', message, span })
+}
+
+/** Reports phase-5 script, style, and event constructs forbidden in authored components. */
+export function componentHtmlDiagnostics(value: string, span: Span): readonly Diagnostic[] {
+  if (/<\s*script\b/i.test(value)) {
+    return [
+      diagnostic(
+        'HMX3001',
+        'Authored components cannot contain script markup at this phase.',
+        span,
+      ),
+    ]
+  }
+  const tags = scanTags(value)
+  const prohibited = tags.find(
+    (tag) => tag.name !== null && (tag.name === 'script' || tag.name === 'style'),
+  )
+  if (prohibited?.name !== undefined && prohibited.name !== null) {
+    return [
+      diagnostic(
+        'HMX3001',
+        `Authored components cannot contain <${prohibited.name}> elements at this phase.`,
+        span,
+      ),
+    ]
+  }
+  for (const tag of tags) {
+    if (tag.attributes.some((attribute) => attribute.name.startsWith('on'))) {
+      return [
+        diagnostic(
+          'HMX3002',
+          'Authored components cannot contain event-handler attributes at this phase.',
+          span,
+        ),
+      ]
+    }
+    if (tag.attributes.some((attribute) => attribute.name === 'srcdoc')) {
+      return [
+        diagnostic(
+          'HMX3001',
+          'Authored components cannot contain embedded srcdoc markup at this phase.',
+          span,
+        ),
+      ]
+    }
+    const unsafeUrl = tag.attributes.find(
+      (attribute) =>
+        URL_ATTRIBUTES.has(attribute.name) &&
+        attribute.value !== null &&
+        !isAllowedDocumentUrl(attribute.value),
+    )
+    if (unsafeUrl !== undefined) {
+      return [
+        diagnostic(
+          'HMX3003',
+          `URL in ${unsafeUrl.name} uses a scheme that is not allowed in authored components.`,
+          span,
+        ),
+      ]
+    }
+  }
+  return []
 }
 
 function sanitizeTag(tag: RawTag, span: Span, diagnostics: Diagnostic[]): string {

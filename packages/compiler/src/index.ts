@@ -1,7 +1,9 @@
 import type { Diagnostic, Root } from '@hymarkx/ast'
 import { parse } from '@hymarkx/parser'
 import { analyze } from './analyze/index.js'
+import { compileComponents } from './components/authored.js'
 import { builtinComponents, mergeComponentRegistries } from './components/builtins.js'
+import { diagnosticOrigin, setDiagnosticOrigin } from './diagnostic-origin.js'
 import { renderDiagnostic, renderDiagnostics } from './diagnostics/render.js'
 import { htmlBackend } from './emit/html.js'
 import { compileFrontmatter } from './frontmatter.js'
@@ -31,10 +33,14 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   }
 
   const compiled = compileAst(parsed.root, parsed.source, options)
+  const diagnostics = [...carried, ...parsed.diagnostics, ...compiled.diagnostics]
+  for (const diagnostic of diagnostics) {
+    setDiagnosticOrigin(diagnostic, parsed.source, options.from)
+  }
   return {
     html: compiled.html,
     css: compiled.css,
-    diagnostics: [...carried, ...parsed.diagnostics, ...compiled.diagnostics],
+    diagnostics,
     source: parsed.source,
     ...(compiled.frontmatter === undefined ? {} : { frontmatter: compiled.frontmatter }),
   }
@@ -52,6 +58,7 @@ export function compileAst(
     components: mergeComponentRegistries(options.components),
     trust,
     source,
+    ...(options.from === undefined ? {} : { from: options.from }),
     ...(frontmatter.value === undefined ? {} : { frontmatter: frontmatter.value }),
   })
   const styles = prepareStyles(analyzed, source, {
@@ -61,7 +68,8 @@ export function compileAst(
   const emitted = htmlBackend.emit(analyzed, {
     trust,
     omittedNodes: styles.omittedNodes,
-    scopeAttributes: styles.scopeAttributes,
+    rootScopeAttributes: styles.rootScopeAttributes,
+    componentScopeAttributes: styles.componentScopeAttributes,
   })
   const html =
     options.inlineCss === true && styles.css !== ''
@@ -82,7 +90,15 @@ export function compileAst(
   }
 }
 
-export { builtinComponents, renderDiagnostic, renderDiagnostics }
+export {
+  builtinComponents,
+  compileComponents,
+  diagnosticOrigin,
+  renderDiagnostic,
+  renderDiagnostics,
+}
+export type { AuthoredComponent, CompileComponentsResult } from './components/authored.js'
+export type { DiagnosticOrigin } from './diagnostic-origin.js'
 export type { RenderDiagnosticOptions } from './diagnostics/render.js'
 export type { Backend, EmitResult } from './emit/backend.js'
 export type {

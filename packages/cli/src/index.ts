@@ -1,8 +1,13 @@
-import { lstat, mkdir, readFile, realpath, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/promises'
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { parseArgs } from 'node:util'
-import { compile, renderDiagnostic } from '@hymarkx/compiler'
-import type { CompileResult, FrontmatterValue, TrustMode } from '@hymarkx/compiler'
+import { compile, compileComponents, diagnosticOrigin, renderDiagnostic } from '@hymarkx/compiler'
+import type {
+  AuthoredComponent,
+  CompileResult,
+  FrontmatterValue,
+  TrustMode,
+} from '@hymarkx/compiler'
 
 /** Current CLI package version. */
 export const VERSION = '0.0.0'
@@ -30,6 +35,12 @@ interface OutputTarget {
   readonly cssPath: string
 }
 
+interface ComponentResolution {
+  readonly sources: readonly AuthoredComponent[]
+  readonly records: readonly DiagnosticRecord[]
+  readonly ioFailed: boolean
+}
+
 const ZERO_SPAN = {
   start: { line: 1, column: 1, offset: 0 },
   end: { line: 1, column: 1, offset: 0 },
@@ -52,6 +63,19 @@ Options:
 
 function cliDiagnostic(code: string, message: string): Diagnostic {
   return { code, severity: 'error', message, span: ZERO_SPAN }
+}
+
+function diagnosticRecord(
+  diagnostic: Diagnostic,
+  fallbackSource: string,
+  fallbackFrom: string,
+): DiagnosticRecord {
+  const origin = diagnosticOrigin(diagnostic)
+  return {
+    diagnostic,
+    source: origin?.source ?? fallbackSource,
+    from: origin?.from ?? fallbackFrom,
+  }
 }
 
 function isInside(root: string, path: string): boolean {
@@ -103,6 +127,162 @@ async function pathExists(path: string): Promise<boolean> {
   } catch (error) {
     return (error as { readonly code?: string }).code !== 'ENOENT' ? Promise.reject(error) : false
   }
+}
+
+function errorCode(error: unknown): string | undefined {
+  return typeof error === 'object' && error !== null && 'code' in error
+    ? String(error.code)
+    : undefined
+}
+
+function componentIoRecord(input: string, path: string, error: unknown): DiagnosticRecord {
+  const detail = error instanceof Error ? error.message : String(error)
+  return {
+    diagnostic: cliDiagnostic('HMX5004', `Could not read component ${path}: ${detail}`),
+    source: '',
+    from: input,
+  }
+}
+
+function componentTraversalRecord(input: string, path: string): DiagnosticRecord {
+  return {
+    diagnostic: cliDiagnostic('HMX3006', `Component path escapes the project root: ${path}`),
+    source: '',
+    from: input,
+  }
+}
+
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function configuredComponents(
+  frontmatter: FrontmatterValue | undefined,
+): readonly (readonly [string, string])[] {
+  const value = frontmatter?.components
+  if (!isRecord(value)) {
+    return []
+  }
+  return Object.entries(value)
+    .filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+    .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+}
+
+async function discoveredComponentFiles(
+  directory: string,
+  projectRoot: string,
+  realProjectRoot: string,
+  input: string,
+  records: DiagnosticRecord[],
+): Promise<{ readonly files: readonly string[]; readonly ioFailed: boolean }> {
+  if (!isInside(projectRoot, directory)) {
+    records.push(componentTraversalRecord(input, directory))
+    return { files: [], ioFailed: false }
+  }
+
+  let realDirectory: string
+  try {
+    realDirectory = await realpath(directory)
+  } catch (error) {
+    if (errorCode(error) === 'ENOENT') {
+      return { files: [], ioFailed: false }
+    }
+    records.push(componentIoRecord(input, directory, error))
+    return { files: [], ioFailed: true }
+  }
+  if (!isInside(realProjectRoot, realDirectory)) {
+    records.push(componentTraversalRecord(input, directory))
+    return { files: [], ioFailed: false }
+  }
+
+  try {
+    const names = await readdir(realDirectory)
+    return {
+      files: names
+        .filter((name) => extname(name).toLowerCase() === '.hmx')
+        .sort()
+        .map((name) => resolve(directory, name)),
+      ioFailed: false,
+    }
+  } catch (error) {
+    records.push(componentIoRecord(input, directory, error))
+    return { files: [], ioFailed: true }
+  }
+}
+
+async function resolveComponents(
+  inputPath: string,
+  input: string,
+  projectRoot: string,
+  frontmatter: FrontmatterValue | undefined,
+): Promise<ComponentResolution> {
+  const records: DiagnosticRecord[] = []
+  const paths = new Map<string, string>()
+  const realProjectRoot = await realpath(projectRoot)
+  let ioFailed = false
+  const localDirectory = resolve(dirname(inputPath), 'components')
+  const rootDirectory = resolve(projectRoot, 'components')
+  const directoryKeys = new Set<string>()
+
+  for (const directory of [localDirectory, rootDirectory]) {
+    const key = process.platform === 'win32' ? directory.toLowerCase() : directory
+    if (directoryKeys.has(key)) {
+      continue
+    }
+    directoryKeys.add(key)
+    const discovered = await discoveredComponentFiles(
+      directory,
+      projectRoot,
+      realProjectRoot,
+      input,
+      records,
+    )
+    ioFailed ||= discovered.ioFailed
+    for (const path of discovered.files) {
+      const name = basename(path, extname(path))
+      if (!paths.has(name)) {
+        paths.set(name, path)
+      }
+    }
+  }
+
+  for (const [name, path] of configuredComponents(frontmatter)) {
+    paths.set(name, resolve(dirname(inputPath), path))
+  }
+
+  const sources: AuthoredComponent[] = []
+  for (const [name, path] of paths) {
+    if (!isInside(projectRoot, path)) {
+      records.push(componentTraversalRecord(input, path))
+      continue
+    }
+
+    let realPath: string
+    try {
+      realPath = await realpath(path)
+    } catch (error) {
+      records.push(componentIoRecord(input, path, error))
+      ioFailed = true
+      continue
+    }
+    if (!isInside(realProjectRoot, realPath)) {
+      records.push(componentTraversalRecord(input, path))
+      continue
+    }
+
+    try {
+      sources.push({
+        name,
+        source: await readFile(realPath, 'utf8'),
+        from: relative(projectRoot, path),
+      })
+    } catch (error) {
+      records.push(componentIoRecord(input, path, error))
+      ioFailed = true
+    }
+  }
+
+  return { sources, records, ioFailed }
 }
 
 async function prepareOutputTarget(target: OutputTarget): Promise<boolean> {
@@ -303,22 +483,51 @@ export async function runCli(
       continue
     }
 
+    // Component paths live in parsed frontmatter, so inspect it before the final pass that
+    // receives the resolved registry and produces the document diagnostics.
+    const inspected = compile(source, {
+      trust,
+      from: input,
+      gfm: parsed.values.gfm,
+    })
+    if (inspected.frontmatter !== undefined) {
+      frontmatters.set(input, inspected.frontmatter)
+    }
+    // The document's own directory is a legitimate component root even when the document
+    // sits outside the working directory — `hmx build /elsewhere/page.md` must still find
+    // `/elsewhere/components/`. Using only the cwd made that fail with a traversal error.
+    const componentRoot = isInside(resolve(io.cwd), inputPath)
+      ? resolve(io.cwd)
+      : dirname(inputPath)
+    const resolvedComponents = await resolveComponents(
+      inputPath,
+      input,
+      componentRoot,
+      inspected.frontmatter,
+    )
+    records.push(...resolvedComponents.records)
+    if (resolvedComponents.ioFailed) {
+      ioFailed = true
+      continue
+    }
+    const authored = compileComponents(resolvedComponents.sources, {
+      trust,
+      gfm: parsed.values.gfm,
+    })
+    records.push(
+      ...authored.diagnostics.map((diagnostic) => diagnosticRecord(diagnostic, '', input)),
+    )
+
     const result = compile(source, {
       trust,
       from: input,
       gfm: parsed.values.gfm,
+      components: authored.registry,
       inlineCss: command === 'build' && parsed.values.out === '-',
     })
     records.push(
-      ...result.diagnostics.map((diagnostic) => ({
-        diagnostic,
-        source: result.source,
-        from: input,
-      })),
+      ...result.diagnostics.map((diagnostic) => diagnosticRecord(diagnostic, result.source, input)),
     )
-    if (result.frontmatter !== undefined) {
-      frontmatters.set(input, result.frontmatter)
-    }
 
     if (command !== 'build') {
       continue
@@ -369,8 +578,12 @@ export async function runCli(
   const diagnostics = records.map((record) => record.diagnostic)
   if (parsed.values.json === true) {
     const frontmatter = jsonFrontmatter(inputs, frontmatters)
+    const jsonDiagnostics = records.map((record) => ({
+      ...record.diagnostic,
+      from: record.from,
+    }))
     io.stdout.write(
-      `${JSON.stringify({ diagnostics, ...(frontmatter === undefined ? {} : { frontmatter }) })}\n`,
+      `${JSON.stringify({ diagnostics: jsonDiagnostics, ...(frontmatter === undefined ? {} : { frontmatter }) })}\n`,
     )
   } else {
     for (const record of records) {

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { compile } from '../../packages/compiler/src/index.js'
+import { compile, compileComponents } from '../../packages/compiler/src/index.js'
 
 const fixturesDirectory = fileURLToPath(new URL('../../fixtures/markdown/', import.meta.url))
 const fixtureNames = readdirSync(fixturesDirectory, { withFileTypes: true })
@@ -15,7 +15,24 @@ describe('Markdown HTML fixtures', () => {
     const input = readFileSync(new URL('input.md', fixtureDirectory), 'utf8')
     const expected = readFileSync(new URL('expected.html', fixtureDirectory), 'utf8')
     const expectedCssUrl = new URL('expected.css', fixtureDirectory)
-    const result = compile(input, { from: `${fixtureName}/input.md`, trust: 'app' })
+    const componentsUrl = new URL('components/', fixtureDirectory)
+    const authored = existsSync(componentsUrl)
+      ? readdirSync(componentsUrl)
+          .filter((name) => name.endsWith('.hmx'))
+          .sort()
+          .map((name) => ({
+            name: name.slice(0, -4),
+            source: readFileSync(new URL(name, componentsUrl), 'utf8'),
+            from: `${fixtureName}/components/${name}`,
+          }))
+      : []
+    const registered = compileComponents(authored, { trust: 'app' })
+    expect(registered.diagnostics).toEqual([])
+    const result = compile(input, {
+      from: `${fixtureName}/input.md`,
+      trust: 'app',
+      components: registered.registry,
+    })
 
     if (fixtureName === 'components-invalid') {
       expect(result.diagnostics.map(({ code, severity }) => ({ code, severity }))).toEqual([

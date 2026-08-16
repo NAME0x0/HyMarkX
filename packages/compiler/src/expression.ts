@@ -16,6 +16,8 @@ export type ExpressionValue =
 export interface ExpressionSourceContext {
   readonly documentSource: string
   readonly startOffset: number
+  /** Names considered for HMX2040 suggestions when scope contains only resolved values. */
+  readonly identifierNames?: readonly string[]
 }
 
 /** Total result of parsing and evaluating one restricted expression. */
@@ -953,9 +955,11 @@ function scalarString(value: PrimitiveValue): string {
 
 class Evaluator {
   readonly #scope: FrontmatterValue
+  readonly #identifierNames: readonly string[]
 
-  constructor(scope: FrontmatterValue) {
+  constructor(scope: FrontmatterValue, identifierNames: readonly string[]) {
     this.#scope = scope
+    this.#identifierNames = identifierNames
   }
 
   evaluate(expression: Expression): ExpressionValue {
@@ -999,7 +1003,10 @@ class Evaluator {
         return expression.value
       case 'identifier': {
         if (!Object.hasOwn(this.#scope, expression.name)) {
-          const replacement = nearestSuggestion(expression.name, Object.keys(this.#scope))
+          const replacement = nearestSuggestion(
+            expression.name,
+            this.#identifierNames.filter((name) => name !== expression.name),
+          )
           failure(
             'HMX2040',
             replacement === undefined
@@ -1310,7 +1317,9 @@ export function evaluateExpression(
 ): ExpressionEvaluation {
   try {
     const expression = new Parser(tokenize(source)).parse()
-    const value = new Evaluator(scope).evaluate(expression)
+    const value = new Evaluator(scope, context.identifierNames ?? Object.keys(scope)).evaluate(
+      expression,
+    )
     return { ok: true, value, diagnostics: [] }
   } catch (error) {
     const issue =

@@ -1,8 +1,10 @@
 import { createDiagnostic, visit } from '@hymarkx/ast'
-import type { Attribute, Diagnostic, Interpolation, Root, Span } from '@hymarkx/ast'
+import type { Attribute, Diagnostic, Interpolation, Node, Root, Span } from '@hymarkx/ast'
+import { authoredComponentFor, type AuthoredComponentDefinition } from '../components/authored.js'
 import type { ComponentRegistry, DirectiveNode } from '../components/types.js'
 import { validateComponent } from '../components/validate.js'
 import type { AnalyzedComponent } from '../components/validate.js'
+import { setDiagnosticOrigin } from '../diagnostic-origin.js'
 import { evaluateExpression } from '../expression.js'
 import type { ExpressionEvaluation, ExpressionValue } from '../expression.js'
 import { nearestSuggestion } from '../suggestions.js'
@@ -11,17 +13,43 @@ import type { FrontmatterValue, TrustMode } from '../types.js'
 /** Syntax tree plus diagnostics produced by semantic analysis. */
 export interface AnalyzedDocument {
   readonly root: Root
+  readonly source: string
+  readonly from?: string
+  readonly authored?: AuthoredComponentDefinition
   readonly diagnostics: readonly Diagnostic[]
   readonly components: ReadonlyMap<DirectiveNode, AnalyzedComponent>
   readonly interpolations: ReadonlyMap<Interpolation, string>
+  readonly expansions: ReadonlyMap<DirectiveNode, AnalyzedExpansion>
+  readonly projections: ReadonlyMap<DirectiveNode, ProjectedChildren>
+}
+
+/** One recursively analyzed authored-component invocation. */
+export interface AnalyzedExpansion {
+  readonly document: AnalyzedDocument
+}
+
+/** Caller-owned child nodes substituted at a component's ::children marker. */
+export interface ProjectedChildren {
+  readonly document: AnalyzedDocument
+  readonly nodes: readonly Node[]
 }
 
 interface AnalyzeOptions {
   readonly components: ComponentRegistry
   readonly trust: TrustMode
   readonly source: string
+  readonly from?: string
   readonly frontmatter?: FrontmatterValue
 }
+
+interface RecursiveAnalyzeOptions extends AnalyzeOptions {
+  readonly scope: FrontmatterValue
+  readonly identifierNames: readonly string[]
+  readonly stack: readonly string[]
+  readonly authored?: AuthoredComponentDefinition
+}
+
+const MAX_COMPONENT_DEPTH = 32
 
 /**
  * Matches a line that opens like a block directive: two or more colons immediately
@@ -153,22 +181,49 @@ function interpolationText(
   return ''
 }
 
-/** Runs semantic component checks without mutating the syntax tree. */
-export function analyze(root: Root, options: AnalyzeOptions): AnalyzedDocument {
+function callerChildren(node: DirectiveNode): readonly Node[] {
+  return node.type === 'containerDirective' ? node.children : []
+}
+
+function propScope(component: AnalyzedComponent): FrontmatterValue {
+  const scope = Object.create(null) as Record<string, FrontmatterValue[string]>
+  for (const name of Object.keys(component.schema.attributes)) {
+    const value = component.attributes[name]
+    if (Object.hasOwn(component.attributes, name) && value !== undefined) {
+      scope[name] = value
+    }
+  }
+  return scope
+}
+
+function analyzeDocument(root: Root, options: RecursiveAnalyzeOptions): AnalyzedDocument {
   const diagnostics: Diagnostic[] = []
   const components = new Map<DirectiveNode, AnalyzedComponent>()
   const interpolations = new Map<Interpolation, string>()
   const attributeExpressions = new Map<Attribute, ExpressionEvaluation>()
-  const scope = options.frontmatter ?? (Object.create(null) as FrontmatterValue)
+  const expansions = new Map<DirectiveNode, AnalyzedExpansion>()
+  const projections = new Map<DirectiveNode, ProjectedChildren>()
+  const document: AnalyzedDocument = {
+    root,
+    source: options.source,
+    ...(options.from === undefined ? {} : { from: options.from }),
+    ...(options.authored === undefined ? {} : { authored: options.authored }),
+    diagnostics,
+    components,
+    interpolations,
+    expansions,
+    projections,
+  }
 
   checkDirectiveLikeParagraphs(root, diagnostics)
 
   visit(root, (node) => {
     if (node.type === 'interpolation') {
       const expression = interpolationSource(node, options.source)
-      const evaluation = evaluateExpression(expression.value, scope, {
+      const evaluation = evaluateExpression(expression.value, options.scope, {
         documentSource: options.source,
         startOffset: expression.startOffset,
+        identifierNames: options.identifierNames,
       })
       diagnostics.push(...evaluation.diagnostics)
       interpolations.set(
@@ -185,12 +240,27 @@ export function analyze(root: Root, options: AnalyzeOptions): AnalyzedDocument {
       node.type === 'leafDirective' ||
       node.type === 'containerDirective'
     ) {
+      if (node.type === 'leafDirective' && node.name === 'children') {
+        if (options.authored === undefined) {
+          diagnostics.push(
+            createDiagnostic({
+              code: 'HMX2056',
+              severity: 'error',
+              message: '::children can only appear inside an authored component document.',
+              span: node.position,
+            }),
+          )
+        }
+        return
+      }
+
       for (const attribute of node.attributes) {
         const expression = attributeExpression(attribute, options.source)
         if (expression !== undefined) {
-          const evaluation = evaluateExpression(expression.value, scope, {
+          const evaluation = evaluateExpression(expression.value, options.scope, {
             documentSource: options.source,
             startOffset: expression.startOffset,
+            identifierNames: options.identifierNames,
           })
           attributeExpressions.set(attribute, evaluation)
           diagnostics.push(...evaluation.diagnostics)
@@ -223,20 +293,95 @@ export function analyze(root: Root, options: AnalyzeOptions): AnalyzedDocument {
           }),
         )
       } else {
-        components.set(
+        const component = validateComponent(
           node,
-          validateComponent(
-            node,
-            schema,
-            renderer,
-            options.trust,
-            attributeExpressions,
-            diagnostics,
-          ),
+          schema,
+          renderer,
+          options.trust,
+          attributeExpressions,
+          diagnostics,
         )
+        components.set(node, component)
+
+        const authored = authoredComponentFor(renderer)
+        if (authored === undefined || !component.kindAllowed) {
+          return
+        }
+
+        const cycleStart = options.stack.indexOf(authored.name)
+        if (cycleStart !== -1) {
+          const cycle = [...options.stack.slice(cycleStart), authored.name]
+          diagnostics.push(
+            createDiagnostic({
+              code: 'HMX2054',
+              severity: 'error',
+              message: `Authored component cycle detected: ${cycle.join(' -> ')}.`,
+              span: node.position,
+            }),
+          )
+          return
+        }
+        if (options.stack.length >= MAX_COMPONENT_DEPTH) {
+          diagnostics.push(
+            createDiagnostic({
+              code: 'HMX2055',
+              severity: 'error',
+              message: `Authored component expansion exceeds the maximum depth of ${MAX_COMPONENT_DEPTH}.`,
+              span: node.position,
+            }),
+          )
+          return
+        }
+
+        const children = callerChildren(node)
+        const marker = authored.childrenMarkers[0]
+        if (marker === undefined && children.length > 0) {
+          diagnostics.push(
+            createDiagnostic({
+              code: 'HMX2052',
+              severity: 'warning',
+              message: `Authored component "${authored.name}" discards supplied content because it has no ::children directive.`,
+              span: children[0]?.position ?? node.position,
+            }),
+          )
+        }
+
+        const nested = analyzeDocument(authored.root, {
+          components: options.components,
+          trust: options.trust,
+          source: authored.source,
+          ...(authored.from === undefined ? {} : { from: authored.from }),
+          scope: propScope(component),
+          identifierNames: Object.keys(schema.attributes),
+          stack: [...options.stack, authored.name],
+          authored,
+        })
+        if (marker !== undefined) {
+          const nestedProjections = nested.projections as Map<DirectiveNode, ProjectedChildren>
+          nestedProjections.set(marker, {
+            document,
+            nodes: children,
+          })
+        }
+        expansions.set(node, { document: nested })
+        diagnostics.push(...nested.diagnostics)
       }
     }
   })
 
-  return { root, diagnostics, components, interpolations }
+  for (const diagnostic of diagnostics) {
+    setDiagnosticOrigin(diagnostic, options.source, options.from)
+  }
+  return document
+}
+
+/** Runs semantic component checks without mutating the syntax tree. */
+export function analyze(root: Root, options: AnalyzeOptions): AnalyzedDocument {
+  const scope = options.frontmatter ?? (Object.create(null) as FrontmatterValue)
+  return analyzeDocument(root, {
+    ...options,
+    scope,
+    identifierNames: Object.keys(scope),
+    stack: [],
+  })
 }

@@ -111,7 +111,7 @@ Implement the restricted expression language from ADR-0004: grammar, evaluator, 
 checker, diagnostics. Expression-valued attributes become legal. Exit: expressions are
 provably pure — a fuzz corpus cannot reach a host object.
 
-## Phase 5 — Components
+## Phase 5 — Components ✅
 
 HMX-authored reusable components: declaration, props, children/slots, scope,
 resolution. Every question in charter §41 answered in the spec first.
