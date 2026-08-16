@@ -152,8 +152,21 @@ describe('expression evaluation', () => {
     expect(rendered('null ?? (false || true)')).toBe('<p>true</p>\n')
   })
 
+  it('reports HMX2061 for assignment outside an event handler', () => {
+    for (const expression of [
+      'value = 1',
+      '(value = 1)',
+      '[value = 1]',
+      '{value: value = 1}',
+      'true ? value = 1 : 2',
+    ]) {
+      expect(diagnostic(expression, 'HMX2061').message).toContain(
+        'only allowed inside an event handler',
+      )
+    }
+  })
+
   it.each([
-    ['value = 1', 'Assignment is not allowed'],
     ['new Thing', 'new expressions are not allowed'],
     ['function () {}', 'Function literals are not allowed'],
     ['value => value', 'Arrow function literals are not allowed'],

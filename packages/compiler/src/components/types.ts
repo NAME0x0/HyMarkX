@@ -44,6 +44,19 @@ export type ResolvedAttributes = Readonly<Record<string, ResolvedAttribute>>
 export interface RenderedElement {
   readonly tag: string
   readonly attributes: Readonly<Record<string, string>>
+  /** Emits an HTML void element without a synthetic closing tag. */
+  readonly void?: boolean
+}
+
+/** One source-attribute reference inside a rendered DOM attribute template. */
+export interface RenderedAttributeReference {
+  readonly attribute: string
+}
+
+/** Declarative mapping from component attributes to one emitted DOM attribute. */
+export interface RenderedAttributeBinding {
+  readonly name: string
+  readonly segments: readonly (string | RenderedAttributeReference)[]
 }
 
 /** Trusted wrapper structure returned by a component renderer. */
@@ -52,6 +65,10 @@ export interface RenderPlan {
   readonly wrappers: readonly RenderedElement[]
   /** Wraps the label before children inside the innermost wrapper. */
   readonly labelWrapper?: RenderedElement
+  /** Templates used to compile reactive source attributes to emitted attributes. */
+  readonly attributeBindings?: readonly RenderedAttributeBinding[]
+  /** Emits one paragraph child's phrasing content directly inside the innermost wrapper. */
+  readonly flattenSingleParagraph?: boolean
 }
 
 /** A parsed directive node accepted by component renderers. */

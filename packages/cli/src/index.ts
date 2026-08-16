@@ -33,6 +33,7 @@ interface OutputTarget {
   readonly root: string
   readonly path: string
   readonly cssPath: string
+  readonly jsPath: string
 }
 
 interface ComponentResolution {
@@ -86,7 +87,7 @@ function isInside(root: string, path: string): boolean {
   )
 }
 
-function outputName(path: string, extension: '.html' | '.css'): string {
+function outputName(path: string, extension: '.html' | '.css' | '.js'): string {
   return `${basename(path, extname(path))}${extension}`
 }
 
@@ -103,6 +104,7 @@ function outputTarget(
       root,
       path: resolve(root, outputName(inputPath, '.html')),
       cssPath: resolve(root, outputName(inputPath, '.css')),
+      jsPath: resolve(root, outputName(inputPath, '.js')),
     }
   }
   if (out === '-') {
@@ -117,6 +119,7 @@ function outputTarget(
     root,
     path: resolve(root, `${relativeStem}.html`),
     cssPath: resolve(root, `${relativeStem}.css`),
+    jsPath: resolve(root, `${relativeStem}.js`),
   }
 }
 
@@ -524,6 +527,7 @@ export async function runCli(
       gfm: parsed.values.gfm,
       components: authored.registry,
       inlineCss: command === 'build' && parsed.values.out === '-',
+      inlineJs: command === 'build' && parsed.values.out === '-',
     })
     records.push(
       ...result.diagnostics.map((diagnostic) => diagnosticRecord(diagnostic, result.source, input)),
@@ -550,6 +554,10 @@ export async function runCli(
         !(await prepareOutputTarget({
           ...target,
           path: target.cssPath,
+        })) ||
+        !(await prepareOutputTarget({
+          ...target,
+          path: target.jsPath,
         }))
       ) {
         records.push({
@@ -564,6 +572,7 @@ export async function runCli(
       }
       await writeFile(target.path, result.html, 'utf8')
       await writeFile(target.cssPath, result.css, 'utf8')
+      await writeFile(target.jsPath, result.js, 'utf8')
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error)
       records.push({

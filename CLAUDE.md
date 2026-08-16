@@ -28,13 +28,15 @@ production code only for edits smaller than the delegation overhead.
 
 ## Current state
 
-Phases 0-5 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
-directives to styled HTML at 652/652 CommonMark conformance, with schema-validated
-components, frontmatter, scoped CSS, {{ }} expressions evaluated at compile time, and
-reusable components authored as .hmx files. Zero JavaScript in static output.
+Phases 0-6 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
+directives to styled, interactive HTML at 652/652 CommonMark conformance — schema-validated
+components, frontmatter, scoped CSS, compile-time expressions, .hmx components, and
+component-local state with a 591-byte gzipped runtime. Static documents emit zero JS.
 
-The "is this just Markdoc?" gate passed on 2026-08-12 — see `prototypes/interactivity/`.
-Phase 6 (state, events, minimal runtime) is next and is the hardest phase in the project.
+Interactivity is safe in document mode because expressions cannot reach a host object —
+the runtime is a security boundary and must never gain an escape hatch without an ADR.
+
+Phase 7 (developer experience: dev server, formatter, language server) is next.
 
 ## Naming
 

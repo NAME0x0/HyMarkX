@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { JSDOM } from 'jsdom'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url))
@@ -45,6 +46,7 @@ describe('built hmx CLI', () => {
       { cwd: repositoryRoot, encoding: 'utf8' },
     )
     const actual = readFileSync(join(outputRoot, 'examples/hello-world/index.html'), 'utf8')
+    const javascript = readFileSync(join(outputRoot, 'examples/hello-world/index.js'), 'utf8')
     const expected = readFileSync(
       resolve(repositoryRoot, 'examples/hello-world/index.html'),
       'utf8',
@@ -54,6 +56,7 @@ describe('built hmx CLI', () => {
     expect(result.stdout).toBe('')
     expect(result.stderr).toBe('0 errors, 0 warnings in 1 file\n')
     expect(actual).toBe(expected)
+    expect(Buffer.byteLength(javascript)).toBe(0)
   })
 
   it('prints only machine-readable diagnostics with --json', () => {
@@ -151,6 +154,41 @@ describe('built hmx CLI', () => {
     expect(stdout.stdout.startsWith('<style>\n:where(:root)')).toBe(true)
     expect(stdout.stdout).toContain('<aside class="hmx-note')
     expect(stdout.stdout).not.toContain('<script')
+  })
+
+  it('builds component-local interactivity as HTML plus one JavaScript artifact', () => {
+    const outputDirectory = join(outputRoot, 'interactive')
+    const result = spawnSync(
+      process.execPath,
+      [cliPath, 'build', 'fixtures/interactivity/two-counters.hmx', '--out', outputDirectory],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )
+    const stem = join(outputDirectory, 'fixtures/interactivity/two-counters')
+    const html = readFileSync(`${stem}.html`, 'utf8')
+    const javascript = readFileSync(`${stem}.js`, 'utf8')
+    const dom = new JSDOM(`${html}<script>${javascript}</script>`, {
+      runScripts: 'dangerously',
+    })
+    const stdout = spawnSync(
+      process.execPath,
+      [cliPath, 'build', 'fixtures/interactivity/two-counters.hmx', '--out', '-'],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )
+    const buttons = dom.window.document.querySelectorAll('button')
+    const outputs = dom.window.document.querySelectorAll('[data-hmx-t]')
+
+    expect(result.status).toBe(0)
+    expect(result.stderr).toBe('0 errors, 0 warnings in 1 file\n')
+    expect(html).not.toContain('<script>')
+    expect(javascript).not.toBe('')
+    expect(stdout.status).toBe(0)
+    expect(stdout.stdout.match(/<script>/g)).toHaveLength(1)
+    buttons[0].click()
+    expect([...outputs].map((node) => node.textContent)).toEqual(['1', '0'])
+    console.log(
+      `HMX CLI two-counter build: HTML markers=${outputs.length}, JavaScript bytes=${Buffer.byteLength(javascript)}, after first click=[${[...outputs].map((node) => node.textContent).join(', ')}]`,
+    )
+    dom.window.close()
   })
 
   it('discovers and expands an authored component twice with one copy of its CSS', () => {

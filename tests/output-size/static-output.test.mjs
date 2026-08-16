@@ -5,11 +5,15 @@ const STATIC_HTML_BYTE_BUDGET = 512
 
 describe('static output proportionality', () => {
   it('emits only proportional HTML and no HMX runtime', () => {
-    const result = compile('# Hello\n\nStatic **content** with a [link](/docs).\n')
+    const result = compile('# Hello\n\nStatic **content** with a [link](/docs).\n', {
+      inlineJs: true,
+    })
 
     expect(result.diagnostics).toEqual([])
     expect(result.html.includes('<script')).toBe(false)
     expect(result.html.toLowerCase()).not.toContain('hmx-runtime')
+    expect(result.js).toBe('')
+    expect(new TextEncoder().encode(result.js).byteLength).toBe(0)
     expect(new TextEncoder().encode(result.html).byteLength).toBeLessThanOrEqual(
       STATIC_HTML_BYTE_BUDGET,
     )
@@ -17,7 +21,7 @@ describe('static output proportionality', () => {
 
   it('emits all built-in components and scoped CSS with zero JavaScript bytes', () => {
     const result = compile(
-      '<style scoped>.hmx-card { color: inherit; }</style>\n\n:::note\nn\n:::\n\n:::card\nc\n:::\n\n:::grid\ng\n:::\n\n:::metric\nm\n:::\n\n:badge[b]\n',
+      '<style scoped>.hmx-card { color: inherit; }</style>\n\n:::note\nn\n:::\n\n:::card\nc\n:::\n\n:::grid\ng\n:::\n\n:::metric\nm\n:::\n\n:badge[b]\n\n:::button\nb\n:::\n\n::input\n\n:::form\nf\n:::\n',
       { trust: 'app', from: 'all-components.hmx' },
     )
     const emitted = `${result.html}${result.css}`
@@ -33,7 +37,7 @@ describe('static output proportionality', () => {
     expect(emitted.includes('<script')).toBe(false)
     expect(emitted.toLowerCase()).not.toContain('hmx-runtime')
     expect(javascriptBytes).toBe(0)
-    expect(Object.hasOwn(result, 'js')).toBe(false)
+    expect(result.js).toBe('')
   })
 
   it('emits frontmatter expressions as deterministic static HTML with zero JavaScript', () => {
@@ -57,7 +61,7 @@ describe('static output proportionality', () => {
     expect(first.html).toContain('title="Expression page"')
     expect(first.html.includes('<script')).toBe(false)
     expect(first.html.toLowerCase()).not.toContain('hmx-runtime')
-    expect(Object.hasOwn(first, 'js')).toBe(false)
+    expect(first.js).toBe('')
   })
 
   it('expands authored components with zero JavaScript artifacts', () => {
@@ -79,7 +83,7 @@ describe('static output proportionality', () => {
     expect(result.diagnostics).toEqual([])
     expect(emitted.includes('<script')).toBe(false)
     expect(emitted.toLowerCase()).not.toContain('hmx-runtime')
-    expect(Object.hasOwn(result, 'js')).toBe(false)
+    expect(result.js).toBe('')
   })
 
   it('never emits script markup hidden inside authored raw HTML', () => {
@@ -100,6 +104,6 @@ describe('static output proportionality', () => {
     expect(registered.diagnostics.map(({ code }) => code)).toContain('HMX3001')
     expect(emitted.toLowerCase()).not.toContain('<script')
     expect(emitted.toLowerCase()).not.toContain('srcdoc')
-    expect(Object.hasOwn(result, 'js')).toBe(false)
+    expect(result.js).toBe('')
   })
 })

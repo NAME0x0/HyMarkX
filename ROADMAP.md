@@ -116,7 +116,7 @@ provably pure — a fuzz corpus cannot reach a host object.
 HMX-authored reusable components: declaration, props, children/slots, scope,
 resolution. Every question in charter §41 answered in the spec first.
 
-## Phase 6 — Minimal interactivity
+## Phase 6 — Minimal interactivity ✅
 
 State, events, and the smallest runtime that can express them. Islands, not a
 framework. Byte budget enforced by test.

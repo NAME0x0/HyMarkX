@@ -67,9 +67,11 @@ at most one `::children`; duplicates produce `HMX2053`. Named slots are not avai
 phase.
 
 Scoped component CSS is emitted only when the component is used and only once per component,
-even when the document uses that component many times. Components cannot contain scripts,
-state, event handlers, embedded `srcdoc` markup, or script-capable URL schemes. This remains
-true when the host compiles the calling document in app trust mode.
+even when the document uses that component many times. Components may declare local HMX state
+and allowlisted HMX event handlers as described in the
+[interactivity guide](interactivity.md). They cannot contain scripts, raw HTML event handlers,
+embedded `srcdoc` markup, or script-capable URL schemes. This remains true when the host
+compiles the calling document in app trust mode.
 
 ## How files are resolved
 

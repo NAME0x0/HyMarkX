@@ -24,6 +24,8 @@ export interface CompileOptions {
   readonly components?: ComponentRegistry
   /** Emit CSS in a `<style>` element ahead of the HTML content. Default: `false`. */
   readonly inlineCss?: boolean
+  /** Emit JavaScript in a `<script>` element after the HTML content. Default: `false`. */
+  readonly inlineJs?: boolean
 }
 
 /** Result of compiling source or an existing HMX syntax tree. */
@@ -32,6 +34,8 @@ export interface CompileResult {
   readonly html: string
   /** Stylesheet for this document. Empty when no styles are needed. */
   readonly css: string
+  /** Feature-shaped interactive runtime. Empty when the document is static. */
+  readonly js: string
   /** Parser, analysis, and emission diagnostics in source order. */
   readonly diagnostics: readonly Diagnostic[]
   /** Normalized source indexed by every diagnostic span. */

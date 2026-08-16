@@ -213,6 +213,7 @@ export function validateComponent(
   trust: TrustMode,
   expressionValues: ReadonlyMap<Attribute, ExpressionEvaluation>,
   diagnostics: Diagnostic[],
+  ignoredAttributes: ReadonlySet<Attribute> = new Set(),
 ): AnalyzedComponent {
   const resolved = Object.create(null) as Record<string, ResolvedAttribute>
   const declaredNames = Object.keys(schema.attributes)
@@ -220,6 +221,9 @@ export function validateComponent(
   const occurrences = new Map<string, Attribute[]>()
 
   for (const attribute of node.attributes) {
+    if (ignoredAttributes.has(attribute)) {
+      continue
+    }
     const attributes = occurrences.get(attribute.name) ?? []
     attributes.push(attribute)
     occurrences.set(attribute.name, attributes)

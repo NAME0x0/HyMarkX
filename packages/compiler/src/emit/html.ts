@@ -4,6 +4,7 @@ import type { AnalyzedDocument } from '../analyze/index.js'
 import type { TrustMode } from '../types.js'
 import type { DirectiveNode, RenderedElement, RenderPlan } from '../components/types.js'
 import { setDiagnosticOrigin } from '../diagnostic-origin.js'
+import type { InteractivityPlan } from '../runtime.js'
 import type { Backend, EmitResult } from './backend.js'
 import { encodeUrl, escapeHtml } from './escape.js'
 import {
@@ -19,6 +20,7 @@ interface HtmlOptions {
   readonly omittedNodes: ReadonlyMap<AnalyzedDocument, ReadonlySet<Html>>
   readonly rootScopeAttributes: readonly string[]
   readonly componentScopeAttributes: ReadonlyMap<AnalyzedDocument, readonly string[]>
+  readonly interactivity: InteractivityPlan
 }
 
 interface EmitContext {
@@ -140,6 +142,36 @@ function withUniversalAttributes(
   }
 }
 
+function interactionAttributes(
+  node: DirectiveNode,
+  document: AnalyzedDocument,
+  options: HtmlOptions,
+): Readonly<Record<string, string>> {
+  const text = options.interactivity.attributeMarkers.get(document)?.get(node)
+  const event = options.interactivity.eventMarkers.get(document)?.get(node)
+  const inputValue = options.interactivity.inputValues.get(document)?.get(node)
+  return {
+    ...(text === undefined ? {} : { 'data-hmx-a': text }),
+    ...(event === undefined ? {} : { 'data-hmx-e': event }),
+    ...(inputValue === undefined ? {} : { value: inputValue }),
+  }
+}
+
+function withOuterAttributes(
+  plan: RenderPlan,
+  attributes: Readonly<Record<string, string>>,
+): RenderPlan {
+  const outer = plan.wrappers[0]
+  if (outer === undefined || Object.keys(attributes).length === 0) return plan
+  return {
+    ...plan,
+    wrappers: [
+      { ...outer, attributes: { ...outer.attributes, ...attributes } },
+      ...plan.wrappers.slice(1),
+    ],
+  }
+}
+
 function directiveActions(
   node: DirectiveNode,
   context: EmitContext,
@@ -147,6 +179,9 @@ function directiveActions(
   scope: string,
   options: HtmlOptions,
 ): EmitAction[] {
+  if (node.type === 'leafDirective' && node.name === 'state') {
+    return []
+  }
   const projection = document.projections.get(node)
   if (projection !== undefined) {
     return childActions(projection.nodes, blockContext, projection.document)
@@ -161,7 +196,10 @@ function directiveActions(
       {
         kind: 'componentEnd',
         boundary,
-        attributes: universalAttributeValues(component?.attributes ?? {}),
+        attributes: {
+          ...universalAttributeValues(component?.attributes ?? {}),
+          ...interactionAttributes(node, document, options),
+        },
         scope: scopeFor(expansion.document, options),
       },
     ]
@@ -181,9 +219,9 @@ function directiveActions(
     ]
   }
 
-  const plan = withUniversalAttributes(
-    component.renderer(node, component.attributes),
-    component.attributes,
+  const plan = withOuterAttributes(
+    withUniversalAttributes(component.renderer(node, component.attributes), component.attributes),
+    interactionAttributes(node, document, options),
   )
   const actions: EmitAction[] = plan.wrappers.map((wrapper) => write(elementStart(wrapper, scope)))
   const label = node.type === 'textDirective' ? [] : (node.label ?? [])
@@ -199,14 +237,20 @@ function directiveActions(
   if (node.type === 'textDirective') {
     actions.push(...childActions(node.children, inlineContext, document))
   } else if (node.type === 'containerDirective') {
-    actions.push(...childActions(node.children, blockContext, document))
+    const paragraph = plan.flattenSingleParagraph === true ? node.children[0] : undefined
+    if (paragraph?.type === 'paragraph' && node.children.length === 1) {
+      actions.push(...childActions(paragraph.children, inlineContext, document))
+    } else {
+      actions.push(...childActions(node.children, blockContext, document))
+    }
   }
   for (let index = plan.wrappers.length - 1; index >= 0; index -= 1) {
     const wrapper = plan.wrappers[index]
-    if (wrapper !== undefined) {
+    if (wrapper !== undefined && wrapper.void !== true) {
       actions.push(write(`</${wrapper.tag}>${context.block && index === 0 ? '\n' : ''}`))
     }
   }
+  if (plan.wrappers[0]?.void === true && context.block) actions.push(write('\n'))
   return actions
 }
 
@@ -497,7 +541,13 @@ function emitHtml(document: AnalyzedDocument, options: HtmlOptions): EmitResult 
         chunks.push(escapeHtml(node.value))
         break
       case 'interpolation':
-        chunks.push(escapeHtml(owner.interpolations.get(node) ?? ''))
+        {
+          const value = escapeHtml(owner.interpolations.get(node) ?? '')
+          const marker = options.interactivity.textMarkers.get(owner)?.get(node)
+          chunks.push(
+            marker === undefined ? value : `<span data-hmx-t="${marker}"${scope}>${value}</span>`,
+          )
+        }
         break
       case 'emphasis':
         pushInOrder(stack, [

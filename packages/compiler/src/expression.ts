@@ -12,21 +12,53 @@ export type ExpressionValue =
   | readonly ExpressionValue[]
   | { readonly [key: string]: ExpressionValue }
 
+/** Compact, JSON-serializable instruction interpreted by the browser runtime. */
+export type ExpressionInstruction =
+  | readonly ['l', string | number | boolean | null]
+  | readonly ['i', string]
+  | readonly ['i', number, string]
+  | readonly ['u', UnaryExpression['operator'], ExpressionInstruction]
+  | readonly ['b', BinaryExpression['operator'], ExpressionInstruction, ExpressionInstruction]
+  | readonly ['c', ExpressionInstruction, ExpressionInstruction, ExpressionInstruction]
+  | readonly ['m', ExpressionInstruction, string | ExpressionInstruction, 0 | 1, 0 | 1]
+  | readonly ['r', readonly ExpressionInstruction[]]
+  | readonly ['o', readonly (readonly [string, ExpressionInstruction])[]]
+  | readonly ['a', string, AssignmentOperator, ExpressionInstruction]
+
 /** Source context used to turn expression-relative offsets into document spans. */
 export interface ExpressionSourceContext {
   readonly documentSource: string
   readonly startOffset: number
   /** Names considered for HMX2040 suggestions when scope contains only resolved values. */
   readonly identifierNames?: readonly string[]
+  /** Check every syntactic read, including initially unreachable reactive branches. */
+  readonly strictScope?: boolean
 }
 
 /** Total result of parsing and evaluating one restricted expression. */
 export type ExpressionEvaluation =
-  | { readonly ok: true; readonly value: ExpressionValue; readonly diagnostics: readonly [] }
+  | {
+      readonly ok: true
+      readonly value: ExpressionValue
+      readonly instruction: ExpressionInstruction
+      readonly identifiers: readonly string[]
+      readonly diagnostics: readonly []
+    }
+  | { readonly ok: false; readonly diagnostics: readonly [Diagnostic] }
+
+/** Result of compiling one event-handler expression without executing it. */
+export type HandlerExpressionCompilation =
+  | {
+      readonly ok: true
+      readonly instruction: ExpressionInstruction
+      readonly identifiers: readonly string[]
+      readonly assignments: readonly string[]
+      readonly diagnostics: readonly []
+    }
   | { readonly ok: false; readonly diagnostics: readonly [Diagnostic] }
 
 type ExpressionDiagnosticCode =
-  'HMX1021' | 'HMX1022' | 'HMX2040' | 'HMX2041' | 'HMX2042' | 'HMX2043' | 'HMX2044'
+  'HMX1021' | 'HMX1022' | 'HMX2040' | 'HMX2041' | 'HMX2042' | 'HMX2043' | 'HMX2044' | 'HMX2061'
 
 interface ExpressionIssue {
   readonly code: ExpressionDiagnosticCode
@@ -126,6 +158,17 @@ interface GroupExpression {
   readonly end: number
 }
 
+type AssignmentOperator = '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '&&=' | '||=' | '??='
+
+interface AssignmentExpression {
+  readonly type: 'assignment'
+  readonly name: string
+  readonly operator: AssignmentOperator
+  readonly value: Expression
+  readonly start: number
+  readonly end: number
+}
+
 type Expression =
   | LiteralExpression
   | IdentifierExpression
@@ -136,6 +179,7 @@ type Expression =
   | ArrayExpression
   | ObjectExpression
   | GroupExpression
+  | AssignmentExpression
 
 const MAX_EXPRESSION_DEPTH = 128
 const OPTIONAL_MISSING: unique symbol = Symbol('optional-missing')
@@ -498,11 +542,13 @@ function logicalFamily(expression: Expression): 'logical' | 'nullish' | undefine
 
 class Parser {
   readonly #tokens: readonly Token[]
+  readonly #allowAssignment: boolean
   #cursor = 0
   #nesting = 0
 
-  constructor(tokens: readonly Token[]) {
+  constructor(tokens: readonly Token[], allowAssignment = false) {
     this.#tokens = tokens
+    this.#allowAssignment = allowAssignment
   }
 
   current(): Token {
@@ -526,6 +572,14 @@ class Parser {
   expect(value: string, message: string): Token {
     const token = this.current()
     if (token.value !== value) {
+      if (!this.#allowAssignment && ASSIGNMENT_OPERATORS.has(token.value)) {
+        failure(
+          'HMX2061',
+          'Assignment is only allowed inside an event handler.',
+          token.start,
+          token.end,
+        )
+      }
       failure('HMX1022', message, token.start, token.end)
     }
     return this.consume()
@@ -544,7 +598,7 @@ class Parser {
   }
 
   parse(): Expression {
-    const expression = this.parseConditional()
+    const expression = this.parseNestedExpression()
     const trailing = this.current()
     if (trailing.kind !== 'eof') {
       this.rejectTrailing(trailing)
@@ -555,7 +609,12 @@ class Parser {
 
   rejectTrailing(token: Token): never {
     if (ASSIGNMENT_OPERATORS.has(token.value)) {
-      failure('HMX2044', 'Assignment is not allowed in expressions.', token.start, token.end)
+      failure(
+        'HMX2061',
+        'Assignment is only allowed inside an event handler.',
+        token.start,
+        token.end,
+      )
     }
     if (token.value === '++' || token.value === '--') {
       failure('HMX2044', 'Increment and decrement are not allowed.', token.start, token.end)
@@ -575,6 +634,44 @@ class Parser {
     failure('HMX1022', `Unexpected token ${JSON.stringify(token.value)}.`, token.start, token.end)
   }
 
+  parseNestedExpression(): Expression {
+    return this.parseAssignment()
+  }
+
+  parseAssignment(): Expression {
+    const target = this.parseConditional()
+    const token = this.current()
+    if (!ASSIGNMENT_OPERATORS.has(token.value)) {
+      return target
+    }
+    if (!this.#allowAssignment) {
+      failure(
+        'HMX2061',
+        'Assignment is only allowed inside an event handler.',
+        token.start,
+        token.end,
+      )
+    }
+    if (target.type !== 'identifier') {
+      failure(
+        'HMX2061',
+        'An event handler may only assign to a declared state name.',
+        target.start,
+        target.end,
+      )
+    }
+    this.consume()
+    const value = this.nested(token, () => this.parseAssignment())
+    return {
+      type: 'assignment',
+      name: target.name,
+      operator: token.value as AssignmentOperator,
+      value,
+      start: target.start,
+      end: value.end,
+    }
+  }
+
   parseConditional(): Expression {
     const test = this.parseBinary(1)
     if (!this.matches('?')) {
@@ -582,9 +679,9 @@ class Parser {
     }
     const question = this.consume()
     return this.nested(question, () => {
-      const consequent = this.parseConditional()
+      const consequent = this.parseNestedExpression()
       this.expect(':', 'Ternary expression requires a colon.')
-      const alternate = this.parseConditional()
+      const alternate = this.parseNestedExpression()
       return {
         type: 'conditional',
         test,
@@ -671,7 +768,7 @@ class Parser {
         this.consume()
         if (this.matches('[')) {
           this.consume()
-          const property = this.nested(token, () => this.parseConditional())
+          const property = this.nested(token, () => this.parseNestedExpression())
           const closing = this.expect(']', 'Computed member access requires a closing bracket.')
           expression = {
             type: 'member',
@@ -727,7 +824,7 @@ class Parser {
       }
       if (token.value === '[') {
         this.consume()
-        const property = this.nested(token, () => this.parseConditional())
+        const property = this.nested(token, () => this.parseNestedExpression())
         const closing = this.expect(']', 'Computed member access requires a closing bracket.')
         expression = {
           type: 'member',
@@ -788,7 +885,7 @@ class Parser {
         failure('HMX2044', 'Arrow function literals are not allowed.', arrow.start, arrow.end)
       }
       return this.nested(token, () => {
-        const expression = this.parseConditional()
+        const expression = this.parseNestedExpression()
         if (this.matches(',')) {
           const comma = this.current()
           failure('HMX2044', 'The comma operator is not allowed.', comma.start, comma.end)
@@ -821,7 +918,7 @@ class Parser {
           const comma = this.current()
           failure('HMX1022', 'Array holes are not supported.', comma.start, comma.end)
         }
-        elements.push(this.parseConditional())
+        elements.push(this.parseNestedExpression())
         if (!this.matches(',')) {
           const closing = this.expect(']', 'Array literal requires a closing bracket.')
           return { type: 'array', elements, start: opening.start, end: closing.end }
@@ -864,7 +961,7 @@ class Parser {
         let value: Expression
         if (this.matches(':')) {
           this.consume()
-          value = this.parseConditional()
+          value = this.parseNestedExpression()
         } else if (keyToken.kind === 'identifier') {
           value = { type: 'identifier', name: key, start: keyToken.start, end: keyToken.end }
         } else {
@@ -937,9 +1034,130 @@ class Parser {
         }
       } else if (node.type === 'group') {
         stack.push({ expression: node.expression, depth: nextDepth })
+      } else if (node.type === 'assignment') {
+        stack.push({ expression: node.value, depth: nextDepth })
       }
     }
   }
+}
+
+function instructionFor(expression: Expression): ExpressionInstruction {
+  switch (expression.type) {
+    case 'literal':
+      return ['l', expression.value]
+    case 'identifier':
+      return ['i', expression.name]
+    case 'unary':
+      return ['u', expression.operator, instructionFor(expression.argument)]
+    case 'binary':
+      return [
+        'b',
+        expression.operator,
+        instructionFor(expression.left),
+        instructionFor(expression.right),
+      ]
+    case 'conditional':
+      return [
+        'c',
+        instructionFor(expression.test),
+        instructionFor(expression.consequent),
+        instructionFor(expression.alternate),
+      ]
+    case 'member':
+      return [
+        'm',
+        instructionFor(expression.object),
+        expression.computed
+          ? instructionFor(expression.property as Expression)
+          : (expression.property as string),
+        expression.computed ? 1 : 0,
+        expression.optional ? 1 : 0,
+      ]
+    case 'array':
+      return ['r', expression.elements.map(instructionFor)]
+    case 'object':
+      return ['o', expression.properties.map(({ key, value }) => [key, instructionFor(value)])]
+    case 'group':
+      return instructionFor(expression.expression)
+    case 'assignment':
+      return ['a', expression.name, expression.operator, instructionFor(expression.value)]
+  }
+}
+
+function expressionNames(expression: Expression): {
+  readonly identifiers: readonly string[]
+  readonly assignments: readonly string[]
+} {
+  const identifiers = new Set<string>()
+  const assignments = new Set<string>()
+  const stack = [expression]
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (node === undefined) continue
+    if (node.type === 'identifier') {
+      identifiers.add(node.name)
+    } else if (node.type === 'unary') {
+      stack.push(node.argument)
+    } else if (node.type === 'binary') {
+      stack.push(node.left, node.right)
+    } else if (node.type === 'conditional') {
+      stack.push(node.test, node.consequent, node.alternate)
+    } else if (node.type === 'member') {
+      stack.push(node.object)
+      if (node.computed) stack.push(node.property as Expression)
+    } else if (node.type === 'array') {
+      stack.push(...node.elements)
+    } else if (node.type === 'object') {
+      stack.push(...node.properties.map(({ value }) => value))
+    } else if (node.type === 'group') {
+      stack.push(node.expression)
+    } else if (node.type === 'assignment') {
+      assignments.add(node.name)
+      if (node.operator !== '=') identifiers.add(node.name)
+      stack.push(node.value)
+    }
+  }
+  return { identifiers: [...identifiers], assignments: [...assignments] }
+}
+
+function assertStaticScope(expression: Expression, scope: FrontmatterValue): void {
+  const names = expressionNames(expression)
+  for (const name of names.identifiers) {
+    if (Object.hasOwn(scope, name)) continue
+    const identifier = findIdentifier(expression, name)
+    failure(
+      'HMX2040',
+      `Unknown identifier "${name}".`,
+      identifier?.start ?? 0,
+      identifier?.end ?? Math.min(1, name.length),
+    )
+  }
+}
+
+function literalPropertyName(expression: Expression): string | undefined {
+  if (expression.type === 'group') return literalPropertyName(expression.expression)
+  if (expression.type !== 'literal') return undefined
+  return expression.value === null ? 'null' : String(expression.value)
+}
+
+function assertStaticMemberSafety(expression: Expression): void {
+  const member = findExpression(expression, (node): node is MemberExpression => {
+    if (node.type !== 'member') return false
+    const name = node.computed
+      ? literalPropertyName(node.property as Expression)
+      : (node.property as string)
+    return name !== undefined && isForbiddenAttributeName(name)
+  })
+  if (member === undefined) return
+  const name = member.computed
+    ? literalPropertyName(member.property as Expression)
+    : (member.property as string)
+  failure(
+    'HMX2044',
+    `Property "${name ?? ''}" is forbidden.`,
+    member.propertyStart,
+    member.propertyEnd,
+  )
 }
 
 function isStructured(value: ExpressionValue): value is Exclude<ExpressionValue, PrimitiveValue> {
@@ -1040,6 +1258,13 @@ class Evaluator {
         }
         return output
       }
+      case 'assignment':
+        failure(
+          'HMX2061',
+          'Assignment is only allowed inside an event handler.',
+          expression.start,
+          expression.end,
+        )
     }
   }
 
@@ -1317,10 +1542,19 @@ export function evaluateExpression(
 ): ExpressionEvaluation {
   try {
     const expression = new Parser(tokenize(source)).parse()
+    assertStaticMemberSafety(expression)
+    if (context.strictScope === true) assertStaticScope(expression, scope)
     const value = new Evaluator(scope, context.identifierNames ?? Object.keys(scope)).evaluate(
       expression,
     )
-    return { ok: true, value, diagnostics: [] }
+    const names = expressionNames(expression)
+    return {
+      ok: true,
+      value,
+      instruction: instructionFor(expression),
+      identifiers: names.identifiers,
+      diagnostics: [],
+    }
   } catch (error) {
     const issue =
       error instanceof ExpressionFailure
@@ -1333,4 +1567,120 @@ export function evaluateExpression(
           }
     return { ok: false, diagnostics: [issueDiagnostic(issue, context)] }
   }
+}
+
+/**
+ * Parses one event handler through the shared expression parser and restricts every read and
+ * assignment to the component-local state names supplied by the compiler.
+ */
+export function compileHandlerExpression(
+  source: string,
+  stateNames: ReadonlySet<string>,
+  context: ExpressionSourceContext = { documentSource: source, startOffset: 0 },
+): HandlerExpressionCompilation {
+  try {
+    const expression = new Parser(tokenize(source), true).parse()
+    assertStaticMemberSafety(expression)
+    const names = expressionNames(expression)
+    for (const name of names.assignments) {
+      if (!stateNames.has(name)) {
+        const assignment = findAssignment(expression, name)
+        failure(
+          'HMX2061',
+          `An event handler may only assign to declared state; "${name}" is not declared.`,
+          assignment?.start ?? 0,
+          assignment === undefined ? Math.min(1, source.length) : assignment.start + name.length,
+        )
+      }
+    }
+    for (const name of names.identifiers) {
+      if (!stateNames.has(name)) {
+        const identifier = findIdentifier(expression, name)
+        const replacement = nearestSuggestion(name, [...stateNames])
+        failure(
+          'HMX2040',
+          replacement === undefined
+            ? `Unknown identifier "${name}".`
+            : `Unknown identifier "${name}"; did you mean "${replacement}"?`,
+          identifier?.start ?? 0,
+          identifier?.end ?? Math.min(1, source.length),
+          replacement,
+        )
+      }
+    }
+    return {
+      ok: true,
+      instruction: instructionFor(expression),
+      identifiers: names.identifiers,
+      assignments: names.assignments,
+      diagnostics: [],
+    }
+  } catch (error) {
+    const issue =
+      error instanceof ExpressionFailure
+        ? error.issue
+        : {
+            code: 'HMX1022' as const,
+            message: 'Expression could not be compiled safely.',
+            start: 0,
+            end: Math.min(1, source.length),
+          }
+    return { ok: false, diagnostics: [issueDiagnostic(issue, context)] }
+  }
+}
+
+function findAssignment(expression: Expression, name: string): AssignmentExpression | undefined {
+  return findExpression(
+    expression,
+    (node): node is AssignmentExpression => node.type === 'assignment' && node.name === name,
+  )
+}
+
+function findIdentifier(expression: Expression, name: string): IdentifierExpression | undefined {
+  return findExpression(
+    expression,
+    (node): node is IdentifierExpression => node.type === 'identifier' && node.name === name,
+  )
+}
+
+function findExpression<T extends Expression>(
+  expression: Expression,
+  matches: (expression: Expression) => expression is T,
+): T | undefined {
+  const stack = [expression]
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (node === undefined) continue
+    if (matches(node)) return node
+    if (node.type === 'unary') stack.push(node.argument)
+    else if (node.type === 'binary') stack.push(node.left, node.right)
+    else if (node.type === 'conditional') stack.push(node.test, node.consequent, node.alternate)
+    else if (node.type === 'member') {
+      stack.push(node.object)
+      if (node.computed) stack.push(node.property as Expression)
+    } else if (node.type === 'array') stack.push(...node.elements)
+    else if (node.type === 'object') stack.push(...node.properties.map(({ value }) => value))
+    else if (node.type === 'group') stack.push(node.expression)
+    else if (node.type === 'assignment') stack.push(node.value)
+  }
+  return undefined
+}
+
+/** Returns whether a declaration name can be referenced by the expression grammar. */
+export function isExpressionIdentifier(name: string): boolean {
+  if (
+    name.length === 0 ||
+    !isIdentifierStart(name[0]) ||
+    KEYWORDS.has(name) ||
+    name === 'true' ||
+    name === 'false' ||
+    name === 'null' ||
+    isForbiddenAttributeName(name)
+  ) {
+    return false
+  }
+  for (let index = 1; index < name.length; index += 1) {
+    if (!isIdentifierContinue(name[index])) return false
+  }
+  return true
 }

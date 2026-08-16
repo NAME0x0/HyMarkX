@@ -7,6 +7,7 @@ import { diagnosticOrigin, setDiagnosticOrigin } from './diagnostic-origin.js'
 import { renderDiagnostic, renderDiagnostics } from './diagnostics/render.js'
 import { htmlBackend } from './emit/html.js'
 import { compileFrontmatter } from './frontmatter.js'
+import { prepareInteractivity } from './runtime.js'
 import { emptyScopeDiagnostics, prepareStyles } from './styles.js'
 import type { CompileOptions, CompileResult } from './types.js'
 
@@ -40,6 +41,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   return {
     html: compiled.html,
     css: compiled.css,
+    js: compiled.js,
     diagnostics,
     source: parsed.source,
     ...(compiled.frontmatter === undefined ? {} : { frontmatter: compiled.frontmatter }),
@@ -65,19 +67,26 @@ export function compileAst(
     ...(options.from === undefined ? {} : { from: options.from }),
     collectAuthorStyles: trust === 'app',
   })
+  const interactivity = prepareInteractivity(analyzed)
   const emitted = htmlBackend.emit(analyzed, {
     trust,
     omittedNodes: styles.omittedNodes,
     rootScopeAttributes: styles.rootScopeAttributes,
     componentScopeAttributes: styles.componentScopeAttributes,
+    interactivity,
   })
-  const html =
+  const styledHtml =
     options.inlineCss === true && styles.css !== ''
       ? `<style>\n${styles.css}\n</style>\n${emitted.html}`
       : emitted.html
+  const html =
+    options.inlineJs === true && interactivity.js !== ''
+      ? `${styledHtml}<script>${interactivity.js}</script>\n`
+      : styledHtml
   return {
     html,
     css: styles.css,
+    js: interactivity.js,
     diagnostics: [
       ...frontmatter.diagnostics,
       ...analyzed.diagnostics,

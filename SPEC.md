@@ -230,9 +230,10 @@ A processor MUST:
 Component resolution — locating component sources — is a **host** responsibility. A
 conforming processor MUST accept components as data and MUST NOT require filesystem access.
 
-At this version an authored component MAY contain scoped styles (§4.4) and MUST NOT contain
-state, event handlers, or scripts. Expansion happens entirely at compile time; a document
-using authored components MUST still emit zero HMX JavaScript.
+An authored component MAY contain scoped styles (§4.4), component-local state, and
+allowlisted HMX event handlers (§4.7), and MUST NOT contain scripts. Expansion itself happens
+at compile time; a document using authored components with no interactive construct MUST
+still emit zero HMX JavaScript.
 
 Named slots are not specified at this version.
 ### 4.7 State and events *(Phase 6)*
@@ -295,9 +296,10 @@ error where recovery is possible; collecting multiple diagnostics per run is req
 
 A processor MUST support two modes:
 
-- **`document`** — the default. Scripts, event handlers, and imports MUST be rejected
-  with an `HMX3xxx` diagnostic. Raw HTML MUST be sanitized against an allowlist. URL
-  attributes MUST be restricted to `http`, `https`, `mailto`, and relative references.
+- **`document`** — the default. Scripts, raw HTML event-handler attributes, and imports MUST
+  be rejected with an `HMX3xxx` diagnostic. Compiled HMX handlers are permitted under §4.7.
+  Raw HTML MUST be sanitized against an allowlist. URL attributes MUST be restricted to
+  `http`, `https`, `mailto`, and relative references.
 - **`app`** — opt-in. Scripts, imports, and raw HTML are permitted.
 
 The mode MUST be supplied by the host (CLI flag, API option, or configuration file).

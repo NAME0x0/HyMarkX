@@ -1,0 +1,7 @@
+::state{count=0}
+
+:::button{on-click="count = count + 1"}
+Increment
+:::
+
+Count is {{ count }}.
