@@ -56,6 +56,16 @@ gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
   `class` and `id`, which are structural. `title` is the odd one out because in HTML it means
   "tooltip" rather than "name". Decide deliberately with an ADR rather than during a review;
   changing it touches fixtures and e2e expectations.
+- **Scoped-style hashes derive from document content, not identity.** Reformatting a document
+  changes every `data-hmx-s-…` attribute and the matching selectors, so a whitespace-only
+  change produces churn across the emitted CSS and HTML. ADR-0011 says the hash comes from
+  *document identity*; content is not identity. Deriving it from the path plus block index
+  would make formatting diffs local. Found while testing meaning-preservation in HMX-011.
+- **`HMX1001` should suggest widening the outer fence.** The formatter cannot repair
+  mis-nested containers — under recovery the tree describes the broken parse, so an automatic
+  rewrite widens the wrong line (attempted and removed in HMX-011). The repair belongs in the
+  diagnostic, where a human approves it: `HMX1001` already knows the opening fence and the
+  inner fence that closed it early, which is everything needed to offer `::::name`.
 - **Fence-count nesting is a usability trap.** Nesting containers requires the *outer*
   fence to carry more colons, so the natural `:::grid` wrapping `:::metric` silently closes
   the outer container. `HMX1001` reports it clearly, but every author will write it wrong

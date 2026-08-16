@@ -1,7 +1,7 @@
 {
-  "name": "@hymarkx/cli",
+  "name": "@hymarkx/formatter",
   "version": "0.0.0",
-  "description": "Command-line interface for building and checking HyMarkX (HMX) documents.",
+  "description": "Canonical formatter for HyMarkX (HMX) constructs.",
   "license": "MIT OR Apache-2.0",
   "private": true,
   "publishConfig": {
@@ -10,14 +10,11 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NAME0x0/HyMarkX.git",
-    "directory": "packages/cli"
+    "directory": "packages/formatter"
   },
   "homepage": "https://github.com/NAME0x0/HyMarkX#readme",
   "bugs": "https://github.com/NAME0x0/HyMarkX/issues",
   "type": "module",
-  "bin": {
-    "hmx": "./dist/bin.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -28,7 +25,7 @@
     "dist"
   ],
   "dependencies": {
-    "@hymarkx/compiler": "workspace:*",
-    "@hymarkx/formatter": "workspace:*"
+    "@hymarkx/ast": "workspace:*",
+    "@hymarkx/parser": "workspace:*"
   }
 }

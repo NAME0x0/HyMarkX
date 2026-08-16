@@ -40,6 +40,7 @@ declare module 'node:util' {
       readonly trust: string
       readonly gfm: boolean
       readonly json: boolean
+      readonly check: boolean
     }
     readonly positionals: string[]
   }

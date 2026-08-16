@@ -31,6 +31,9 @@ importers:
       '@hymarkx/compiler':
         specifier: workspace:*
         version: link:../compiler
+      '@hymarkx/formatter':
+        specifier: workspace:*
+        version: link:../formatter
 
   packages/compiler:
     dependencies:
@@ -49,6 +52,15 @@ importers:
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
+
+  packages/formatter:
+    dependencies:
+      '@hymarkx/ast':
+        specifier: workspace:*
+        version: link:../ast
+      '@hymarkx/parser':
+        specifier: workspace:*
+        version: link:../parser
 
   packages/parser:
     dependencies:

@@ -7,12 +7,5 @@
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
-  "references": [
-    {
-      "path": "../compiler"
-    },
-    {
-      "path": "../formatter"
-    }
-  ]
+  "references": [{ "path": "../ast" }, { "path": "../parser" }]
 }

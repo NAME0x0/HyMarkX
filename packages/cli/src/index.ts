@@ -2,6 +2,7 @@ import { lstat, mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/pr
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { parseArgs } from 'node:util'
 import { compile, compileComponents, diagnosticOrigin, renderDiagnostic } from '@hymarkx/compiler'
+import { format } from '@hymarkx/formatter'
 import type {
   AuthoredComponent,
   CompileResult,
@@ -52,9 +53,11 @@ const HELP = `Usage: hmx <command> [options]
 Commands:
   hmx build <input...> [--out <dir>] [--trust document|app] [--no-gfm] [--json]
   hmx check <input...> [--trust document|app] [--no-gfm] [--json]
+  hmx fmt <input...> [--check] [--json]
 
 Options:
   --out <dir>                 Output directory; use - for stdout
+  --check                     fmt only: report rather than rewrite; exit 1 if changed
   --trust document|app        Host-selected trust mode (default: document)
   --no-gfm                    Disable GFM extensions
   --json                      Print diagnostics as JSON
@@ -77,6 +80,74 @@ function diagnosticRecord(
     source: origin?.source ?? fallbackSource,
     from: origin?.from ?? fallbackFrom,
   }
+}
+
+/**
+ * Formats files in place, or reports which would change under `--check`.
+ *
+ * `--check` is the CI mode: it writes nothing and exits 1 when any file differs, so a
+ * pipeline fails on unformatted input rather than quietly rewriting the repository.
+ */
+async function runFormat(
+  inputs: readonly string[],
+  checkOnly: boolean,
+  json: boolean,
+  io: CliIo,
+): Promise<number> {
+  const results: { readonly path: string; readonly changed: boolean }[] = []
+  let failed = false
+
+  for (const input of inputs) {
+    const inputPath = resolve(io.cwd, input)
+    if (!isInside(resolve(io.cwd), inputPath) && !isAbsolute(input)) {
+      io.stderr.write(`error: input escapes the working directory: ${input}\n`)
+      failed = true
+      continue
+    }
+    let source: string
+    try {
+      source = await readFile(inputPath, 'utf8')
+    } catch (error) {
+      io.stderr.write(`error: could not read ${input}: ${(error as Error).message}\n`)
+      failed = true
+      continue
+    }
+
+    const result = format(source, { from: input })
+    for (const diagnostic of result.diagnostics) {
+      if (diagnostic.severity === 'error') {
+        io.stderr.write(renderDiagnostic(diagnostic, source, { color: io.color, from: input }))
+      }
+    }
+    results.push({ path: input, changed: result.changed })
+    if (result.changed && !checkOnly) {
+      try {
+        await writeFile(inputPath, result.source, 'utf8')
+      } catch (error) {
+        io.stderr.write(`error: could not write ${input}: ${(error as Error).message}\n`)
+        failed = true
+      }
+    }
+  }
+
+  if (json) {
+    io.stdout.write(`${JSON.stringify({ files: results })}\n`)
+  } else {
+    const changed = results.filter((entry) => entry.changed)
+    if (checkOnly) {
+      for (const entry of changed) {
+        io.stderr.write(`would reformat ${entry.path}\n`)
+      }
+    }
+    io.stderr.write(
+      `${checkOnly ? 'checked' : 'formatted'} ${results.length} file${results.length === 1 ? '' : 's'}, ${changed.length} changed\n`,
+    )
+  }
+
+  if (failed) {
+    return 2
+  }
+  return checkOnly && results.some((entry) => entry.changed) ? 1 : 0
 }
 
 function isInside(root: string, path: string): boolean {
@@ -378,6 +449,7 @@ export async function runCli(
         trust: { type: 'string', default: 'document' },
         gfm: { type: 'boolean', default: true },
         json: { type: 'boolean', default: false },
+        check: { type: 'boolean', default: false },
       },
     })
   } catch (error) {
@@ -394,6 +466,12 @@ export async function runCli(
   }
 
   const [command, ...inputs] = parsed.positionals
+  if (command === 'fmt') {
+    if (inputs.length === 0) {
+      return usageError('fmt requires at least one input file', io)
+    }
+    return await runFormat(inputs, parsed.values.check === true, parsed.values.json === true, io)
+  }
   if (command !== 'build' && command !== 'check') {
     return usageError(
       command === undefined ? 'a command is required' : `unknown command: ${command}`,
