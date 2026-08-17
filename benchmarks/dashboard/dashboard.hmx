@@ -1,0 +1,33 @@
+---
+title: Analytics
+---
+
+# {{ title }}
+
+::::grid{columns=3 gap=4}
+
+:::metric[Revenue]
+$42,500
+:::
+
+:::metric[Users]
+14,302
+:::
+
+:::metric[Growth]
++18.4%
+:::
+
+::::
+
+:::note[Heads up]{type=warning}
+Figures are preliminary.
+:::
+
+::state{signups=128}
+
+:::button{on-click="signups = signups + 1"}
+Add signup
+:::
+
+Signups today: {{ signups }}.

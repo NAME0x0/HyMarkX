@@ -1,0 +1,51 @@
+:root {
+  --surface: #f8fafc;
+  --text: #172033;
+  --muted: #526176;
+  --border: #cbd5e1;
+  --warning: #b45309;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: calc(var(--gap) * 0.25rem);
+}
+.metric {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: var(--surface);
+  color: var(--text);
+}
+.metric-label {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+.metric-value {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.note {
+  border-radius: 0.5rem;
+  border-block-start: 3px solid var(--warning);
+  padding: 1rem;
+  background: var(--surface);
+  color: var(--text);
+}
+.note-title {
+  margin: 0 0 0.5rem;
+  color: var(--warning);
+  font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #172033;
+    --text: #f8fafc;
+    --muted: #cbd5e1;
+    --border: #475569;
+    --warning: #fbbf24;
+  }
+}
