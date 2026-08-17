@@ -58,7 +58,7 @@ the integrity of generated output.
 | T6 | Supply chain | compromised dependency | minimal dependency set, pinned lockfile, `pnpm audit` in CI, dependency rationale recorded in ADR-0003 |
 | T7 | Secret leakage | env vars reaching client output | no env access in the expression language; server/client boundary specified before data features ship |
 | T8 | Prototype pollution | attribute names like `__proto__` | attribute bags are `null`-prototype objects; `__proto__`/`constructor`/`prototype` keys rejected (`HMX3005`) |
-| T9 | ReDoS / parser DoS | pathological nesting or backtracking input | micromark is linear-time by construction; nesting depth capped; fuzzing planned before 1.0 |
+| T9 | ReDoS / parser DoS | pathological nesting or backtracking input | micromark is linear-time by construction; nesting depth capped; whole-pipeline fuzzing in `tests/fuzz/` |
 | T10 | Path traversal | `../../etc/passwd` in an import or asset path | resolution confined to the project root; absolute and escaping paths rejected (`HMX3006`) |
 | T11 | Entity-expansion DoS in frontmatter | a billion-laughs YAML document | `maxAliasCount: 10`; required test asserting prompt rejection with `HMX2021` |
 | T12 | Tag-driven object construction in frontmatter | YAML type tags that instantiate host objects | `schema: 'core'`, `customTags: []`, `merge: false`, `stringKeys: true` |
@@ -75,3 +75,38 @@ in `app` mode, and anything involving a server runtime (there isn't one).
 `tests/security/` is a required suite, not an optional one. Every control in the tables
 above MUST have at least one test that fails if the control is removed. Every reported
 vulnerability gains a regression test before its fix is merged.
+
+## Vulnerabilities found and fixed
+
+Recorded rather than quietly patched, because the pattern is more useful than the individual
+bug.
+
+### Parser hang on a malformed directive followed by non-ASCII (T9)
+
+**Found:** 2026-08-17, by the whole-pipeline fuzzer on its first run.
+**Reachable from:** any untrusted document, with default options.
+**Impact:** denial of service. `parse()` looped forever — not slowly, indefinitely.
+
+```
+:::card{ malformed
+é
+```
+
+Any non-ASCII character on a later line would do: `é`, `中`, `😀`, a lone surrogate, a
+combining mark. ASCII was fine, which is why every hand-written test missed it.
+
+**Cause, and it was ours.** The directive-name guard rejects non-ASCII inside a directive
+name, and stayed armed after the line ended. A non-ASCII character on a later line then
+re-entered `nok` from a fresh tokenize call, and `micromark-extension-gfm-table` — whose
+container continuation re-runs the line — turned that into an unbounded loop. Upstream
+`micromark-extension-directive` was unaffected.
+
+**Fix:** disarm the guard at the line ending, which `SPEC.md` §4.1 requires anyway since a
+directive name cannot span lines. One condition; regression tests in
+`packages/parser/test/hang-regression.test.ts` carry explicit timeouts because the failure
+mode is a hang rather than a wrong answer.
+
+**Worth noting about the process:** the fuzzer appeared to be "slow" for several minutes and
+was nearly written off as needing fewer cases. It was not slow. It had found the bug on the
+first pass, and the hang was mistaken for volume. With the fix in place the same suite runs
+2,800 cases in four seconds.

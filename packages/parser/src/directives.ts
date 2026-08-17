@@ -2,6 +2,7 @@ import { createDiagnostic, isForbiddenAttributeName } from '@hymarkx/ast'
 import type { Attribute, Diagnostic, Span } from '@hymarkx/ast'
 import type { CompileContext, Extension, Handle, Token } from 'mdast-util-from-markdown'
 import { directive } from 'micromark-extension-directive'
+import { markdownLineEnding } from 'micromark-util-character'
 import { decodeString } from 'micromark-util-decode-string'
 import type { Construct, Effects, State } from 'micromark-util-types'
 import { directiveAttributes, directiveAttributeTokenTypes } from './directive-attributes.js'
@@ -84,6 +85,16 @@ function guardDirectiveName(construct: Construct, type: DirectiveType): Construc
 
       const guardState = (state: State): State =>
         function (code) {
+          // A directive name cannot span lines (SPEC §4.1), so the guard must disarm at the
+          // line ending. Leaving it armed made a non-ASCII character on any later line
+          // re-enter `nok` from a fresh tokenize call — and with
+          // `micromark-extension-gfm-table` present, whose container continuation re-runs the
+          // line, that became an infinite loop on untrusted input. Found by the pipeline
+          // fuzzer; see SECURITY.md T9.
+          if (markdownLineEnding(code)) {
+            inDirectiveName = false
+            beforeDirectiveName = false
+          }
           if (
             (beforeDirectiveName || inDirectiveName) &&
             code !== null &&
