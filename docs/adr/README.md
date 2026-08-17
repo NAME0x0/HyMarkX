@@ -21,6 +21,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0013](0013-component-model.md) | Authored components are `.hmx` files with props in frontmatter | Accepted |
 | [0014](0014-state-and-events.md) | Component-local state, compiled reactivity, `@` family rejected | Accepted |
 | [0015](0015-developer-experience.md) | Conservative formatter, full-reparse language server | Accepted |
+| [0016](0016-foreign-components.md) | Foreign components are framework-agnostic islands, never run at build time | Accepted |
 
 ## Decisions still open
 
@@ -31,4 +32,3 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | Named slots for authored components | evidence from real documents | ADR-0013 defers them; caller-side syntax is where they turn verbose |
 | A declared `title` prop also emitting an HTML tooltip | needs an ADR | see `BACKLOG.md`; accessibility concern against specified behaviour |
 | CLA vs DCO for outside contributions | before the first external PR | ADR-0010: a DCO does not grant relicensing rights |
-| TSX interoperability direction | Phase 8 | |

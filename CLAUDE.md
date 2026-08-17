@@ -37,7 +37,8 @@ build/check/fmt/dev plus an LSP server and VS Code extension.
 Interactivity is safe in document mode because expressions cannot reach a host object —
 the runtime is a security boundary and must never gain an escape hatch without an ADR.
 
-Phase 8 (TS/TSX interoperability) is next.
+Phase 8 complete: foreign components are framework-agnostic islands the compiler never
+executes. Phase 9 (hardening, fuzzing, security audit, 0.1 publish) is next.
 
 ## Naming
 

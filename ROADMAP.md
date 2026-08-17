@@ -125,7 +125,7 @@ framework. Byte budget enforced by test.
 
 `hmx dev` with fast reload, `hmx fmt`, language server, VS Code extension.
 
-## Phase 8 — TS/TSX interoperability
+## Phase 8 — TS/TSX interoperability ✅
 
 Import TSX components from HMX; the reverse if justified. React adapter as one
 backend, not as the definition of the language.

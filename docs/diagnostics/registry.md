@@ -15,3 +15,11 @@ listed here and must never be reused.
 | `HMX2042` | active | Non-finite numeric result. |
 | `HMX2043` | active | Object or array used in a text position. |
 | `HMX2044` | active | Prohibited expression construct. |
+
+## Foreign components (Phase 8)
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `HMX2070` | info | An island needs a framework runtime supplied by the host. Reported so the cost is never silent. |
+| `HMX2072` | error | The `from` specifier is missing, or is not a relative or package path. Protocol-relative, `data:`, `file:` and absolute URLs are refused. |
+| `HMX3010` | error | An island appeared in `document` trust mode. Foreign components are `app` mode only. |

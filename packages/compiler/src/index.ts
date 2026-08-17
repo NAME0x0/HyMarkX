@@ -44,6 +44,7 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
     js: compiled.js,
     diagnostics,
     source: parsed.source,
+    islands: compiled.islands,
     ...(compiled.frontmatter === undefined ? {} : { frontmatter: compiled.frontmatter }),
   }
 }
@@ -95,6 +96,7 @@ export function compileAst(
       ...emptyScopeDiagnostics(styles, emitted.html),
     ],
     source,
+    islands: analyzed.islands,
     ...(frontmatter.value === undefined ? {} : { frontmatter: frontmatter.value }),
   }
 }

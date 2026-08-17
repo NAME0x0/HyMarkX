@@ -182,6 +182,13 @@ function directiveActions(
   if (node.type === 'leafDirective' && node.name === 'state') {
     return []
   }
+  const island = document.islandNodes.get(node)
+  if (island !== undefined) {
+    // A placeholder and nothing else. The host bundles the module and mounts into this
+    // element; the compiler has deliberately not looked at the file (ADR-0016).
+    return [write(`<div data-hmx-island="${island.id}"${scope}></div>${context.block ? '\n' : ''}`)]
+  }
+
   const projection = document.projections.get(node)
   if (projection !== undefined) {
     return childActions(projection.nodes, blockContext, projection.document)

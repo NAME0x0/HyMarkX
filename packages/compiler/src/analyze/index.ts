@@ -5,6 +5,8 @@ import type { ComponentRegistry, DirectiveNode } from '../components/types.js'
 import { validateComponent } from '../components/validate.js'
 import type { AnalyzedComponent } from '../components/validate.js'
 import { setDiagnosticOrigin } from '../diagnostic-origin.js'
+import { islandFor } from '../islands.js'
+import type { Island } from '../islands.js'
 import {
   compileHandlerExpression,
   evaluateExpression,
@@ -59,6 +61,10 @@ export interface AnalyzedDocument {
   readonly interpolations: ReadonlyMap<Interpolation, string>
   readonly expansions: ReadonlyMap<DirectiveNode, AnalyzedExpansion>
   readonly projections: ReadonlyMap<DirectiveNode, ProjectedChildren>
+  /** Foreign-component references, in document order (ADR-0016). */
+  readonly islands: readonly Island[]
+  /** The island each ::island node produced, for the emitter. */
+  readonly islandNodes: ReadonlyMap<DirectiveNode, Island>
   readonly reactivity: AnalyzedReactivity
 }
 
@@ -357,6 +363,8 @@ function analyzeDocument(root: Root, options: RecursiveAnalyzeOptions): Analyzed
   const attributeExpressions = new Map<Attribute, ExpressionEvaluation>()
   const expansions = new Map<DirectiveNode, AnalyzedExpansion>()
   const projections = new Map<DirectiveNode, ProjectedChildren>()
+  const islands: Island[] = []
+  const islandNodes = new Map<DirectiveNode, Island>()
   const document: AnalyzedDocument = {
     root,
     source: options.source,
@@ -367,6 +375,8 @@ function analyzeDocument(root: Root, options: RecursiveAnalyzeOptions): Analyzed
     interpolations,
     expansions,
     projections,
+    islands,
+    islandNodes,
     reactivity: {
       state,
       scope,
@@ -407,6 +417,14 @@ function analyzeDocument(root: Root, options: RecursiveAnalyzeOptions): Analyzed
       node.type === 'containerDirective'
     ) {
       if (node.type === 'leafDirective' && node.name === 'state') {
+        return
+      }
+      if (node.type === 'leafDirective' && node.name === 'island') {
+        const island = islandFor(node, islands.length, options.trust, diagnostics)
+        if (island !== undefined) {
+          islands.push(island)
+          islandNodes.set(node, island)
+        }
         return
       }
       if (node.type === 'leafDirective' && node.name === 'children') {

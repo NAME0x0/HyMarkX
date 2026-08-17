@@ -11,6 +11,7 @@ decision was made, see [`docs/adr/`](../adr/).
 | [Formatting](formatting.md) | `hmx fmt`, and what it deliberately leaves alone |
 | [Dev server](dev-server.md) | `hmx dev`, routing, live reload |
 | [Editor support](editor-support.md) | Language server, VS Code, other editors |
+| [Foreign components](foreign-components.md) | TSX islands, the host adapter, what they cost |
 
 Every code example in these guides is compiled by the test suite (`tests/guides/`), so an
 example that stops working fails the build rather than misleading a reader.

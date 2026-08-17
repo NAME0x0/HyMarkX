@@ -42,4 +42,24 @@ export interface CompileResult {
   readonly source: string
   /** Parsed frontmatter, or undefined when the document has none. */
   readonly frontmatter?: FrontmatterValue
+  /**
+   * Foreign-component references for the host to resolve and bundle (ADR-0016).
+   *
+   * Empty for every document without an `::island`. The compiler records references and
+   * never imports, transpiles, or evaluates them, so a document using islands is **not
+   * runnable from `hmx build` output alone** — a host integration must supply the modules
+   * and their framework runtime.
+   */
+  readonly islands: readonly IslandRef[]
+}
+
+/** Props passed to a foreign component: the same restricted scalars expressions produce. */
+export type IslandProps = Readonly<Record<string, string | number | boolean | null>>
+
+/** One foreign-component reference in the island manifest. */
+export interface IslandRef {
+  readonly id: number
+  readonly from: string
+  readonly export: string
+  readonly props: IslandProps
 }
