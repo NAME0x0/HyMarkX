@@ -167,6 +167,19 @@ Packages are created when a boundary is real, not to match a diagram.
 | [`docs/adr/`](docs/adr/) | 15 Architecture Decision Records |
 | [`docs/guides/`](docs/guides/) | Styling, components, interactivity, formatting, dev server, editors |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Workflow, change control, definition of done |
+| [`llms.txt`](llms.txt) | Canonical summary for language models, including the mistakes they actually make |
+| [`AGENTS.md`](AGENTS.md) | Instructions for coding agents working on this repository |
+
+### Using HMX with an AI assistant
+
+Point it at [`llms.txt`](llms.txt). It documents the syntax, the built-in components, the
+trust model — and, most usefully, what **does not** exist, so a model does not invent
+`@state` or `{% if %}` from other languages it has seen.
+
+Editor-specific entry points are included: a Claude Code skill at
+`.claude/skills/hymarkx/`, Cursor rules at `.cursor/rules/`, and `AGENTS.md` for Codex.
+All three defer to `llms.txt` rather than restating it, and every example in them is
+compiled by the test suite.
 
 ## Status
 

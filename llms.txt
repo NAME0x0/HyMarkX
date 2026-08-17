@@ -1,0 +1,148 @@
+# HyMarkX (HMX)
+
+> A Markdown-compatible language that compiles documents to HTML, and progressively to
+> styled, component-based, interactive pages. Ordinary Markdown is already valid HMX.
+> Static documents emit zero JavaScript; interactivity costs about 1 KB.
+
+Pre-alpha. Phases 0–7 of 10 complete. Nothing published to npm. Syntax may still change.
+
+**If you are generating or editing `.hmx` files, read "Rules that prevent the common
+mistakes" below. Most errors come from four things, all listed there.**
+
+## Rules that prevent the common mistakes
+
+These are the failures actually observed while building the language — including one that
+shipped in this project's own README for six phases.
+
+**1. Nesting containers needs MORE colons on the outer fence.**
+
+```md
+::::grid{columns=2}
+
+:::card
+Inner
+:::
+
+::::
+```
+
+`:::grid` wrapping `:::card` at the same width does **not** nest — the inner fence closes
+the outer container and you get `HMX1001`. This is the single most common mistake.
+
+**2. Interpolation is `{{ expr }}`, never `{ expr }`.**
+
+Single braces are ordinary text (they appear in 4 CommonMark conformance examples).
+Attribute *values* use single braces: `{title={site.name}}`.
+
+**3. `@state`, `@if`, `@for` do not exist.** They appear in early design sketches and were
+formally rejected in ADR-0014. Everything is a directive. State is `::state{count=0}`.
+
+**4. Expressions cannot call functions.** No `toUpperCase()`, no `Math.max()`, no
+`fetch()`. Identifiers not in scope are compile errors, not `undefined`. Assignment is legal
+**only** inside an event handler, and only to declared state.
+
+## Syntax
+
+```md
+---
+title: Dashboard          # frontmatter: metadata, and the scope for {{ }}
+---
+
+# {{ title }}             # interpolation, resolved at compile time
+
+:::note[Heads up]{type=warning}   # container directive: name, [label], {attributes}
+Body content.
+:::
+
+::children                # leaf directive (inside component files only)
+
+:badge[live]{kind=success}   # text directive, inline
+
+::state{count=0}          # reactive state, component-local
+
+:::button{on-click="count = count + 1"}
+Increment
+:::
+```
+
+Attributes: `{key=value}`, `{key="quoted value"}`, `{flag}` (bare, means true), `{#id}`,
+`{.class}`. Shorthands may be mixed with named attributes in any order.
+
+## Built-in components
+
+| Name | Form | Attributes |
+|---|---|---|
+| `note` | container | `type`: info \| warning \| danger \| success (default info) |
+| `card` | container | — |
+| `grid` | container | `columns`: number (default 3), `gap`: number (default 4) |
+| `metric` | container | — |
+| `badge` | text | `kind`: info \| warning \| danger \| success (default info) |
+| `button` | container | `type`: button \| submit \| reset (default button) |
+| `input` | leaf or container | `type`: text, `value`: string, `name`: string |
+| `form` | container | — |
+
+`id`, `class`, and `title` are accepted on every component without being declared.
+
+## Authoring a reusable component
+
+A component is a `.hmx` file in `components/`, named with a capital letter. Props are
+declared in frontmatter using the same schema shape as built-ins.
+
+```md
+---
+props:
+  title: { type: string, required: true }
+  tone: { type: enum, values: [info, warning], default: info }
+---
+
+:::note{type={tone}}
+## {{ title }}
+
+::children
+:::
+```
+
+Used as `:::Card{title="Revenue"}`. Capitalised names are yours; lowercase are built-in.
+A component's props are its **entire** scope — it cannot see the caller's frontmatter.
+
+## What does not exist yet
+
+Do not generate these; they are recorded decisions, not oversights:
+
+- named derived state (`::derived`) — deferred, ADR-0014
+- shared or global state between components — no ambient store by design
+- named slots — only the default `::children`
+- `async`, data loading, `fetch`, effects, lifecycle hooks
+- TSX interop — Phase 8, not started
+- author `<style>` in `document` trust mode — `app` mode only
+- loops or conditionals of any kind — there is no `if` or `for`
+
+## Trust modes
+
+`document` (default) rejects `<script>`, `<style>`, and raw HTML outside an allowlist, and
+restricts URL schemes. `app` permits them. **The host chooses the mode; no document
+construct can change it.** Interactivity works in both, because expressions cannot reach a
+host object.
+
+## Toolchain
+
+```bash
+hmx build page.hmx --out dist   # compile
+hmx check page.hmx              # diagnostics only
+hmx fmt page.hmx --check        # formatting, CI mode
+hmx dev .                       # dev server with live reload
+```
+
+Diagnostics have stable codes: `HMX1xxx` syntax, `HMX2xxx` semantic, `HMX3xxx` security,
+`HMX4xxx` accessibility, `HMX5xxx` configuration and I/O. `hmx check` is the fastest way to
+verify generated output — if it exits 0, the document is valid.
+
+## Reference
+
+- [SPEC.md](SPEC.md): normative language definition
+- [VISION.md](VISION.md): what the project is trying to be, and what would make it fail
+- [ARCHITECTURE.md](ARCHITECTURE.md): pipeline, packages, boundaries
+- [SECURITY.md](SECURITY.md): trust modes and threat model
+- [docs/adr/](docs/adr/): 15 decision records, including every rejected idea and why
+- [docs/guides/](docs/guides/): styling, components, interactivity, formatting, dev, editors
+- [BACKLOG.md](BACKLOG.md): known gaps and rejected proposals

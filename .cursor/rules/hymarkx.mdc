@@ -1,0 +1,23 @@
+---
+description: Writing HyMarkX (.hmx) documents and working in this repository
+globs: ["**/*.hmx", "**/*.md"]
+alwaysApply: false
+---
+
+Read `llms.txt` at the repository root before generating `.hmx` content — it is canonical
+and lists the mistakes that are actually common.
+
+The four that cause most failures:
+
+1. Nesting containers needs MORE colons on the outer fence: `::::grid` wrapping `:::card`.
+   Equal widths do not nest; the inner fence closes the outer container (`HMX1001`).
+2. Interpolation is `{{ expr }}`. Single braces are ordinary text. Attribute values use
+   `{key={expr}}`.
+3. `@state`, `@if`, `@for` do not exist — rejected in ADR-0014. Everything is a directive:
+   `::state{count=0}`.
+4. Expressions cannot call functions and cannot reach globals. Assignment is legal only
+   inside an event handler, only to declared state.
+
+Verify generated documents with `hmx check <file>`. Exit code 0 means valid.
+
+When changing the repository itself, read `AGENTS.md`.
