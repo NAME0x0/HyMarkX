@@ -42,15 +42,27 @@ future packages is not created.
 
 ```
 packages/
-  ast/       @hymarkx/ast       core shared vocabulary: node types, spans, builders, visitor,
-                                and the Diagnostic type. Zero runtime dependencies.
-  parser/    @hymarkx/parser    source → HMX AST. Only package allowed to import micromark/mdast.
-  compiler/  @hymarkx/compiler  AST → analysis → HTML. Owns diagnostics and backends.
-  cli/       @hymarkx/cli       `hmx` binary. Thin: argument parsing, file I/O, reporting.
+  ast/              @hymarkx/ast       core shared vocabulary: node types, spans, builders,
+                                       visitor, Diagnostic. Zero runtime dependencies.
+  parser/           @hymarkx/parser    source → HMX AST. Only package allowed to import
+                                       micromark/mdast.
+  compiler/         @hymarkx/compiler  analysis, components, styles, expressions, state,
+                                       HTML backend, emitted runtime. Owns diagnostics.
+  formatter/        @hymarkx/formatter canonical formatting of HMX constructs.
+  language-server/  @hymarkx/language-server  LSP over parser, compiler and formatter.
+  cli/              @hymarkx/cli       `hmx` binary: build, check, fmt, dev.
+
+editors/vscode/                        language contribution, TextMate grammar, LSP client.
+prototypes/                            throwaway experiments, kept as evidence.
 ```
 
-Planned, deliberately absent until earned: `runtime`, `formatter`, `language-server`,
-`integrations/*`, `editors/vscode`.
+Still deliberately absent until earned: a separate `runtime` package (the emitted runtime is
+small enough to live in the compiler) and `integrations/*`.
+
+**Host packages.** `@hymarkx/cli` and `@hymarkx/language-server` may import `node:` builtins
+and touch the filesystem. Every other package must run unchanged in a browser, which is what
+the boundary check enforces — the rule is scoped to `packages/`, since `editors/` is host
+code by definition.
 
 ### Dependency rule
 

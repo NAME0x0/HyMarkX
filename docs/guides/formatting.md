@@ -28,9 +28,17 @@ Body
 **Expression spacing.** One space inside the braces.
 
 ```md
+---
+title: Report
+---
+
 {{title}} and {{  title  }}
 ```
 ```md
+---
+title: Report
+---
+
 {{ title }} and {{ title }}
 ```
 
