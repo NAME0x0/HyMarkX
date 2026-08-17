@@ -3,6 +3,7 @@ import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from '
 import { parseArgs } from 'node:util'
 import { compile, compileComponents, diagnosticOrigin, renderDiagnostic } from '@hymarkx/compiler'
 import { format } from '@hymarkx/formatter'
+import { startDevServer } from './dev.js'
 import type {
   AuthoredComponent,
   CompileResult,
@@ -54,6 +55,7 @@ Commands:
   hmx build <input...> [--out <dir>] [--trust document|app] [--no-gfm] [--json]
   hmx check <input...> [--trust document|app] [--no-gfm] [--json]
   hmx fmt <input...> [--check] [--json]
+  hmx dev [dir] [--out <port>] [--trust document|app]
 
 Options:
   --out <dir>                 Output directory; use - for stdout
@@ -156,6 +158,47 @@ function isInside(root: string, path: string): boolean {
     candidate === '' ||
     (!isAbsolute(candidate) && candidate !== '..' && !candidate.startsWith(`..${sep}`))
   )
+}
+
+/**
+ * Runs the development server until interrupted.
+ *
+ * Component discovery is reused from the build path rather than reimplemented, so a page
+ * cannot render differently under `hmx dev` than it will under `hmx build`.
+ */
+async function runDev(
+  directory: string,
+  trust: TrustMode,
+  port: string | undefined,
+  io: CliIo,
+): Promise<number> {
+  const root = resolve(io.cwd, directory)
+  const parsedPort = port === undefined ? 4321 : Number(port)
+  if (!Number.isInteger(parsedPort) || parsedPort < 0 || parsedPort > 65535) {
+    return usageError('--out must be a port number when used with dev', io)
+  }
+
+  const compileDocument = async (documentPath: string): Promise<CompileResult> => {
+    const source = await readFile(documentPath, 'utf8')
+    const from = relative(root, documentPath) || documentPath
+    const inspected = compile(source, { trust, from })
+    const resolved = await resolveComponents(documentPath, from, root, inspected.frontmatter)
+    const authored = compileComponents(resolved.sources, { trust })
+    return compile(source, {
+      trust,
+      from,
+      components: authored.registry,
+      inlineCss: false,
+      inlineJs: false,
+    })
+  }
+
+  const server = await startDevServer({ root, port: parsedPort, trust }, io, compileDocument)
+  await new Promise<void>(() => {
+    // Runs until the process is interrupted; the caller owns the lifetime.
+  })
+  await server.close()
+  return 0
 }
 
 function outputName(path: string, extension: '.html' | '.css' | '.js'): string {
@@ -466,6 +509,12 @@ export async function runCli(
   }
 
   const [command, ...inputs] = parsed.positionals
+  if (command === 'dev') {
+    if (parsed.values.trust !== 'document' && parsed.values.trust !== 'app') {
+      return usageError('--trust must be either document or app', io)
+    }
+    return await runDev(inputs[0] ?? '.', parsed.values.trust, parsed.values.out, io)
+  }
   if (command === 'fmt') {
     if (inputs.length === 0) {
       return usageError('fmt requires at least one input file', io)

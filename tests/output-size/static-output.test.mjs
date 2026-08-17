@@ -106,4 +106,21 @@ describe('static output proportionality', () => {
     expect(emitted.toLowerCase()).not.toContain('srcdoc')
     expect(result.js).toBe('')
   })
+
+  // ADR-0015: the dev server's reload client must never reach a build. A development
+  // convenience leaking into production output would break output proportionality, which
+  // is one of the few genuine advantages this project has over the alternatives.
+  it.each([
+    ['static document', '# Hello\n\nJust prose.\n'],
+    [
+      'interactive document',
+      '::state{count=0}\n\n:::button{on-click="count = count + 1"}\n+\n:::\n\n{{ count }}\n',
+    ],
+  ])('never emits dev-server machinery for a %s', (_label, source) => {
+    const result = compile(source, { trust: 'app' })
+    const emitted = `${result.html}${result.css}${result.js}`
+
+    expect(emitted).not.toContain('__hmx/reload')
+    expect(emitted).not.toContain('EventSource')
+  })
 })
