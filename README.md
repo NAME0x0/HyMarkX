@@ -10,6 +10,15 @@ web applications.
 > nothing is published, syntax may still change without migration paths, and the language
 > has no users. Do not depend on it yet.
 
+<p align="center">
+  <img src="assets/evolution.svg" alt="The same document from plain text to a working page: source on the left, rendered result on the right, and the bytes shipped at each step" width="900">
+</p>
+
+*Every frame above is generated from real compiler output by
+[`scripts/generate-evolution-svg.mjs`](scripts/generate-evolution-svg.mjs) — the source, the
+rendered preview, the colours, and the byte counts. A test asserts the numbers still match
+what the compiler emits, so the picture cannot drift into marketing.*
+
 ## Why
 
 Markdown is the best way to write content and the worst way to build an interface. The

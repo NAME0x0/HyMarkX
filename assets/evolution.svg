@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500" role="img" aria-label="HyMarkX: the same document from plain text to a working page">
+  <title>HyMarkX — plain text to a working page</title>
+  <desc>Generated from real compiler output by scripts/generate-evolution-svg.mjs. Source, rendered preview and byte counts all come from compiling each document with the HyMarkX toolchain.</desc>
+  <style>
+    .bg { fill: #0b1120; }
+    .panel { fill: #111a2e; }
+    .preview { fill: #f8fafc; }
+    .chrome { fill: #1e293b; }
+    .dot1 { fill: #f87171; } .dot2 { fill: #fbbf24; } .dot3 { fill: #4ade80; }
+    text { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    .title { fill: #e2e8f0; font-size: 17px; font-weight: 600; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .caption { fill: #64748b; font-size: 12px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .src { fill: #94a3b8; font-size: 12.5px; white-space: pre; }
+    .s-dir { fill: #f472b6; } .s-attr { fill: #fbbf24; } .s-expr { fill: #4ade80; }
+    .s-head { fill: #93c5fd; } .s-tag { fill: #c084fc; }
+    .r-h1 { fill: #172033; font-size: 19px; font-weight: 700; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .r-h2 { fill: #172033; font-size: 14px; font-weight: 600; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .r-p { fill: #172033; font-size: 12px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .r-label { fill: #526176; font-size: 10.5px; font-family: ui-sans-serif, system-ui, sans-serif; text-transform: uppercase; }
+    .r-value { fill: #172033; font-size: 17px; font-weight: 700; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .r-btn { fill: #ffffff; font-size: 12px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .r-dot { fill: #526176; }
+    .r-card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+    .meter { fill: #475569; font-size: 11px; }
+    .meter.zero { fill: #4ade80; }
+    .meter.live { fill: #fbbf24; }
+    .footer { fill: #334155; font-size: 11px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .stage { opacity: 0; animation: cycle 17.0s infinite; }
+    @keyframes cycle {
+      0%      { opacity: 0; transform: translateY(6px); }
+      2%, 18% { opacity: 1; transform: translateY(0); }
+      20%     { opacity: 0; transform: translateY(-6px); }
+      100%    { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .stage { animation: none; }
+      .stage:last-of-type { opacity: 1; }
+    }
+  </style>
+
+  <rect class="bg" width="900" height="500" rx="12"/>
+  <rect class="panel" x="24" y="34" width="404" height="424" rx="10"/>
+  <rect class="preview" x="452" y="34" width="424" height="424" rx="10"/>
+  <rect class="chrome" x="452" y="34" width="424" height="26" rx="10"/>
+  <rect class="chrome" x="452" y="48" width="424" height="12"/>
+  <circle class="dot1" cx="470" cy="47" r="4"/>
+  <circle class="dot2" cx="484" cy="47" r="4"/>
+  <circle class="dot3" cx="498" cy="47" r="4"/>
+
+  <g class="stage" style="animation-delay:0.0s">
+      <text x="44" y="58" class="title">Plain text</text>
+      <text x="44" y="78" class="caption">Just words. Already a valid document.</text>
+      <text x="44" y="100" class="src">Quarterly revenue reached $42,500.</text>
+      <text x="44" y="117" class="src">Users grew to 14,302.</text>
+      <text x="44" y="134" class="src"></text>
+      <text x="476" y="107" class="r-p">Quarterly revenue reached $42,500.
+Users grew to 14,302.</text>
+      <text x="44" y="470" class="meter">HTML 64 B</text>
+      <text x="150" y="470" class="meter">CSS 0 B</text>
+      <text x="240" y="470" class="meter zero">JS 0 B</text>
+    </g>
+  <g class="stage" style="animation-delay:3.4s">
+      <text x="44" y="58" class="title">Markdown</text>
+      <text x="44" y="78" class="caption">Structure, with nothing new to learn.</text>
+      <text x="44" y="100" class="src"><tspan class="s-head"># Dashboard</tspan></text>
+      <text x="44" y="117" class="src"></text>
+      <text x="44" y="134" class="src"><tspan class="s-head">## Revenue</tspan></text>
+      <text x="44" y="151" class="src"></text>
+      <text x="44" y="168" class="src">$42,500 this month.</text>
+      <text x="44" y="185" class="src"></text>
+      <text x="44" y="202" class="src">- Users: 14,302</text>
+      <text x="44" y="219" class="src">- Growth: +18.4%</text>
+      <text x="44" y="236" class="src"></text>
+      <text x="476" y="112" class="r-h1">Dashboard</text>
+      <text x="476" y="143" class="r-h2">Revenue</text>
+      <text x="476" y="167" class="r-p">$42,500 this month.</text>
+      <circle cx="480" cy="185" r="2" class="r-dot"/><text x="490" y="189" class="r-p">Users: 14,302</text>
+      <circle cx="480" cy="205" r="2" class="r-dot"/><text x="490" y="209" class="r-p">Growth: +18.4%</text>
+      <text x="44" y="470" class="meter">HTML 121 B</text>
+      <text x="150" y="470" class="meter">CSS 0 B</text>
+      <text x="240" y="470" class="meter zero">JS 0 B</text>
+    </g>
+  <g class="stage" style="animation-delay:6.8s">
+      <text x="44" y="58" class="title">+ Components</text>
+      <text x="44" y="78" class="caption">Directives, not JSX. Still no JavaScript.</text>
+      <text x="44" y="100" class="src"><tspan class="s-dir">::::grid</tspan><tspan class="s-attr">{columns=2}</tspan></text>
+      <text x="44" y="117" class="src"></text>
+      <text x="44" y="134" class="src"><tspan class="s-dir">:::metric</tspan>[Revenue]</text>
+      <text x="44" y="151" class="src">$42,500</text>
+      <text x="44" y="168" class="src"><tspan class="s-dir">:::</tspan></text>
+      <text x="44" y="185" class="src"></text>
+      <text x="44" y="202" class="src"><tspan class="s-dir">:::metric</tspan>[Users]</text>
+      <text x="44" y="219" class="src">14,302</text>
+      <text x="44" y="236" class="src"><tspan class="s-dir">:::</tspan></text>
+      <text x="44" y="253" class="src"></text>
+      <text x="44" y="270" class="src"><tspan class="s-dir">::::</tspan></text>
+      <text x="44" y="287" class="src"></text>
+      <text x="44" y="304" class="src"><tspan class="s-dir">:::note</tspan>[Heads up]<tspan class="s-attr">{type=warning}</tspan></text>
+      <text x="44" y="321" class="src">Figures are preliminary.</text>
+      <rect x="476" y="96" width="180" height="52" rx="6" class="r-card"/>
+      <text x="488" y="116" class="r-label">Revenue</text>
+      <text x="488" y="136" class="r-value">$42,500</text>
+      <rect x="672" y="96" width="180" height="52" rx="6" class="r-card"/>
+      <text x="684" y="116" class="r-label">Users</text>
+      <text x="684" y="136" class="r-value">14,302</text>
+      <rect x="476" y="156" width="376" height="50" rx="6" class="r-card"/>
+      <rect x="476" y="156" width="376" height="3" rx="1.5" fill="#b45309"/>
+      <text x="488" y="178" class="r-label" fill="#b45309">Heads up</text>
+      <text x="488" y="195" class="r-p">Figures are preliminary.</text>
+      <text x="44" y="470" class="meter">HTML 362 B</text>
+      <text x="150" y="470" class="meter">CSS 2015 B</text>
+      <text x="240" y="470" class="meter zero">JS 0 B</text>
+    </g>
+  <g class="stage" style="animation-delay:10.2s">
+      <text x="44" y="58" class="title">+ Styling</text>
+      <text x="44" y="78" class="caption">Scoped CSS. Emitted only for what you used.</text>
+      <text x="44" y="100" class="src">&lt;style scoped&gt;</text>
+      <text x="44" y="117" class="src">.hmx-metric <tspan class="s-attr">{ border-block-start: 3px solid #2563eb; }</tspan></text>
+      <text x="44" y="134" class="src">&lt;/style&gt;</text>
+      <text x="44" y="151" class="src"></text>
+      <text x="44" y="168" class="src"><tspan class="s-dir">::::grid</tspan><tspan class="s-attr">{columns=2}</tspan></text>
+      <text x="44" y="185" class="src"></text>
+      <text x="44" y="202" class="src"><tspan class="s-dir">:::metric</tspan>[Revenue]</text>
+      <text x="44" y="219" class="src">$42,500</text>
+      <text x="44" y="236" class="src"><tspan class="s-dir">:::</tspan></text>
+      <text x="44" y="253" class="src"></text>
+      <text x="44" y="270" class="src"><tspan class="s-dir">:::metric</tspan>[Users]</text>
+      <text x="44" y="287" class="src">14,302</text>
+      <text x="44" y="304" class="src"><tspan class="s-dir">:::</tspan></text>
+      <text x="44" y="321" class="src"></text>
+      <rect x="476" y="96" width="180" height="52" rx="6" class="r-card"/>
+      <text x="488" y="116" class="r-label">Revenue</text>
+      <text x="488" y="136" class="r-value">$42,500</text>
+      <rect x="672" y="96" width="180" height="52" rx="6" class="r-card"/>
+      <text x="684" y="116" class="r-label">Users</text>
+      <text x="684" y="136" class="r-value">14,302</text>
+      <text x="44" y="470" class="meter">HTML 382 B</text>
+      <text x="150" y="470" class="meter">CSS 1482 B</text>
+      <text x="240" y="470" class="meter zero">JS 0 B</text>
+    </g>
+  <g class="stage" style="animation-delay:13.6s">
+      <text x="44" y="58" class="title">+ Interactivity</text>
+      <text x="44" y="78" class="caption">Native state and events. A working page.</text>
+      <text x="44" y="100" class="src"><tspan class="s-dir">::state</tspan><tspan class="s-attr">{count=14302}</tspan></text>
+      <text x="44" y="117" class="src"></text>
+      <text x="44" y="134" class="src"><tspan class="s-dir">:::metric</tspan>[Users]</text>
+      <text x="44" y="151" class="src"><tspan class="s-attr">{{ count }</tspan>}</text>
+      <text x="44" y="168" class="src"><tspan class="s-dir">:::</tspan></text>
+      <text x="44" y="185" class="src"></text>
+      <text x="44" y="202" class="src"><tspan class="s-dir">:::button</tspan><tspan class="s-attr">{on-click="count = count + 1"}</tspan></text>
+      <text x="44" y="219" class="src">Add user</text>
+      <text x="44" y="236" class="src"><tspan class="s-dir">:::</tspan></text>
+      <text x="44" y="253" class="src"></text>
+      <rect x="476" y="96" width="180" height="52" rx="6" class="r-card"/>
+      <text x="488" y="116" class="r-label">Users</text>
+      <text x="488" y="136" class="r-value">14302</text>
+      <rect x="476" y="96" width="104" height="28" rx="6" fill="#2563eb"/>
+      <text x="528" y="114" class="r-btn" text-anchor="middle">Add user</text>
+      <text x="44" y="470" class="meter">HTML 164 B</text>
+      <text x="150" y="470" class="meter">CSS 1154 B</text>
+      <text x="240" y="470" class="meter live">JS 996 B</text>
+    </g>
+
+  <text x="24" y="20" class="title" style="font-size:14px">HyMarkX</text>
+  <text x="110" y="20" class="footer">start writing · add capability only when you need it</text>
+  <text x="876" y="20" class="footer" text-anchor="end">every frame generated from real compiler output</text>
+</svg>
