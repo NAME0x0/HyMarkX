@@ -28,15 +28,16 @@ production code only for edits smaller than the delegation overhead.
 
 ## Current state
 
-Phases 0-6 complete: `@hymarkx/{ast,parser,compiler,cli}` compile Markdown plus HMX
-directives to styled, interactive HTML at 652/652 CommonMark conformance — schema-validated
-components, frontmatter, scoped CSS, compile-time expressions, .hmx components, and
-component-local state with a 591-byte gzipped runtime. Static documents emit zero JS.
+Phases 0-7 complete: `@hymarkx/{ast,parser,compiler,formatter,language-server,cli}` compile
+Markdown plus HMX directives to styled, interactive HTML at 652/652 CommonMark conformance,
+with schema-validated components, frontmatter, scoped CSS, compile-time expressions, .hmx
+components, and component-local state on a 591-byte gzipped runtime. Tooling: hmx
+build/check/fmt/dev plus an LSP server and VS Code extension.
 
 Interactivity is safe in document mode because expressions cannot reach a host object —
 the runtime is a security boundary and must never gain an escape hatch without an ADR.
 
-Phase 7 (developer experience: dev server, formatter, language server) is next.
+Phase 8 (TS/TSX interoperability) is next.
 
 ## Naming
 

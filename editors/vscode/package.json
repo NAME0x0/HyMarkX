@@ -1,0 +1,47 @@
+{
+  "name": "hymarkx",
+  "displayName": "HyMarkX",
+  "description": "Syntax highlighting, diagnostics, completion and formatting for HyMarkX (.hmx).",
+  "version": "0.0.0",
+  "license": "MIT OR Apache-2.0",
+  "private": true,
+  "publisher": "hymarkx",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NAME0x0/HyMarkX.git",
+    "directory": "editors/vscode"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:hymarkx"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "hymarkx",
+        "aliases": [
+          "HyMarkX",
+          "hmx"
+        ],
+        "extensions": [
+          ".hmx"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "hymarkx",
+        "scopeName": "text.html.markdown.hmx",
+        "path": "./syntaxes/hymarkx.tmLanguage.json"
+      }
+    ]
+  }
+}

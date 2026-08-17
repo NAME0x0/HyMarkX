@@ -121,7 +121,7 @@ resolution. Every question in charter §41 answered in the spec first.
 State, events, and the smallest runtime that can express them. Islands, not a
 framework. Byte budget enforced by test.
 
-## Phase 7 — Developer experience
+## Phase 7 — Developer experience ✅
 
 `hmx dev` with fast reload, `hmx fmt`, language server, VS Code extension.
 

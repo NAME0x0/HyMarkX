@@ -1,0 +1,35 @@
+{
+  "name": "@hymarkx/language-server",
+  "version": "0.0.0",
+  "description": "Language Server Protocol implementation for HyMarkX (HMX).",
+  "license": "MIT OR Apache-2.0",
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NAME0x0/HyMarkX.git",
+    "directory": "packages/language-server"
+  },
+  "homepage": "https://github.com/NAME0x0/HyMarkX#readme",
+  "bugs": "https://github.com/NAME0x0/HyMarkX/issues",
+  "type": "module",
+  "bin": {
+    "hmx-language-server": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@hymarkx/ast": "workspace:*",
+    "@hymarkx/compiler": "workspace:*",
+    "@hymarkx/formatter": "workspace:*"
+  }
+}

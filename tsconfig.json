@@ -14,6 +14,9 @@
       "path": "./packages/formatter"
     },
     {
+      "path": "./packages/language-server"
+    },
+    {
       "path": "./packages/cli"
     }
   ]

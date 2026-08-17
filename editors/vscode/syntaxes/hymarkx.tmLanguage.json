@@ -1,0 +1,77 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "HyMarkX",
+  "scopeName": "text.html.markdown.hmx",
+  "patterns": [
+    { "include": "#frontmatter" },
+    { "include": "#container-directive" },
+    { "include": "#leaf-directive" },
+    { "include": "#text-directive" },
+    { "include": "#interpolation" },
+    { "include": "text.html.markdown" }
+  ],
+  "repository": {
+    "frontmatter": {
+      "comment": "Only at the very start of the document, matching SPEC 4.3.",
+      "begin": "\\A(-{3})\\s*$",
+      "end": "^(-{3})\\s*$",
+      "beginCaptures": { "1": { "name": "punctuation.definition.frontmatter.hmx" } },
+      "endCaptures": { "1": { "name": "punctuation.definition.frontmatter.hmx" } },
+      "contentName": "meta.embedded.block.yaml",
+      "patterns": [{ "include": "source.yaml" }]
+    },
+    "container-directive": {
+      "match": "^(:{3,})([A-Za-z0-9][A-Za-z0-9_-]*)?(\\[[^\\]]*\\])?(\\{[^}]*\\})?\\s*$",
+      "captures": {
+        "1": { "name": "punctuation.definition.directive.hmx" },
+        "2": { "name": "entity.name.tag.directive.hmx" },
+        "3": { "name": "string.other.label.hmx" },
+        "4": { "patterns": [{ "include": "#attributes" }] }
+      }
+    },
+    "leaf-directive": {
+      "match": "^(::)([A-Za-z0-9][A-Za-z0-9_-]*)(\\[[^\\]]*\\])?(\\{[^}]*\\})?\\s*$",
+      "captures": {
+        "1": { "name": "punctuation.definition.directive.hmx" },
+        "2": { "name": "entity.name.tag.directive.hmx" },
+        "3": { "name": "string.other.label.hmx" },
+        "4": { "patterns": [{ "include": "#attributes" }] }
+      }
+    },
+    "text-directive": {
+      "match": "(:)([A-Za-z0-9][A-Za-z0-9_-]*)(\\[[^\\]]*\\])(\\{[^}]*\\})?",
+      "captures": {
+        "1": { "name": "punctuation.definition.directive.hmx" },
+        "2": { "name": "entity.name.tag.directive.hmx" },
+        "3": { "name": "string.other.label.hmx" },
+        "4": { "patterns": [{ "include": "#attributes" }] }
+      }
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "match": "([#.][A-Za-z0-9_-]+)",
+          "name": "entity.other.attribute-name.shorthand.hmx"
+        },
+        {
+          "match": "([A-Za-z0-9_-]+)(=)(\"[^\"]*\"|'[^']*'|\\{[^}]*\\}|[^\\s}]+)",
+          "captures": {
+            "1": { "name": "entity.other.attribute-name.hmx" },
+            "2": { "name": "punctuation.separator.key-value.hmx" },
+            "3": { "name": "string.quoted.hmx" }
+          }
+        },
+        { "match": "[A-Za-z0-9_-]+", "name": "entity.other.attribute-name.hmx" }
+      ]
+    },
+    "interpolation": {
+      "comment": "Escaped as \\{{ per ADR-0012, so the lookbehind keeps literals unhighlighted.",
+      "match": "(?<!\\\\)(\\{\\{)([^}]*)(\\}\\})",
+      "captures": {
+        "1": { "name": "punctuation.section.embedded.begin.hmx" },
+        "2": { "name": "meta.embedded.expression.hmx" },
+        "3": { "name": "punctuation.section.embedded.end.hmx" }
+      }
+    }
+  }
+}

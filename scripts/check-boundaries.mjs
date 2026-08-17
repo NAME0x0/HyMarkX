@@ -5,7 +5,12 @@ import { fileURLToPath } from 'node:url'
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url))
 const packagesDirectory = resolve(repositoryRoot, 'packages')
 const parserSourceDirectory = resolve(packagesDirectory, 'parser', 'src')
-const cliSourceDirectory = resolve(packagesDirectory, 'cli', 'src')
+// The CLI and the language server are the host-facing packages: both need stdio and the
+// filesystem. Everything else must run in a browser, which is what ADR-0005 protects.
+const hostSourceDirectories = [
+  resolve(packagesDirectory, 'cli', 'src'),
+  resolve(packagesDirectory, 'language-server', 'src'),
+]
 const forbiddenPackage =
   /^(?:micromark|mdast|hast|unist|remark|unified)|^@types\/(?:mdast|unist|hast)(?:$|\/)/
 const sourceExtension = /\.(?:[cm]?[jt]sx?)$/
@@ -56,8 +61,14 @@ function stripCommentsAndStrings(source) {
 }
 
 function checkSourceFile(path) {
+  // ADR-0005's browser-safety rule governs packages/. Editor integrations are host code by
+  // definition — a VS Code extension runs in Node — so the Node checks below do not apply
+  // to them, while the Markdown-engine rule still does everywhere.
+  const isPackageSource = path.startsWith(`${packagesDirectory}${sep}`)
   const isParserSource = path.startsWith(`${parserSourceDirectory}${sep}`)
-  const isCliSource = path.startsWith(`${cliSourceDirectory}${sep}`)
+  const isCliSource = hostSourceDirectories.some((directory) =>
+    path.startsWith(`${directory}${sep}`),
+  )
   const source = readFileSync(path, 'utf8')
   for (const pattern of importPatterns) {
     pattern.lastIndex = 0
@@ -68,17 +79,18 @@ function checkSourceFile(path) {
       }
       if (
         specifier?.startsWith('node:') === true &&
+        isPackageSource &&
         !isCliSource &&
         path.includes(`${sep}src${sep}`)
       ) {
         violations.push(
-          `${displayPath(path)} imports ${specifier}; only @hymarkx/cli may use Node builtins`,
+          `${displayPath(path)} imports ${specifier}; only @hymarkx/cli and @hymarkx/language-server may use Node builtins`,
         )
       }
     }
   }
 
-  if (!isCliSource && path.includes(`${sep}src${sep}`)) {
+  if (isPackageSource && !isCliSource && path.includes(`${sep}src${sep}`)) {
     const code = stripCommentsAndStrings(source)
     forbiddenGlobal.lastIndex = 0
     for (const match of code.matchAll(forbiddenGlobal)) {

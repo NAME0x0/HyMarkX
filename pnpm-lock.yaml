@@ -62,6 +62,18 @@ importers:
         specifier: workspace:*
         version: link:../parser
 
+  packages/language-server:
+    dependencies:
+      '@hymarkx/ast':
+        specifier: workspace:*
+        version: link:../ast
+      '@hymarkx/compiler':
+        specifier: workspace:*
+        version: link:../compiler
+      '@hymarkx/formatter':
+        specifier: workspace:*
+        version: link:../formatter
+
   packages/parser:
     dependencies:
       '@hymarkx/ast':
