@@ -1,0 +1,54 @@
+name: Bug report
+description: Something compiles, renders, or fails differently than it should
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        HyMarkX is alpha. Diagnostics carry stable codes (`HMX1001`, `HMX2044`, …) — including
+        the code you saw makes a report much faster to act on. Every code is listed in
+        [SPEC.md Appendix B](https://github.com/NAME0x0/HyMarkX/blob/main/SPEC.md).
+
+  - type: textarea
+    id: document
+    attributes:
+      label: The smallest document that reproduces it
+      description: Paste the source, not a description of it. A few lines beats a whole file.
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what you got
+      description: |
+        If it is a Markdown compatibility issue, say what CommonMark or GFM does instead —
+        that is the invariant the project is built on and those reports get priority.
+    validations:
+      required: true
+
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      placeholder: hmx build page.hmx --trust document
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `hmx --version`
+      placeholder: 0.0.2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: trust
+    attributes:
+      label: Trust mode
+      options: ['document (default)', 'app', 'not sure']
+    validations:
+      required: false

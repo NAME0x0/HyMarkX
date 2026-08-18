@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/NAME0x0/HyMarkX/blob/main/SECURITY.md
+    about: Read SECURITY.md first. HyMarkX must not render untrusted content in production yet.
+  - name: Question about using HMX
+    url: https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides
+    about: The guides cover data and expressions, styling, components, interactivity, and editors.

@@ -1,0 +1,42 @@
+name: Syntax or language proposal
+description: A change to the language itself
+labels: ['syntax', 'needs-adr']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Syntax changes need an ADR and a `SPEC.md` update before any code — see
+        [CONTRIBUTING.md](https://github.com/NAME0x0/HyMarkX/blob/main/CONTRIBUTING.md).
+        This issue is where that case gets made.
+
+        Proposals are measured against one rule above all others: **a document containing no
+        HMX construct must render as CommonMark + GFM.** A proposal that cannot satisfy it is
+        declined regardless of its other merits.
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The syntax, written out
+      description: Show a document using it, not a description of the shape.
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: What it collides with
+      description: |
+        Does this sequence already mean something in CommonMark or GFM? The conformance suite
+        has 692 examples — how many contain it? Measured answers carry far more weight than
+        "probably nothing".
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternative
+    attributes:
+      label: What already works instead
+      description: What does the language make you write today, and why is that not good enough?
+    validations:
+      required: true
