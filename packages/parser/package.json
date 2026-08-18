@@ -22,7 +22,10 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
   ],
   "dependencies": {
     "@hymarkx/ast": "workspace:*",
@@ -42,5 +45,8 @@
     "micromark-util-decode-string": "^2.0.1",
     "micromark-util-character": "^2.1.1",
     "micromark-util-types": "^2.0.2"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

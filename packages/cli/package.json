@@ -25,10 +25,16 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
   ],
   "dependencies": {
     "@hymarkx/compiler": "workspace:*",
     "@hymarkx/formatter": "workspace:*"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

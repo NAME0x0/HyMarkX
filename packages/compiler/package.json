@@ -22,7 +22,10 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
   ],
   "dependencies": {
     "@hymarkx/ast": "workspace:*",
@@ -30,5 +33,8 @@
     "postcss": "^8.5.26",
     "postcss-selector-parser": "^7.1.1",
     "yaml": "^2.9.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

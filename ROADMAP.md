@@ -155,12 +155,22 @@ Done so far:
   silent code-span corruption on its first run — the spec suites test constructs one at a
   time, and this one needed three of them in the same line.
 
-Still open: documentation completeness, the publish checklist below, and one syntax decision
-the compatibility suite surfaced (`12:30` in prose loses `:30` — see `BACKLOG.md` P2).
+- **Documentation completeness.** SPEC.md Appendix B now registers all 50 diagnostic codes,
+  cross-checked in both directions by `tests/spec/diagnostic-codes.test.mjs` — 30 were
+  undocumented. Added the missing guide for data and expressions, and a link checker over every
+  Markdown file.
+- **Publish readiness.** `tests/spec/publish-readiness.test.mjs` holds the mechanical half;
+  `docs/publishing.md` records the rest. Fixed along the way: tarballs shipped 11 kB of
+  incremental build cache and no licence text, and packages had no README, so every npm page
+  would have been blank.
 
-Publishing checklist: remove `"private": true` from every package manifest (it exists to
-prevent an accidental pre-alpha release), confirm `publishConfig.access` is `public` on the
-scoped packages, and replace the `hymarkx` placeholder on npm with the real CLI.
+Still open: the publish itself (see below), and one syntax decision the compatibility suite
+surfaced (`12:30` in prose loses `:30` — see `BACKLOG.md` P2).
+
+Publishing checklist: [`docs/publishing.md`](docs/publishing.md). Everything a test can hold
+is held by `tests/spec/publish-readiness.test.mjs`; what remains needs a person — removing
+`"private": true`, setting the version, publishing in dependency order, and replacing the
+`hymarkx` placeholder on npm.
 
 ## Phase 10 — Ecosystem
 
