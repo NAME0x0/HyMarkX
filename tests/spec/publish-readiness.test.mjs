@@ -142,6 +142,22 @@ describe('publish readiness', () => {
     expect(versions).toHaveLength(1)
   })
 
+  /**
+   * `hmx --version` has to agree with the package that shipped it.
+   *
+   * The constant is written by hand because deriving it at runtime would mean declaring
+   * `node:url` and `readFileSync` in the hand-written Node types for this one string. That is a
+   * fine trade as long as drift cannot survive a test run — and it had already drifted: 0.0.2
+   * shipped to npm reporting `0.0.0`.
+   */
+  it('the CLI reports the version it was published as', () => {
+    const { manifest } = manifests.find((entry) => entry.name === 'cli')
+    const source = readFileSync(`${packagesDirectory}cli/src/index.ts`, 'utf8')
+    const declared = source.match(/export const VERSION = '([^']+)'/)?.[1]
+
+    expect(declared).toBe(manifest.version)
+  })
+
   it('every package README states the pre-release warning', () => {
     for (const { name } of manifests) {
       const readme = readFileSync(`${packagesDirectory}${name}/README.md`, 'utf8')

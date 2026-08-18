@@ -6,9 +6,15 @@
 progressively enhanced language for documents, websites, interfaces, and interactive
 web applications.
 
-> ⚠️ **Status: pre-alpha.** Phases 0–7 of 10 are complete and the toolchain works, but
-> nothing is published, syntax may still change without migration paths, and the language
-> has no users. Do not depend on it yet.
+```sh
+npm install -g hymarkx
+hmx build page.hmx
+```
+
+> ⚠️ **Status: alpha (0.0.2).** Published and installable, but syntax may still change
+> without migration paths, and HyMarkX **must not be used to render untrusted content in
+> production** — see [`SECURITY.md`](SECURITY.md) and the
+> [security audit](docs/security-audit.md) for exactly why.
 
 <p align="center">
   <img src="assets/evolution.svg" alt="The same document from plain text to a working page: source on the left, rendered result on the right, and the bytes shipped at each step" width="900">
@@ -130,13 +136,31 @@ for an honest account of what each does better and what HMX is actually claiming
 
 ## Try it
 
-```bash
-pnpm install && pnpm build
+```sh
+npm install -g hymarkx
 
-node packages/cli/dist/bin.js build page.hmx --out -   # compile to stdout
-node packages/cli/dist/bin.js check page.hmx           # diagnostics only
-node packages/cli/dist/bin.js fmt page.hmx --check     # formatting, CI mode
-node packages/cli/dist/bin.js dev .                    # dev server with live reload
+hmx build page.hmx --out -    # compile to stdout
+hmx check page.hmx            # diagnostics only
+hmx fmt page.hmx --check      # formatting, CI mode
+hmx dev .                     # dev server with live reload
+```
+
+### Packages
+
+| Package | Purpose |
+|---|---|
+| [`hymarkx`](https://www.npmjs.com/package/hymarkx) | Install this — provides the `hmx` command |
+| [`@hymarkx/compiler`](https://www.npmjs.com/package/@hymarkx/compiler) | Documents to HTML, CSS, and an optional runtime |
+| [`@hymarkx/parser`](https://www.npmjs.com/package/@hymarkx/parser) | Markdown + HMX to an AST with real source spans |
+| [`@hymarkx/ast`](https://www.npmjs.com/package/@hymarkx/ast) | Node types, spans, diagnostics |
+| [`@hymarkx/formatter`](https://www.npmjs.com/package/@hymarkx/formatter) | `hmx fmt` |
+| [`@hymarkx/language-server`](https://www.npmjs.com/package/@hymarkx/language-server) | LSP for editors |
+| [`@hymarkx/cli`](https://www.npmjs.com/package/@hymarkx/cli) | CLI implementation |
+
+### From source
+
+```sh
+pnpm install && pnpm build && pnpm check
 ```
 
 ## Repository layout
@@ -185,7 +209,8 @@ compiled by the test suite.
 
 ## Status
 
-**Phases 0–7 complete.** 1,125 tests. CommonMark 652/652 and GFM 40/40, never regressed.
+**Phases 0–9 complete; published to npm as 0.0.2.** 1,383 tests. CommonMark 652/652 and
+GFM 40/40, never regressed across ten phases and eight syntax additions.
 
 | Phase | |
 |---|---|
@@ -198,9 +223,16 @@ compiled by the test suite.
 | 5 Authored components | ✅ |
 | 6 State, events, runtime | ✅ |
 | 7 Developer experience | ✅ |
-| 8 TS/TSX interoperability | not started |
-| 9 Hardening, fuzzing, 0.1 publish | not started |
+| 8 TS/TSX interoperability | ✅ |
+| 9 Hardening, fuzzing, audit, publish | ✅ |
 | 10 Ecosystem | not started |
+
+Phase 9 found two real defects that no existing suite would have caught, both now fixed and
+regression-tested: a parser hang reachable from untrusted input, found by
+[fuzzing](SECURITY.md#vulnerabilities-found-and-fixed) on its first run, and a silent
+code-span corruption in ordinary prose, found by compiling every Markdown file in this
+repository against a reference renderer. Both are written up rather than quietly patched,
+because the pattern is more useful than the individual bug.
 
 The gate at the end of Phase 3 was a genuine stop condition: without a demonstrated path to
 native interactivity, HMX would have been Markdoc with different punctuation and should not

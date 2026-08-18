@@ -20,6 +20,9 @@ declare module 'node:fs/promises' {
   export function stat(path: string): Promise<{ isFile(): boolean }>
   export function readdir(path: string): Promise<string[]>
   export function realpath(path: string): Promise<string>
+  // Only `force` is declared: it is the option the CLI uses, and declaring `recursive` would
+  // make an accidental directory deletion typecheck.
+  export function rm(path: string, options?: { readonly force?: boolean }): Promise<void>
   export function writeFile(path: string, data: string, encoding: 'utf8'): Promise<void>
 }
 

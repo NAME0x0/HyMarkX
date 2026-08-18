@@ -36,7 +36,12 @@ describe('built hmx CLI', () => {
     expect(help.status).toBe(0)
     expect(help.stdout).toContain('hmx build <input...>')
     expect(version.status).toBe(0)
-    expect(version.stdout).toBe('0.0.0\n')
+    // Read from the manifest rather than hardcoded: this assertion said `0.0.0` while the
+    // package shipped as 0.0.2, so it was pinning the bug rather than catching it.
+    const { version: published } = JSON.parse(
+      readFileSync(resolve(repositoryRoot, 'packages/cli/package.json'), 'utf8'),
+    )
+    expect(version.stdout).toBe(`${published}\n`)
   })
 
   it('builds examples/hello-world and preserves its relative path under --out', () => {
@@ -46,7 +51,6 @@ describe('built hmx CLI', () => {
       { cwd: repositoryRoot, encoding: 'utf8' },
     )
     const actual = readFileSync(join(outputRoot, 'examples/hello-world/index.html'), 'utf8')
-    const javascript = readFileSync(join(outputRoot, 'examples/hello-world/index.js'), 'utf8')
     const expected = readFileSync(
       resolve(repositoryRoot, 'examples/hello-world/index.html'),
       'utf8',
@@ -56,7 +60,47 @@ describe('built hmx CLI', () => {
     expect(result.stdout).toBe('')
     expect(result.stderr).toBe('0 errors, 0 warnings in 1 file\n')
     expect(actual).toBe(expected)
-    expect(Buffer.byteLength(javascript)).toBe(0)
+    // A document with no interactivity gets no JavaScript file at all. This used to assert a
+    // 0-byte file existed, which is the same promise expressed as a file somebody then has to
+    // explain or deploy.
+    expect(existsSync(join(outputRoot, 'examples/hello-world/index.js'))).toBe(false)
+  })
+
+  /**
+   * A document that loses its interactivity must lose its runtime with it.
+   *
+   * Skipping the write for empty output is only half the fix. If the previous build left a
+   * runtime behind, a page that no longer has state would keep serving it — a stale file that
+   * still loads, which is worse than the empty one this replaced.
+   */
+  it('removes a runtime left by an earlier build once the state is gone', () => {
+    const project = mkdtempSync(join(tmpdir(), 'hmx-sidecar-'))
+    const document = join(project, 'index.hmx')
+    const emitted = join(project, 'dist', 'index.js')
+    const run = () =>
+      spawnSync(process.execPath, [cliPath, 'build', 'index.hmx', '--out', 'dist'], {
+        cwd: project,
+        encoding: 'utf8',
+      })
+
+    writeFileSync(
+      document,
+      '::state{count=0}\n\n:::button{on-click="count = count + 1"}\n+\n:::\n',
+      'utf8',
+    )
+    const interactive = run()
+
+    expect(interactive.status).toBe(0)
+    expect(existsSync(emitted)).toBe(true)
+    expect(Buffer.byteLength(readFileSync(emitted))).toBeGreaterThan(0)
+
+    writeFileSync(document, '# Just a heading now\n', 'utf8')
+    const staticBuild = run()
+
+    expect(staticBuild.status).toBe(0)
+    expect(existsSync(emitted)).toBe(false)
+
+    rmSync(project, { recursive: true, force: true })
   })
 
   it('prints only machine-readable diagnostics with --json', () => {

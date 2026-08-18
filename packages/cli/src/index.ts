@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises'
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { parseArgs } from 'node:util'
 import { compile, compileComponents, diagnosticOrigin, renderDiagnostic } from '@hymarkx/compiler'
@@ -12,7 +12,7 @@ import type {
 } from '@hymarkx/compiler'
 
 /** Current CLI package version. */
-export const VERSION = '0.0.0'
+export const VERSION = '0.0.2'
 
 /** Injectable CLI environment used by the binary and subprocess tests. */
 export interface CliIo {
@@ -203,6 +203,26 @@ async function runDev(
 
 function outputName(path: string, extension: '.html' | '.css' | '.js'): string {
   return `${basename(path, extname(path))}${extension}`
+}
+
+/**
+ * Writes a CSS or JS sidecar, or removes it when the compiler produced nothing.
+ *
+ * Output proportionality is a promise the compiler already keeps — a document that uses no
+ * interactivity compiles to an empty string — but writing that empty string still left a
+ * 0-byte `.js` file in the output directory, which is a file somebody has to explain, deploy,
+ * or wonder about. The emitted HTML never referenced it.
+ *
+ * Removal matters as much as skipping. A document that had state and then lost it would
+ * otherwise keep serving the previous build's runtime, which is worse than an empty file: it is
+ * a stale one that still loads.
+ */
+async function writeSidecar(path: string, contents: string): Promise<void> {
+  if (contents === '') {
+    await rm(path, { force: true })
+    return
+  }
+  await writeFile(path, contents, 'utf8')
 }
 
 function outputTarget(
@@ -698,8 +718,8 @@ export async function runCli(
         continue
       }
       await writeFile(target.path, result.html, 'utf8')
-      await writeFile(target.cssPath, result.css, 'utf8')
-      await writeFile(target.jsPath, result.js, 'utf8')
+      await writeSidecar(target.cssPath, result.css)
+      await writeSidecar(target.jsPath, result.js)
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error)
       records.push({
