@@ -101,6 +101,24 @@ describe('publish readiness', () => {
     expect(manifest.engines?.node).toBe('>=22')
   })
 
+  /**
+   * The VS Code extension's Marketplace identity, pinned because it cannot be changed.
+   *
+   * The publisher id is permanent, and it is a *person's* account rather than the project's:
+   * one publisher holds everything its owner ever ships. Changing `name` after publishing does
+   * not rename the extension, it creates a different one — so both halves of `name0x0.hymarkx`
+   * are load-bearing.
+   */
+  it('the VS Code extension keeps the Marketplace identity it was published under', () => {
+    const manifest = JSON.parse(
+      readFileSync(`${repositoryRoot}editors/vscode/package.json`, 'utf8'),
+    )
+
+    expect(manifest.publisher).toBe('name0x0')
+    expect(manifest.name).toBe('hymarkx')
+    expect(manifest.main).toBe('./dist/extension.js')
+  })
+
   // The whole point of the CLI package. `hmx` is the binary name users type; the package it
   // installs from is `hymarkx`, because npm's typosquat filter refuses `hmx` as a package name.
   it('the CLI exposes the hmx binary from a file the build produces', () => {

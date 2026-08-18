@@ -4,7 +4,7 @@
   "description": "Language support for HyMarkX (.hmx): syntax highlighting, diagnostics, completion, hover and formatting.",
   "version": "0.0.2",
   "license": "MIT OR Apache-2.0",
-  "publisher": "hymarkx",
+  "publisher": "name0x0",
   "engines": {
     "vscode": "^1.90.0"
   },

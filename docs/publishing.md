@@ -99,8 +99,15 @@ and **the publisher ID can never be changed once created.**
      fails in a way that reads like a permissions bug.
    - Scopes: Custom defined → Show all scopes → **Marketplace → Manage**.
 3. Create the publisher at the Marketplace publisher management page, logged in with that same
-   account. `hymarkx` matches the npm scope.
-4. `npx @vscode/vsce login hymarkx`, then `pnpm --dir editors/vscode publish`.
+   account. The publisher is **`name0x0`**, not `hymarkx`.
+
+   A publisher is an account that can hold many extensions, not a project page — so it is named
+   after the person who signs the releases rather than after one of them. That keeps it coherent
+   with the personal Microsoft account, the personal domain used for verification, and the
+   LinkedIn and Twitter links on the profile, and it means anything published later sits under
+   the same identity instead of under a project it has nothing to do with. Users still see the
+   extension titled *HyMarkX*; the publisher id only appears in `name0x0.hymarkx`.
+4. `npx @vscode/vsce login name0x0`, then `pnpm --dir editors/vscode publish`.
 
 **Personal access tokens retire on 1 December 2026.** Microsoft's replacement for automated
 publishing is Entra ID with workload identity federation. A manual publish with a PAT works
