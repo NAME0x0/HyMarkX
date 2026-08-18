@@ -42,14 +42,34 @@ describe('dependency-graph.svg', () => {
   /**
    * The claim the diagram exists to make, asserted rather than drawn on trust.
    *
-   * `check-boundaries.mjs` enforces the rule in the code; this checks the picture is telling
-   * the same story — exactly one box carries the engine marker, and it is the parser.
+   * `check-boundaries.mjs` enforces the rule in the code; this checks the picture tells the
+   * same story. Exactly one box may be labelled as carrying engine dependencies, and the
+   * boundary drawn around it has to name the ADR, or it is decoration.
    */
-  it('marks the parser, and only the parser, as reaching the engine', () => {
-    const engineBoxes = [...committed.matchAll(/class="node engine">[\s\S]*?<\/g>/g)]
+  it('marks exactly one package as reaching the engine, and names the rule', () => {
+    const engineLabels = [...committed.matchAll(/>(\d+) engine deps</g)]
 
-    expect(engineBoxes).toHaveLength(1)
-    expect(engineBoxes[0][0]).toContain('>parser</text>')
+    expect(engineLabels).toHaveLength(1)
+    expect(Number(engineLabels[0][1])).toBeGreaterThan(0)
+    expect(committed).toContain('ADR-0005')
+  })
+
+  /**
+   * The accent is the diagram's only emphasis, so it has to land on the thing being emphasised.
+   *
+   * Spending it on a second colour would leave the reader with two focal points and no idea
+   * which one the picture is about.
+   */
+  it('spends the accent colour only on the engine boundary', () => {
+    const accentFills = [...committed.matchAll(/fill="#2563eb"/g)]
+    const parserBlock = committed.slice(
+      committed.indexOf('>parser</text>') - 400,
+      committed.indexOf('>parser</text>') + 200,
+    )
+
+    expect(parserBlock).toContain('#2563eb')
+    // Markers, zone, parser box and its sublabel — not scattered across every node.
+    expect(accentFills.length).toBeLessThanOrEqual(4)
   })
 
   // GitHub serves this file raw. A non-ASCII character rendered as mojibake the first time this

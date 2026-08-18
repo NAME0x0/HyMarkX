@@ -253,12 +253,13 @@ recorded with its reasoning rather than left as an implied promise.
 ## Architecture at a glance
 
 <p align="center">
-  <img src="assets/dependency-graph.svg" alt="Dependency graph of the seven HyMarkX packages: ast at the top, then parser, then compiler and formatter, then cli and language-server, then hymarkx. Only parser carries Markdown engine dependencies." width="460">
+  <img src="assets/dependency-graph.svg" alt="Dependency graph of the seven HyMarkX packages in five layers: ast at the top, then parser, then compiler and formatter, then cli and language-server, then hymarkx. Only parser carries Markdown engine dependencies, and it sits inside a boundary marked ADR-0005." width="640">
 </p>
 
 Generated from the package manifests by
 [`scripts/generate-dependency-graph.mjs`](scripts/generate-dependency-graph.mjs), with a test
 that regenerates it and compares bytes — adding a dependency without redrawing fails the build.
+Edges another path already implies are left out, so every line drawn carries information.
 
 The purple box is the point: **only `@hymarkx/parser` may import micromark, mdast, or any other
 Markdown engine.** That is ADR-0005, and `scripts/check-boundaries.mjs` enforces it on every
