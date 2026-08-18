@@ -292,6 +292,17 @@ A conforming processor MUST report failures as diagnostics with a stable code, a
 severity, and a source span (see `ARCHITECTURE.md` §4). It MUST NOT abort on the first
 error where recovery is possible; collecting multiple diagnostics per run is required.
 
+Codes are grouped by range, and the range is part of the contract:
+
+| Range | Meaning |
+|---|---|
+| `HMX1xxx` | Syntax and recovery — the document could not be read as written |
+| `HMX2xxx` | Semantics and validation — the document parsed but does not mean anything valid |
+| `HMX3xxx` | Trust and safety — the document asked for something its trust mode forbids |
+| `HMX5xxx` | Host and internal failures — not the document's fault |
+
+Every code a processor emits is listed in [Appendix B](#appendix-b--diagnostic-codes-normative).
+
 ## 7. Trust modes *(normative)*
 
 A processor MUST support two modes:
@@ -320,3 +331,84 @@ attribute-value form `{ident={...}}`; the interpolation sigil `{{` (escape it as
 
 A leading `@` is **no longer reserved**. ADR-0014 rejects the `@`-statement family, so a
 line beginning with `@` is ordinary text and will stay that way.
+
+## Appendix B — Diagnostic codes *(normative)*
+
+Every code the reference implementation emits. `tests/spec/diagnostic-codes.test.mjs` fails if
+a code is emitted without appearing here, or appears here without being emitted — a documented
+code that does not exist is as much a defect as an undocumented one that does.
+
+Codes are stable once published. A condition may be reworded; a code may not be reused for a
+different condition, and a retired code stays listed rather than being deleted.
+
+### `HMX1xxx` — syntax and recovery
+
+| Code | Severity | Condition |
+|---|---|---|
+| `HMX1001` | error | Container directive is not closed; recovery closes it at end of document |
+| `HMX1002` | error | Document nests deeper than the Markdown engine can process |
+| `HMX1011` | warning | A line matches `:{2,}[A-Za-z0-9]` but was not recognized as a directive |
+| `HMX1020` | error | Interpolation is not closed |
+| `HMX1021` | error | Expression nests too deeply |
+| `HMX1022` | error | Expression could not be parsed or compiled safely |
+
+### `HMX2xxx` — semantics and validation
+
+| Code | Severity | Condition |
+|---|---|---|
+| `HMX2001` | warning | Unknown attribute on a known component |
+| `HMX2002` | warning | Unknown component; content renders without a wrapper |
+| `HMX2003` | error | Required attribute missing |
+| `HMX2004` | error | Value outside an enum's permitted values |
+| `HMX2005` | error | Value fails its declared type or range |
+| `HMX2006` | warning | Content not permitted by the component's `children` rule |
+| `HMX2007` | error | Label required and absent, or present and forbidden |
+| `HMX2008` | error | Component written in a directive form it does not declare |
+| `HMX2010` | warning | More than one `#id` shorthand; the last wins |
+| `HMX2020` | error | Frontmatter is not a mapping |
+| `HMX2021` | error | Frontmatter is not valid YAML, including refusal to expand aliases |
+| `HMX2022` | error | Reserved frontmatter key holds the wrong type |
+| `HMX2030` | error | Scoped CSS does not parse |
+| `HMX2031` | warning | Scoped style has no emitted elements to scope |
+| `HMX2040` | error | Expression reads an identifier that is not in scope |
+| `HMX2041` | error | Computed property name is not a scalar |
+| `HMX2042` | error | Numeric result is not finite |
+| `HMX2043` | error | Object or array rendered in a text position |
+| `HMX2044` | error | Construct outside the expression sub-language: calls, arrow functions, `++`/`--`, the comma operator, tagged templates |
+| `HMX2050` | error | Authored component document is malformed |
+| `HMX2051` | error | Authored component's declared props are malformed |
+| `HMX2052` | warning | Authored component is given content but has no `::children` to place it |
+| `HMX2053` | error | Authored component prop fails its declared schema |
+| `HMX2054` | error | Authored components form a cycle |
+| `HMX2055` | error | Authored component expansion exceeds the maximum depth |
+| `HMX2056` | error | `::children` outside an authored component document |
+| `HMX2057` | error | Authored component registered more than once |
+| `HMX2060` | error | Event attribute is not allowlisted |
+| `HMX2061` | error | Assignment outside an event handler, or an event attribute with no handler |
+| `HMX2062` | error | State name is not a valid identifier, or collides with a name already in scope |
+| `HMX2063` | error | `::state` not declared at a document or authored-component root |
+| `HMX2070` | info | Island needs a framework runtime the host must supply — reported so the cost is not silent |
+| `HMX2072` | error | Island's `from` specifier is missing or not an allowed form |
+
+### `HMX3xxx` — trust and safety
+
+| Code | Severity | Condition |
+|---|---|---|
+| `HMX3001` | error | `<script>` or `<style>` markup where the trust mode forbids it |
+| `HMX3002` | error | Inline event-handler attribute where the trust mode forbids it |
+| `HMX3003` | error | URL scheme not permitted in `document` mode |
+| `HMX3005` | error | Directive attribute name can modify object prototypes |
+| `HMX3006` | error | Path escapes the project root |
+| `HMX3007` | error | Frontmatter key can modify object prototypes |
+| `HMX3010` | error | Foreign component used outside `app` trust mode |
+
+### `HMX5xxx` — host and internal failures
+
+Not the document's fault. A processor SHOULD make that clear in how it reports them.
+
+| Code | Severity | Condition |
+|---|---|---|
+| `HMX5001` | error | Internal parser failure |
+| `HMX5002` | error | Unsupported input file extension |
+| `HMX5003` | error | Two inputs would write the same output file |
+| `HMX5004` | error | A component file could not be read |
