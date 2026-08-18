@@ -1,9 +1,8 @@
 {
   "name": "@hymarkx/cli",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Command-line interface for building and checking HyMarkX (HMX) documents.",
   "license": "MIT OR Apache-2.0",
-  "private": true,
   "publishConfig": {
     "access": "public"
   },

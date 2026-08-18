@@ -1,9 +1,8 @@
 {
   "name": "@hymarkx/compiler",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Trust-aware HTML compiler and diagnostic renderer for HyMarkX (HMX).",
   "license": "MIT OR Apache-2.0",
-  "private": true,
   "publishConfig": {
     "access": "public"
   },
