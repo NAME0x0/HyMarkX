@@ -25,15 +25,47 @@ const version = JSON.parse(
 rmSync(destination, { recursive: true, force: true })
 mkdirSync(destination, { recursive: true })
 
-// `pnpm.cmd` rather than `shell: true`: passing args through a shell concatenates rather than
-// escapes them, which Node now warns about, and the destination path can contain spaces.
-const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
+/**
+ * Runs `pnpm pack` without going through a shell.
+ *
+ * `shell: true` would concatenate rather than escape the arguments — Node warns about it, and
+ * the destination path can contain spaces. But naming the executable directly is its own trap:
+ * on Windows pnpm is `pnpm.cmd` under PowerShell and a extensionless shell script under Git
+ * Bash, so hardcoding either breaks the other.
+ *
+ * `npm_execpath` is set by pnpm when this runs as `pnpm run release:pack`, and points at
+ * pnpm's own JavaScript entry point — running that with the current Node needs no shell and no
+ * guess about file extensions. The candidate list is the fallback for a bare
+ * `node scripts/pack.mjs`.
+ */
+function pack(cwd) {
+  const options = { cwd, stdio: 'pipe' }
+  const args = ['pack', '--pack-destination', destination]
+  const execPath = process.env.npm_execpath
+
+  if (execPath && /\.(?:c?js)$/.test(execPath)) {
+    execFileSync(process.execPath, [execPath, ...args], options)
+    return
+  }
+
+  for (const candidate of ['pnpm', 'pnpm.cmd']) {
+    try {
+      execFileSync(candidate, args, options)
+      return
+    } catch {
+      // Try the next spelling.
+    }
+  }
+
+  // Neither spelling is spawnable without a shell on Windows: under Git Bash `pnpm` is an
+  // extensionless shell script, and Node refuses to spawn `pnpm.cmd` directly (EINVAL) as a
+  // deliberate guard against command injection through `.cmd` files. Running through pnpm sets
+  // `npm_execpath` and sidesteps both.
+  throw new Error('Run this through pnpm so it can locate itself:\n\n  pnpm run release:pack\n')
+}
 
 for (const name of packages) {
-  execFileSync(pnpm, ['pack', '--pack-destination', destination], {
-    cwd: `${repositoryRoot}packages/${name}`,
-    stdio: 'pipe',
-  })
+  pack(`${repositoryRoot}packages/${name}`)
   console.log(`packed ${name}`)
 }
 
