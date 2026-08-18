@@ -27,3 +27,7 @@ Thumbs.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+.gstack/
+
+# Publish tarballs produced by `pnpm pack`; see docs/publishing.md.
+.release/
