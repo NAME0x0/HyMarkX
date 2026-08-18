@@ -161,10 +161,12 @@ Packages are created when a boundary is real, not to match a diagram.
 | [`VISION.md`](VISION.md) | Why the project exists and what would make it fail |
 | [`SPEC.md`](SPEC.md) | Normative language specification (v0.0 draft) |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Pipeline, packages, diagnostics, testing |
-| [`SECURITY.md`](SECURITY.md) | Trust modes and threat model |
+| [`SECURITY.md`](SECURITY.md) | Trust modes, threat model, and vulnerabilities found |
+| [`docs/security-audit.md`](docs/security-audit.md) | Every threat walked, with the test behind each control — and the two with no test |
+| [`docs/research/performance.md`](docs/research/performance.md) | Measured baseline: plain CommonMark costs what a bare CommonMark parse costs |
 | [`ROADMAP.md`](ROADMAP.md) | Phases, exit criteria, and the Markdoc gate |
 | [`BACKLOG.md`](BACKLOG.md) | Prioritised work, and rejected ideas with reasons |
-| [`docs/adr/`](docs/adr/) | 15 Architecture Decision Records |
+| [`docs/adr/`](docs/adr/) | 16 Architecture Decision Records |
 | [`docs/guides/`](docs/guides/) | Styling, components, interactivity, formatting, dev server, editors |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Workflow, change control, definition of done |
 | [`llms.txt`](llms.txt) | Canonical summary for language models, including the mistakes they actually make |

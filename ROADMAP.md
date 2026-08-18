@@ -145,8 +145,12 @@ Done so far:
   for about what a bare CommonMark + GFM parse costs (1.00x), and compile time grows linearly
   with document size (exponent 1.09).
 
-Still open: the security audit walking T1–T13 with evidence per control, compatibility
-suites, documentation completeness, and the publish checklist below.
+- **Security audit** ([`docs/security-audit.md`](docs/security-audit.md)), walking T1–T13 with
+  the test behind each control. Eleven have one; T5 is closed by construction rather than by
+  defence, and T6 has process only. `tests/security/audit.test.mjs` fails if a cited test is
+  renamed or a threat is added to the model without being audited.
+
+Still open: compatibility suites, documentation completeness, and the publish checklist below.
 
 Publishing checklist: remove `"private": true` from every package manifest (it exists to
 prevent an accidental pre-alpha release), confirm `publishConfig.access` is `public` on the
