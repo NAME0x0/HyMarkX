@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 454 590" width="454" height="590" role="img" aria-label="HyMarkX workspace dependency graph">
+  <title>HyMarkX workspace dependency graph</title>
+  <desc>7 packages. Arrows point to the packages that depend on each box. Only @hymarkx/parser may reach the Markdown engine (ADR-0005).</desc>
+  <style>
+    .node rect { fill: #ffffff; stroke: #d0d7de; stroke-width: 1.5; }
+    .node.engine rect { stroke: #8250df; stroke-width: 2.5; }
+    .name { font: 600 14px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #1f2328; text-anchor: middle; }
+    .note { font: 400 11px ui-sans-serif, system-ui, sans-serif; fill: #656d76; text-anchor: middle; }
+    .edge { fill: none; stroke: #8c959f; stroke-width: 1.5; marker-end: url(#arrow); }
+    .caption { font: 400 11px ui-sans-serif, system-ui, sans-serif; fill: #656d76; text-anchor: middle; }
+    @media (prefers-color-scheme: dark) {
+      .node rect { fill: #161b22; stroke: #30363d; }
+      .node.engine rect { stroke: #a371f7; }
+      .name { fill: #e6edf3; }
+      .note, .caption { fill: #8b949e; }
+      .edge { stroke: #6e7681; }
+    }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8c959f" />
+    </marker>
+  </defs>
+  <g class="edge">
+    <path d="M 119 302 C 119 331, 119 331, 119 353" />
+    <path d="M 335 302 C 335 331, 119 331, 119 353" />
+    <path d="M 227 78 C 227 163, 119 163, 119 241" />
+    <path d="M 227 190 C 227 219, 119 219, 119 241" />
+    <path d="M 227 78 C 227 163, 335 163, 335 241" />
+    <path d="M 227 190 C 227 219, 335 219, 335 241" />
+    <path d="M 119 414 C 119 443, 227 443, 227 465" />
+    <path d="M 227 78 C 227 219, 335 219, 335 353" />
+    <path d="M 119 302 C 119 331, 335 331, 335 353" />
+    <path d="M 335 302 C 335 331, 335 331, 335 353" />
+    <path d="M 227 78 C 227 107, 227 107, 227 129" />
+  </g>
+    <g class="node">
+      <rect x="132" y="24" width="190" height="54" rx="8" />
+      <text class="name" x="227" y="46">ast</text>
+      <text class="note" x="227" y="64">0 external</text>
+    </g>
+    <g class="node">
+      <rect x="24" y="360" width="190" height="54" rx="8" />
+      <text class="name" x="119" y="382">cli</text>
+      <text class="note" x="119" y="400">0 external</text>
+    </g>
+    <g class="node">
+      <rect x="24" y="248" width="190" height="54" rx="8" />
+      <text class="name" x="119" y="270">compiler</text>
+      <text class="note" x="119" y="288">3 external</text>
+    </g>
+    <g class="node">
+      <rect x="240" y="248" width="190" height="54" rx="8" />
+      <text class="name" x="335" y="270">formatter</text>
+      <text class="note" x="335" y="288">0 external</text>
+    </g>
+    <g class="node">
+      <rect x="132" y="472" width="190" height="54" rx="8" />
+      <text class="name" x="227" y="494">hymarkx</text>
+      <text class="note" x="227" y="512">0 external</text>
+    </g>
+    <g class="node">
+      <rect x="240" y="360" width="190" height="54" rx="8" />
+      <text class="name" x="335" y="382">language-server</text>
+      <text class="note" x="335" y="400">0 external</text>
+    </g>
+    <g class="node engine">
+      <rect x="132" y="136" width="190" height="54" rx="8" />
+      <text class="name" x="227" y="158">parser</text>
+      <text class="note" x="227" y="176">16 engine deps</text>
+    </g>
+  <text class="caption" x="227" y="568">Arrows point to the packages that depend on each box.</text>
+  <text class="caption" x="227" y="582">Only @hymarkx/parser may reach the Markdown engine (ADR-0005).</text>
+</svg>

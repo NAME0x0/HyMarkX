@@ -243,6 +243,22 @@ for the same counter — not on an argument. See [`ROADMAP.md`](ROADMAP.md).
 async or data loading, named slots, TSX interop, and author CSS in `document` mode. Each is
 recorded with its reasoning rather than left as an implied promise.
 
+## Architecture at a glance
+
+<p align="center">
+  <img src="assets/dependency-graph.svg" alt="Dependency graph of the seven HyMarkX packages: ast at the top, then parser, then compiler and formatter, then cli and language-server, then hymarkx. Only parser carries Markdown engine dependencies." width="460">
+</p>
+
+Generated from the package manifests by
+[`scripts/generate-dependency-graph.mjs`](scripts/generate-dependency-graph.mjs), with a test
+that regenerates it and compares bytes — adding a dependency without redrawing fails the build.
+
+The purple box is the point: **only `@hymarkx/parser` may import micromark, mdast, or any other
+Markdown engine.** That is ADR-0005, and `scripts/check-boundaries.mjs` enforces it on every
+run, including for editor integrations and benchmarks. Everything downstream speaks the HMX AST
+and nothing else, which is what keeps the compiler swappable and the browser-facing packages
+free of Node.
+
 ## License
 
 Licensed under either of [MIT](LICENSE-MIT) or [Apache License 2.0](LICENSE-APACHE), at

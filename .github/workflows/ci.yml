@@ -2,29 +2,165 @@ name: CI
 
 on:
   push:
+    branches: [main]
+    tags: ['v*']
   pull_request:
+  # Weekly, so a break caused by something outside this repository — a dependency yanked, a
+  # transitive advisory, a new Node patch — surfaces on a schedule rather than on the next
+  # unrelated pull request.
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+# A force-push or a quick second push should cancel the run it superseded, except on main,
+# where every commit's result is worth having.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  # Turns pnpm's interactive progress output into something readable in a log.
+  CI: true
 
 jobs:
-  check:
+  build-and-test:
+    name: Build and test (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
+      # One Node version failing should not hide whether the other passed.
+      fail-fast: false
       matrix:
         node-version: [22, 24]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Check
-        run: pnpm check
-      - name: Check dependency boundaries
-        run: node scripts/check-boundaries.mjs
+
+      - name: Compile
+        run: pnpm build
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+  conventions:
+    name: Conventions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Check formatting
         run: pnpm format:check
+
+      # ADR-0005: only @hymarkx/parser may import a Markdown engine, and only the CLI and
+      # language server may assume Node. This has silently broken before — see HMX-013 — so it
+      # runs as its own step with its own name rather than tucked inside another command.
+      - name: Check dependency boundaries
+        run: node scripts/check-boundaries.mjs
+
+      # The committed SVGs are generated from real compiler output and real manifests. If a
+      # change makes them stale, the diagrams start describing an older version of the code.
+      - name: Check generated assets are current
+        run: |
+          pnpm assets
+          git diff --exit-code --stat -- assets/ \
+            || (echo '::error::assets/ is stale — run `pnpm assets` and commit the result' && exit 1)
+
+  packaging:
+    name: Packaging
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Compile
+        run: pnpm build
+
+      # Publishing is one-way: a wrong `files` list ships a package that cannot resolve its own
+      # entry point, and the fix is a new version rather than an edit. Packing on every run
+      # means the tarball is verified long before anyone runs the release.
+      - name: Pack every package
+        run: pnpm run release:pack
+
+      - name: Verify tarball contents
+        run: node scripts/check-tarballs.mjs
+
+      - name: Upload tarballs
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: .release/*.tgz
+          retention-days: 7
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Advisory data changes without this repository changing, so a failure here should not
+    # block a pull request that did not cause it. It is a signal, not a gate.
+    continue-on-error: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit
+        run: pnpm audit --audit-level moderate
