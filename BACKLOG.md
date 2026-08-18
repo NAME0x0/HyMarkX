@@ -34,6 +34,19 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 *The first three were found by the HMX-P01 interactivity prototype. All are bounded design
 gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
 
+- **`12:30` in prose loses `:30`.** `:name` is valid text-directive syntax, so `12:30`, `3:4`
+  and `a:b` parse `:30`/`:4`/`:b` as a text directive. With no registered component that is
+  `HMX2002` and, because a bare directive has no label, no children to render — so the text
+  disappears. SPEC §5 says "degradation over data loss"; this is data loss, and it conflicts
+  with invariant 1 for a document whose author wrote no HMX at all.
+
+  Zero occurrences across the 74 Markdown files in this repository, and `note: text` is
+  unaffected (a space after the colon is not a name), so it is not urgent. Two candidate
+  fixes, and picking between them is an ADR decision, not a patch: render an unknown text
+  directive's source text literally, which stops the data loss but leaves `12:30` looking
+  odd; or require a label or attributes for text directives (`:name[…]` / `:name{…}`), which
+  removes the collision entirely at the cost of the bare `:name` form. Found by the
+  compatibility suite in `tests/compatibility/`.
 - **Render plans cannot emit void elements.** `RenderPlan.wrappers` describes paired tags
   only, so a component rendering `<input>` produces `<input ...></input>`. Browsers
   normalise it and behaviour is correct, but the serialised HTML is invalid. Needed before

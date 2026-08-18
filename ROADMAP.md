@@ -150,7 +150,13 @@ Done so far:
   defence, and T6 has process only. `tests/security/audit.test.mjs` fails if a cited test is
   renamed or a threat is added to the model without being audited.
 
-Still open: compatibility suites, documentation completeness, and the publish checklist below.
+- **Compatibility suite** (`tests/compatibility/`), compiling every Markdown file in the
+  repository and requiring byte-identical output to a bare micromark + GFM render. It found a
+  silent code-span corruption on its first run — the spec suites test constructs one at a
+  time, and this one needed three of them in the same line.
+
+Still open: documentation completeness, the publish checklist below, and one syntax decision
+the compatibility suite surfaced (`12:30` in prose loses `:30` — see `BACKLOG.md` P2).
 
 Publishing checklist: remove `"private": true` from every package manifest (it exists to
 prevent an accidental pre-alpha release), confirm `publishConfig.access` is `public` on the
