@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500" role="img" aria-label="HyMarkX: the same document from plain text to a working page">
   <title>HyMarkX — plain text to a working page</title>
   <desc>Generated from real compiler output by scripts/generate-evolution-svg.mjs. Source, rendered preview and byte counts all come from compiling each document with the HyMarkX toolchain.</desc>
@@ -154,8 +155,8 @@ Users grew to 14,302.</text>
       <rect x="476" y="96" width="180" height="52" rx="6" class="r-card"/>
       <text x="488" y="116" class="r-label">Users</text>
       <text x="488" y="136" class="r-value">14302</text>
-      <rect x="476" y="96" width="104" height="28" rx="6" fill="#2563eb"/>
-      <text x="528" y="114" class="r-btn" text-anchor="middle">Add user</text>
+      <rect x="476" y="156" width="84" height="28" rx="6" fill="#2563eb"/>
+      <text x="518" y="174" class="r-btn" text-anchor="middle">Add user</text>
       <text x="44" y="470" class="meter">HTML 164 B</text>
       <text x="150" y="470" class="meter">CSS 1154 B</text>
       <text x="240" y="470" class="meter live">JS 996 B</text>

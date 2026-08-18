@@ -13,7 +13,10 @@ const stages = svg.split('<g class="stage"').slice(1)
 describe('evolution.svg', () => {
   it('is well-formed and has one frame per stage', () => {
     expect(stages).toHaveLength(5)
-    expect(svg.startsWith('<svg')).toBe(true)
+    // The XML declaration comes first. GitHub serves this file raw from a README reference, and
+    // without a declared encoding a browser may fall back to latin-1 — which is how the middle
+    // dot in the strapline once rendered as "Å·".
+    expect(svg.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<svg')).toBe(true)
     expect(svg.trimEnd().endsWith('</svg>')).toBe(true)
   })
 

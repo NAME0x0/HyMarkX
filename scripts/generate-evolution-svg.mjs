@@ -133,12 +133,20 @@ function drawBlock(block, y, palette) {
       <text x="${x + 12}" y="${y + 39}" class="r-p">${escapeXml(block.text)}</text>`,
         height: 58,
       }
-    case 'button':
+    case 'button': {
+      // Sized to its label rather than fixed at 104px, which left "Add user" floating in 27px of
+      // padding on each side and reading as a stretched box rather than a button.
+      //
+      // 6.4px per character approximates 12px system sans — measured against the real glyph run,
+      // which came out at 6.2. Erring high keeps a longer label off the edges, and the 72px floor
+      // stops a two-letter label collapsing into a square.
+      const width = Math.max(72, Math.round((block.text.length * 6.4 + 32) / 4) * 4)
       return {
-        svg: `<rect x="${x}" y="${y}" width="104" height="28" rx="6" fill="${palette.info}"/>
-      <text x="${x + 52}" y="${y + 18}" class="r-btn" text-anchor="middle">${escapeXml(block.text)}</text>`,
+        svg: `<rect x="${x}" y="${y}" width="${width}" height="28" rx="6" fill="${palette.info}"/>
+      <text x="${x + width / 2}" y="${y + 18}" class="r-btn" text-anchor="middle">${escapeXml(block.text)}</text>`,
         height: 38,
       }
+    }
     default:
       return {
         svg: `<text x="${x}" y="${y + 11}" class="r-p">${escapeXml(block.text)}</text>`,
@@ -152,7 +160,15 @@ function renderPreview(blocks, palette) {
   let inlineX = 0
   const parts = []
   for (const block of blocks) {
-    const drawn = drawBlock(block, y, palette)
+    let drawn = drawBlock(block, y, palette)
+    // Closing an inline row moves `y` down, so anything that follows has to be drawn again at
+    // the new position. Drawing first and advancing afterwards put the button on top of the
+    // metric card it should have sat below.
+    if (drawn.inline !== true && inlineX > 0) {
+      inlineX = 0
+      y += 60
+      drawn = drawBlock(block, y, palette)
+    }
     if (drawn.inline === true) {
       parts.push(
         drawn.svg
@@ -165,10 +181,6 @@ function renderPreview(blocks, palette) {
         y += drawn.height
       }
       continue
-    }
-    if (inlineX > 0) {
-      inlineX = 0
-      y += 60
     }
     parts.push(drawn.svg)
     y += drawn.height
@@ -239,7 +251,12 @@ const frames = compiled
   })
   .join('\n')
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500" role="img" aria-label="HyMarkX: the same document from plain text to a working page">
+// The XML declaration is not decoration. Without it a browser handed this file raw — which is
+// exactly how GitHub serves an image referenced from a README — may fall back to latin-1 and
+// render any non-ASCII character as mojibake. The middle dot in the strapline did precisely
+// that, arriving as "Å·".
+const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500" role="img" aria-label="HyMarkX: the same document from plain text to a working page">
   <title>HyMarkX — plain text to a working page</title>
   <desc>Generated from real compiler output by scripts/generate-evolution-svg.mjs. Source, rendered preview and byte counts all come from compiling each document with the HyMarkX toolchain.</desc>
   <style>

@@ -214,34 +214,73 @@ export function build() {
     })
   })
 
-  // Every connector leaving the same row drops on its own y, so two horizontal runs can never
-  // share a path. 12px apart keeps them independently traceable.
-  const drops = new Map()
-  const perRow = new Map()
-  for (const edge of edges) {
-    const row = position.get(edge.from).row
-    perRow.set(row, [...(perRow.get(row) ?? []), edge])
+  const key = (edge) => `${edge.from}>${edge.to}`
+
+  /**
+   * Spreads attach points along a node edge instead of stacking them on the midpoint.
+   *
+   * Two connectors sharing one point on a box is the anti-pattern that makes a diagram
+   * unreadable at the exact moment a reader is trying to follow a specific dependency: both
+   * lines emerge from the same pixel and there is no way to tell which is which.
+   */
+  const fan = (groups) => {
+    const points = new Map()
+    for (const [, list] of groups) {
+      list.forEach((edge, index) => {
+        points.set(key(edge), (NODE_WIDTH * (index + 1)) / (list.length + 1))
+      })
+    }
+    return points
   }
-  for (const [row, list] of perRow) {
+
+  const groupBy = (selector) => {
+    const groups = new Map()
+    for (const edge of edges) {
+      const id = selector(edge)
+      groups.set(id, [...(groups.get(id) ?? []), edge])
+    }
+    return groups
+  }
+
+  const exitOffsets = fan(groupBy((edge) => edge.from))
+  const entryOffsets = fan(groupBy((edge) => edge.to))
+
+  /**
+   * Every connector leaving a row drops on its own y, spread evenly through the gap.
+   *
+   * The previous version stepped down 12px at a time from a fixed offset, which put the third
+   * connector 8px above the next row — exactly the corner radius. The closing arc then consumed
+   * the whole remaining drop, leaving a zero-length final segment. SVG orients `marker-end` off
+   * the last segment with length, so the arrowhead pointed sideways along the horizontal run
+   * instead of down into the box, and the elbow read as a hook.
+   */
+  const drops = new Map()
+  for (const [row, list] of groupBy((edge) => position.get(edge.from).row)) {
     const bandTop = PADDING + row * (NODE_HEIGHT + ROW_GAP) + NODE_HEIGHT
     list.forEach((edge, index) => {
-      drops.set(`${edge.from}>${edge.to}`, grid(bandTop + 24 + index * 12))
+      drops.set(key(edge), bandTop + grid((ROW_GAP * (index + 1)) / (list.length + 1)))
     })
   }
 
-  const verticalRuns = edges.map((edge) => ({
-    x: position.get(edge.to).x + NODE_WIDTH / 2,
-    top: drops.get(`${edge.from}>${edge.to}`),
-    bottom: position.get(edge.to).y,
-  }))
+  // Both halves of every connector, so a horizontal run knows what it has to hop over: the
+  // drop into a destination and the initial descent out of a source.
+  const verticalRuns = edges.flatMap((edge) => {
+    const from = position.get(edge.from)
+    const to = position.get(edge.to)
+    const dropY = drops.get(key(edge))
+    return [
+      { x: grid(to.x + entryOffsets.get(key(edge))), top: dropY, bottom: to.y },
+      { x: grid(from.x + exitOffsets.get(key(edge))), top: from.y + NODE_HEIGHT, bottom: dropY },
+    ]
+  })
 
   const drawnEdges = edges
     .map((edge) => {
       const from = position.get(edge.from)
       const to = position.get(edge.to)
-      const x1 = from.x + NODE_WIDTH / 2
-      const x2 = to.x + NODE_WIDTH / 2
-      const dropY = drops.get(`${edge.from}>${edge.to}`)
+      const x1 = grid(from.x + exitOffsets.get(key(edge)))
+      const x2 = grid(to.x + entryOffsets.get(key(edge)))
+      const dropY = drops.get(key(edge))
       const crossings = verticalRuns
         .filter((run) => run.x !== x1 && run.x !== x2 && run.top < dropY && run.bottom > dropY)
         .map((run) => run.x)

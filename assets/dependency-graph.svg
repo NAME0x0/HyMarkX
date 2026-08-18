@@ -17,13 +17,13 @@
   <text x="234" y="116" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" letter-spacing="0.12em">MARKDOWN ENGINE / ADR-0005</text>
 
   <g>
-    <path d="M 220,312 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
-    <path d="M 420,312 V 340 Q 420,348 412,348 H 228 Q 220,348 220,356 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
-    <path d="M 320,200 V 216 Q 320,224 312,224 H 228 Q 220,224 220,232 V 256" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-opacity="0.85" marker-end="url(#arrow-accent)"/>
-    <path d="M 320,200 V 228 Q 320,236 328,236 H 412 Q 420,236 420,244 V 256" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-opacity="0.85" marker-end="url(#arrow-accent)"/>
-    <path d="M 220,424 V 440 Q 220,448 228,448 H 312 Q 320,448 320,456 V 480" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
-    <path d="M 220,312 V 352 Q 220,360 228,360 H 412 Q 420,360 420,368 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
-    <path d="M 420,312 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
+    <path d="M 192,312 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
+    <path d="M 392,312 V 328 Q 392,336 384,336 H 256 Q 248,336 248,344 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
+    <path d="M 292,200 V 212 Q 292,220 284,220 H 228 Q 220,220 220,228 V 256" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-opacity="0.85" marker-end="url(#arrow-accent)"/>
+    <path d="M 348,200 V 228 Q 348,236 356,236 H 412 Q 420,236 420,244 V 256" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-opacity="0.85" marker-end="url(#arrow-accent)"/>
+    <path d="M 220,424 V 444 Q 220,452 228,452 H 312 Q 320,452 320,460 V 480" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
+    <path d="M 248,312 V 336 Q 248,344 256,344 H 384 Q 392,344 392,352 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
+    <path d="M 448,312 V 368" fill="none" stroke="#526176" stroke-width="1.2" stroke-opacity="0.55" marker-end="url(#arrow)"/>
     <path d="M 320,88 V 144" fill="none" stroke="#2563eb" stroke-width="1.2" stroke-opacity="0.85" marker-end="url(#arrow-accent)"/>
   </g>
 
