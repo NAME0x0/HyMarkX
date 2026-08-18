@@ -83,6 +83,10 @@ function guardDirectiveName(construct: Construct, type: DirectiveType): Construc
         },
       }
 
+      // A directive name is ASCII per SPEC 4.1; upstream would accept Unicode names.
+      const rejectsAsDirectiveName = (code: number | null): boolean =>
+        code !== null && code > 127 && !/[\p{P}\p{Z}\s]/u.test(String.fromCodePoint(code))
+
       const guardState = (state: State): State =>
         function (code) {
           // A directive name cannot span lines (SPEC §4.1), so the guard must disarm at the
@@ -95,12 +99,20 @@ function guardDirectiveName(construct: Construct, type: DirectiveType): Construc
             inDirectiveName = false
             beforeDirectiveName = false
           }
-          if (
-            (beforeDirectiveName || inDirectiveName) &&
-            code !== null &&
-            code > 127 &&
-            !/[\p{P}\p{Z}\s]/u.test(String.fromCodePoint(code))
-          ) {
+
+          // `beforeDirectiveName` arms for exactly one code and then disarms, because only the
+          // character immediately after `:` can begin a name. It used to stay armed until a name
+          // token was entered, which never happens when the attempt fails — so in `: \`&\` → \`x\``
+          // the guard was still live at the non-ASCII character, returned `nok` from the middle
+          // of the paragraph, and shifted the surrounding code spans by one backtick. Silent
+          // wrong output with no diagnostic; found by the CommonMark compatibility corpus.
+          if (beforeDirectiveName) {
+            beforeDirectiveName = false
+            if (rejectsAsDirectiveName(code)) {
+              return nok(code)
+            }
+          }
+          if (inDirectiveName && rejectsAsDirectiveName(code)) {
             return nok(code)
           }
           const next = state(code)
