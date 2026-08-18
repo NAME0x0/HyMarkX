@@ -167,7 +167,7 @@ Packages are created when a boundary is real, not to match a diagram.
 | [`ROADMAP.md`](ROADMAP.md) | Phases, exit criteria, and the Markdoc gate |
 | [`BACKLOG.md`](BACKLOG.md) | Prioritised work, and rejected ideas with reasons |
 | [`docs/adr/`](docs/adr/) | 16 Architecture Decision Records |
-| [`docs/guides/`](docs/guides/) | Styling, components, interactivity, formatting, dev server, editors |
+| [`docs/guides/`](docs/guides/) | Data and expressions, styling, components, interactivity, formatting, dev server, editors |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Workflow, change control, definition of done |
 | [`llms.txt`](llms.txt) | Canonical summary for language models, including the mistakes they actually make |
 | [`AGENTS.md`](AGENTS.md) | Instructions for coding agents working on this repository |

@@ -5,6 +5,7 @@ decision was made, see [`docs/adr/`](../adr/).
 
 | Guide | Covers |
 |---|---|
+| [Data and expressions](data-and-expressions.md) | Frontmatter, `{{ }}` interpolation, and what expressions deliberately cannot do |
 | [Styling](styling.md) | Built-in component styles, design tokens, `<style scoped>` |
 | [Components](components.md) | Authoring `.hmx` components, props, `::children` |
 | [Interactivity](interactivity.md) | `::state`, event handlers, the emitted runtime |
