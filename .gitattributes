@@ -12,3 +12,10 @@ tests/conformance/** -text
 *.woff binary
 *.woff2 binary
 pnpm-lock.yaml -diff linguist-generated
+
+# GitHub's Linguist has no `.hmx` language, so these files are invisible in the language bar
+# and get no highlighting. Mapping them to Markdown is honest — a document containing no HMX
+# construct *is* Markdown, which is the project's first invariant — and it gets both. Replace
+# this with a real language entry once Linguist accepts one; that needs HMX in use across a few
+# hundred repositories, not a request.
+*.hmx linguist-language=Markdown
