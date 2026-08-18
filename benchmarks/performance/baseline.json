@@ -1,0 +1,58 @@
+{
+  "environment": {
+    "node": "v25.6.1",
+    "platform": "win32-x64",
+    "calibrationNsPerIteration": 2.8153
+  },
+  "complexity": {
+    "smallBytes": 31717,
+    "largeBytes": 126593,
+    "smallMs": 69,
+    "largeMs": 309.71,
+    "growthExponent": 1.085
+  },
+  "invariantOne": {
+    "bytes": 3592,
+    "bareParseNsPerByte": 1459.83,
+    "hmxParseNsPerByte": 1660.19,
+    "overheadVersusBareParse": 1,
+    "observedRatioRange": [0.94, 1.386]
+  },
+  "workloads": [
+    {
+      "name": "prose",
+      "bytes": 3592,
+      "parseNsPerByte": 2214.89,
+      "compileNsPerByte": 2286.83,
+      "compileCostVersusProse": 1
+    },
+    {
+      "name": "directives",
+      "bytes": 2240,
+      "parseNsPerByte": 1932.81,
+      "compileNsPerByte": 2088.66,
+      "compileCostVersusProse": 0.913
+    },
+    {
+      "name": "expressions",
+      "bytes": 2175,
+      "parseNsPerByte": 1358.25,
+      "compileNsPerByte": 1466.07,
+      "compileCostVersusProse": 0.641
+    },
+    {
+      "name": "html",
+      "bytes": 2008,
+      "parseNsPerByte": 329.43,
+      "compileNsPerByte": 439.34,
+      "compileCostVersusProse": 0.192
+    },
+    {
+      "name": "mixed",
+      "bytes": 8007,
+      "parseNsPerByte": 1908.14,
+      "compileNsPerByte": 2237.79,
+      "compileCostVersusProse": 0.979
+    }
+  ]
+}

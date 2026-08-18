@@ -135,6 +135,19 @@ backend, not as the definition of the language.
 Fuzzing, security audit, performance targets from measured baselines, compatibility
 suites, documentation completeness, 0.1 publish.
 
+Done so far:
+
+- **Whole-pipeline fuzzing** (`tests/fuzz/`), which found a parser hang on its first run —
+  a malformed directive followed by any non-ASCII character looped forever with GFM enabled,
+  reachable from untrusted input. Fixed, regression-tested, and written up in `SECURITY.md`.
+- **Performance baseline** ([`docs/research/performance.md`](docs/research/performance.md)),
+  with a regression gate in `tests/benchmarks/performance.test.mjs`. Plain CommonMark parses
+  for about what a bare CommonMark + GFM parse costs (1.00x), and compile time grows linearly
+  with document size (exponent 1.09).
+
+Still open: the security audit walking T1–T13 with evidence per control, compatibility
+suites, documentation completeness, and the publish checklist below.
+
 Publishing checklist: remove `"private": true` from every package manifest (it exists to
 prevent an accidental pre-alpha release), confirm `publishConfig.access` is `public` on the
 scoped packages, and replace the `hymarkx` placeholder on npm with the real CLI.

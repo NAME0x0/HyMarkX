@@ -11,6 +11,21 @@ const hostSourceDirectories = [
   resolve(packagesDirectory, 'cli', 'src'),
   resolve(packagesDirectory, 'language-server', 'src'),
 ]
+/**
+ * The one file allowed to import the Markdown engine outside `@hymarkx/parser`.
+ *
+ * It exists to measure HMX against a bare CommonMark + GFM parse, which is how invariant 1's
+ * claim gets a number instead of an assertion — and measuring against the engine requires
+ * importing it. The exemption is a single named file rather than a `benchmarks/` carve-out,
+ * because a directory-wide hole would let the next engine import in without anyone deciding to
+ * allow it.
+ *
+ * It stays honest because the engine packages are root devDependencies: nothing here reaches a
+ * published package, and `checkManifest` still refuses them in every `packages/*` manifest.
+ */
+const engineComparisonFiles = new Set([
+  resolve(repositoryRoot, 'benchmarks', 'performance', 'bare-parser.mjs'),
+])
 const forbiddenPackage =
   /^(?:micromark|mdast|hast|unist|remark|unified)|^@types\/(?:mdast|unist|hast)(?:$|\/)/
 const sourceExtension = /\.(?:[cm]?[jt]sx?)$/
@@ -74,7 +89,12 @@ function checkSourceFile(path) {
     pattern.lastIndex = 0
     for (const match of source.matchAll(pattern)) {
       const specifier = match[1]
-      if (specifier !== undefined && forbiddenPackage.test(specifier) && !isParserSource) {
+      if (
+        specifier !== undefined &&
+        forbiddenPackage.test(specifier) &&
+        !isParserSource &&
+        !engineComparisonFiles.has(path)
+      ) {
         violations.push(`${displayPath(path)} imports ${specifier}`)
       }
       if (
