@@ -1,109 +1,159 @@
-const { spawn } = require('node:child_process')
-const { join } = require('node:path')
+import * as vscode from 'vscode'
+import { handle } from '@hymarkx/language-server'
 
 /**
- * Minimal LSP client.
+ * The HyMarkX language features, running the server in this process.
  *
- * Written against the `vscode` API only — the extension deliberately carries no
- * `vscode-languageclient` dependency, matching the server, which speaks the protocol
- * directly. The surface used here is small enough that the dependency would cost more in
- * version churn than it saves in code.
+ * The previous version spawned `@hymarkx/language-server` as a child process and located it at
+ * `extensionPath/../../packages/language-server/dist/bin.js` — a path into the monorepo. That
+ * works when the extension is run from a checkout and fails for every installed user, because
+ * no such directory exists inside a VSIX.
+ *
+ * Spawning is not needed at all. The server exports `handle(message, documents)`: a synchronous,
+ * pure function from one LSP message to a response and any notifications. So the extension
+ * bundles it and calls it directly. No child process, no stdio framing, no Content-Length
+ * parsing, no path resolution, and nothing to kill on shutdown.
+ *
+ * What is lost is process isolation — a crash in the server takes the extension host's
+ * extension with it rather than dying in its own process. That is an acceptable trade for a
+ * compiler that is synchronous and has a fuzzed parser, and it is worth stating rather than
+ * discovering.
  */
-function activate(context) {
-  const vscode = require('vscode')
-  const serverPath = join(
-    context.extensionPath,
-    '..',
-    '..',
-    'packages',
-    'language-server',
-    'dist',
-    'bin.js',
-  )
-
-  const server = spawn(process.execPath, [serverPath], { stdio: ['pipe', 'pipe', 'pipe'] })
+export function activate(context) {
+  // The server is stateless between calls; this map is the document state it operates on.
+  const documents = new Map()
   const diagnostics = vscode.languages.createDiagnosticCollection('hymarkx')
   context.subscriptions.push(diagnostics)
 
   let nextId = 1
-  const pending = new Map()
 
-  function send(message) {
-    const body = JSON.stringify({ jsonrpc: '2.0', ...message })
-    server.stdin.write(`Content-Length: ${Buffer.byteLength(body)}\r\n\r\n${body}`)
-  }
-
-  function request(method, params) {
-    const id = nextId++
-    send({ id, method, params })
-    return new Promise((resolve) => pending.set(id, resolve))
-  }
-
-  let buffer = ''
-  server.stdout.setEncoding('utf8')
-  server.stdout.on('data', (chunk) => {
-    buffer += chunk
-    for (;;) {
-      const headerEnd = buffer.indexOf('\r\n\r\n')
-      if (headerEnd === -1) return
-      const length = Number(/Content-Length:\s*(\d+)/i.exec(buffer.slice(0, headerEnd))?.[1])
-      const bodyStart = headerEnd + 4
-      if (!Number.isFinite(length) || buffer.length < bodyStart + length) return
-      const message = JSON.parse(buffer.slice(bodyStart, bodyStart + length))
-      buffer = buffer.slice(bodyStart + length)
-
-      if (message.id !== undefined && pending.has(message.id)) {
-        pending.get(message.id)(message.result)
-        pending.delete(message.id)
-      } else if (message.method === 'textDocument/publishDiagnostics') {
-        const uri = vscode.Uri.parse(message.params.uri)
-        diagnostics.set(
-          uri,
-          message.params.diagnostics.map((item) => {
-            const range = new vscode.Range(
-              item.range.start.line,
-              item.range.start.character,
-              item.range.end.line,
-              item.range.end.character,
-            )
-            const diagnostic = new vscode.Diagnostic(range, item.message, item.severity - 1)
-            diagnostic.code = item.code
-            diagnostic.source = item.source
-            return diagnostic
-          }),
-        )
+  /** Sends one message through the server and applies whatever comes back. */
+  function send(method, params) {
+    const result = handle({ jsonrpc: '2.0', id: nextId++, method, params }, documents)
+    for (const notification of result.notifications) {
+      if (notification.method === 'textDocument/publishDiagnostics') {
+        applyDiagnostics(notification.params)
       }
     }
-  })
+    return result.response?.result
+  }
 
-  void request('initialize', { capabilities: {} })
-  send({ method: 'initialized', params: {} })
+  function applyDiagnostics(params) {
+    diagnostics.set(
+      vscode.Uri.parse(params.uri),
+      params.diagnostics.map((item) => {
+        const range = toRange(item.range)
+        // LSP severities are 1-4 (Error..Hint); the VS Code enum is 0-3 in the same order.
+        const diagnostic = new vscode.Diagnostic(range, item.message, item.severity - 1)
+        diagnostic.code = item.code
+        diagnostic.source = item.source ?? 'hymarkx'
+        return diagnostic
+      }),
+    )
+  }
 
-  const sync = (document) => {
-    if (document.languageId !== 'hymarkx') return
-    send({
-      method: 'textDocument/didOpen',
-      params: {
-        textDocument: { uri: document.uri.toString(), text: document.getText() },
-      },
+  function toRange(range) {
+    return new vscode.Range(
+      range.start.line,
+      range.start.character,
+      range.end.line,
+      range.end.character,
+    )
+  }
+
+  const isHmx = (document) => document.languageId === 'hymarkx'
+
+  const open = (document) => {
+    if (!isHmx(document)) {
+      return
+    }
+    send('textDocument/didOpen', {
+      textDocument: { uri: document.uri.toString(), text: document.getText() },
     })
   }
 
-  vscode.workspace.textDocuments.forEach(sync)
+  send('initialize', { capabilities: {} })
+  send('initialized', {})
+  vscode.workspace.textDocuments.forEach(open)
+
+  const selector = { language: 'hymarkx' }
+
   context.subscriptions.push(
-    vscode.workspace.onDidOpenTextDocument(sync),
+    vscode.workspace.onDidOpenTextDocument(open),
+
     vscode.workspace.onDidChangeTextDocument((event) => {
-      if (event.document.languageId !== 'hymarkx') return
-      send({
-        method: 'textDocument/didChange',
-        params: {
-          textDocument: { uri: event.document.uri.toString() },
-          contentChanges: [{ text: event.document.getText() }],
-        },
+      if (!isHmx(event.document)) {
+        return
+      }
+      send('textDocument/didChange', {
+        textDocument: { uri: event.document.uri.toString() },
+        contentChanges: [{ text: event.document.getText() }],
       })
     }),
-    { dispose: () => server.kill() },
+
+    vscode.workspace.onDidCloseTextDocument((document) => {
+      if (!isHmx(document)) {
+        return
+      }
+      send('textDocument/didClose', { textDocument: { uri: document.uri.toString() } })
+      diagnostics.delete(document.uri)
+    }),
+
+    // Completion, hover and formatting were implemented in the server and never wired up here,
+    // while the extension's own description promised all three.
+    vscode.languages.registerCompletionItemProvider(
+      selector,
+      {
+        provideCompletionItems(document, position) {
+          // A CompletionList, not a bare array — reading it as an array yields nothing at all,
+          // silently, which is the sort of bug that looks like "completion isn't implemented".
+          const list = send('textDocument/completion', {
+            textDocument: { uri: document.uri.toString() },
+            position: { line: position.line, character: position.character },
+          })
+          return (list?.items ?? []).map((item) => {
+            const completion = new vscode.CompletionItem(item.label)
+            completion.detail = item.detail
+            completion.documentation = item.documentation
+            if (item.kind !== undefined) {
+              completion.kind = item.kind - 1
+            }
+            return completion
+          })
+        },
+      },
+      ':',
+      '{',
+    ),
+
+    vscode.languages.registerHoverProvider(selector, {
+      provideHover(document, position) {
+        const hover = send('textDocument/hover', {
+          textDocument: { uri: document.uri.toString() },
+          position: { line: position.line, character: position.character },
+        })
+        if (!hover?.contents) {
+          return undefined
+        }
+        const markdown = new vscode.MarkdownString(
+          typeof hover.contents === 'string' ? hover.contents : hover.contents.value,
+        )
+        return new vscode.Hover(markdown, hover.range ? toRange(hover.range) : undefined)
+      },
+    }),
+
+    vscode.languages.registerDocumentFormattingEditProvider(selector, {
+      provideDocumentFormattingEdits(document) {
+        const edits = send('textDocument/formatting', {
+          textDocument: { uri: document.uri.toString() },
+          options: {},
+        })
+        return (edits ?? []).map((edit) =>
+          vscode.TextEdit.replace(toRange(edit.range), edit.newText),
+        )
+      },
+    }),
   )
 }
 
-module.exports = { activate, deactivate() {} }
+export function deactivate() {}

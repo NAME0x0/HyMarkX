@@ -137,11 +137,26 @@ jobs:
       - name: Verify tarball contents
         run: node scripts/check-tarballs.mjs
 
+      # The extension is published to a different marketplace by a different tool, and its
+      # bundle inlines the language server — so a change to the server can break the extension
+      # without touching anything the tests above cover. Packaging it here catches that.
+      #
+      # vsce reads the manifest from its working directory, so this has to run inside the
+      # extension; the output path is therefore relative to it.
+      - name: Build the VS Code extension
+        run: node editors/vscode/build.mjs
+
+      - name: Package the VS Code extension
+        run: npx --yes @vscode/vsce package --no-dependencies --out ../../.release/hymarkx-vscode.vsix
+        working-directory: editors/vscode
+
       - name: Upload tarballs
         uses: actions/upload-artifact@v4
         with:
           name: packages
-          path: .release/*.tgz
+          path: |
+            .release/*.tgz
+            .release/*.vsix
           retention-days: 7
 
   audit:

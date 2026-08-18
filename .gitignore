@@ -31,3 +31,7 @@ pnpm-debug.log*
 
 # Publish tarballs produced by `pnpm pack`; see docs/publishing.md.
 .release/
+
+# esbuild output for the VS Code extension; rebuilt by `pnpm build:extension`.
+editors/vscode/dist/
+*.vsix

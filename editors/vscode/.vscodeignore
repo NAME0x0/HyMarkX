@@ -1,0 +1,9 @@
+# Everything except the bundle and its metadata. The bundle already contains the language
+# server and its dependency tree, so shipping node_modules would duplicate all of it — and
+# `vsce package --no-dependencies` is what keeps that promise honest.
+src/**
+node_modules/**
+build.mjs
+.vscodeignore
+**/*.map
+**/tsconfig.json

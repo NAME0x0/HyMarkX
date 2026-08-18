@@ -80,3 +80,49 @@ warning in the README where npm renders it, not only in a file nobody clicks.
 - Install into a scratch project on Node 22 and run `hmx build` on a real document. The
   workspace resolves `@hymarkx/*` locally, so a broken published dependency graph is invisible
   from inside this repository.
+
+## The VS Code extension
+
+Published to a different marketplace, by a different tool, under a different identity from the
+npm packages. None of the npm setup carries over.
+
+### What it needs from you
+
+**A Microsoft account you will still control in ten years.** The Marketplace runs on Azure
+DevOps, and the same account has to own the Azure DevOps organisation, the token, and the
+publisher. Avoid a work or university account: if you lose that tenant you lose the publisher,
+and **the publisher ID can never be changed once created.**
+
+1. Create an Azure DevOps organisation if you have none.
+2. User settings → Personal access tokens → New Token.
+   - **Organization: All accessible organizations.** Scoped to a single organisation the token
+     fails in a way that reads like a permissions bug.
+   - Scopes: Custom defined → Show all scopes → **Marketplace → Manage**.
+3. Create the publisher at the Marketplace publisher management page, logged in with that same
+   account. `hymarkx` matches the npm scope.
+4. `npx @vscode/vsce login hymarkx`, then `pnpm --dir editors/vscode publish`.
+
+**Personal access tokens retire on 1 December 2026.** Microsoft's replacement for automated
+publishing is Entra ID with workload identity federation. A manual publish with a PAT works
+until then; do not build a pipeline on one.
+
+### What it needs from the repository
+
+`pnpm build:extension` bundles the extension and the language server into a single CommonJS
+file with esbuild. That bundle is the whole reason the extension is installable: it previously
+resolved its server at a path *inside this monorepo*, which worked from a checkout and would
+have failed for every real user.
+
+CI builds and packages the extension on every run, because the bundle inlines the language
+server — a change there can break the extension without touching anything the other suites
+cover.
+
+### Two traps
+
+- **vsce rejects SVG images in README.md** unless they come from a trusted badge provider. The
+  extension has its own README for this reason; the root one embeds `assets/evolution.svg` and
+  `assets/dependency-graph.svg` and would be refused after all the account setup is done.
+- **The extension is deliberately not a pnpm workspace member.** Its manifest `name` is the
+  Marketplace extension id, and `hymarkx` is already the npm installer package, so including it
+  would put two packages with one name in the workspace. esbuild resolves the server through a
+  build-time alias instead, and `vitest.config.mjs` states the same alias for tests.

@@ -1,17 +1,17 @@
 {
   "name": "hymarkx",
   "displayName": "HyMarkX",
-  "description": "Syntax highlighting, diagnostics, completion and formatting for HyMarkX (.hmx).",
-  "version": "0.0.0",
+  "description": "Language support for HyMarkX (.hmx): syntax highlighting, diagnostics, completion, hover and formatting.",
+  "version": "0.0.2",
   "license": "MIT OR Apache-2.0",
-  "private": true,
   "publisher": "hymarkx",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
     "Programming Languages",
-    "Formatters"
+    "Formatters",
+    "Linters"
   ],
   "repository": {
     "type": "git",
@@ -43,5 +43,23 @@
         "path": "./syntaxes/hymarkx.tmLanguage.json"
       }
     ]
+  },
+  "keywords": [
+    "hymarkx",
+    "hmx",
+    "markdown",
+    "commonmark",
+    "documentation",
+    "static site"
+  ],
+  "qna": false,
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "package": "npx @vscode/vsce package --no-dependencies",
+    "publish": "npx @vscode/vsce publish --no-dependencies"
   }
 }
