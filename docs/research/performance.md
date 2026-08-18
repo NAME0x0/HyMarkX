@@ -70,6 +70,21 @@ stays near 1.0 until the quadratic term dominates, and no threshold above the he
 changes that. Catching smaller regressions needs a quiet machine and a stored baseline, which
 is what `baseline.json` is for.
 
+## What CI can and cannot check
+
+The growth exponent runs everywhere. It compares two large measurements taken in the same run,
+and it survived a GitHub runner unchanged.
+
+The invariant-1 ratio does not. It compares two timings milliseconds apart, which needs a
+machine that is not being shared: on a GitHub runner it read **1.952** on an unchanged tree,
+against a threshold calibrated at 0.98–1.05 here. So the assertion is skipped on CI and the
+measured value is printed to the log instead.
+
+That is a real gap, not a tidy solution. A regression in this number would reach main and be
+caught only by the next local run or the next `baseline.json` refresh. The alternative — a
+threshold loose enough to survive a shared runner — would be about 3x, which no plausible
+regression would trip, so it would be a gate in name only.
+
 ## Why there are no millisecond thresholds
 
 The same unchanged tree measured 1460 and 2324 ns/byte on two runs an hour apart on the

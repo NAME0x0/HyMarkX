@@ -83,6 +83,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The evolution SVG is generated from real compiler output, so the asset check below
+      # needs a build.
+      - name: Compile
+        run: pnpm build
+
       - name: Check formatting
         run: pnpm format:check
 
