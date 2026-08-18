@@ -2,6 +2,13 @@
 
 **Markdown that grows into a web app — and stops growing when you stop asking.**
 
+[![npm](https://img.shields.io/npm/v/hymarkx?color=cb3837&label=npm)](https://www.npmjs.com/package/hymarkx)
+[![CI](https://github.com/NAME0x0/HyMarkX/actions/workflows/ci.yml/badge.svg)](https://github.com/NAME0x0/HyMarkX/actions/workflows/ci.yml)
+[![CommonMark](https://img.shields.io/badge/CommonMark-652%2F652-2ea44f)](tests/conformance/)
+[![GFM](https://img.shields.io/badge/GFM-40%2F40-2ea44f)](tests/conformance/)
+[![runtime](https://img.shields.io/badge/runtime-591%20B%20gzipped-blue)](docs/guides/interactivity.md)
+[![license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](LICENSE-MIT)
+
 `HyMarkX` (**HMX**, extension `.hmx`, CLI `hmx`) is a Markdown-compatible,
 progressively enhanced language for documents, websites, interfaces, and interactive
 web applications.
