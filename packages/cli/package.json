@@ -1,6 +1,6 @@
 {
   "name": "@hymarkx/cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Command-line interface for building and checking HyMarkX (HMX) documents.",
   "license": "MIT OR Apache-2.0",
   "publishConfig": {
@@ -21,6 +21,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./bin": {
+      "types": "./dist/bin.d.ts",
+      "import": "./dist/bin.js"
     }
   },
   "files": [

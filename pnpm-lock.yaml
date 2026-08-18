@@ -107,6 +107,12 @@ importers:
         specifier: workspace:*
         version: link:../parser
 
+  packages/hymarkx:
+    dependencies:
+      '@hymarkx/cli':
+        specifier: workspace:*
+        version: link:../cli
+
   packages/language-server:
     dependencies:
       '@hymarkx/ast':

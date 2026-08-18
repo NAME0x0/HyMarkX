@@ -28,13 +28,14 @@ const manifests = readdirSync(packagesDirectory, { withFileTypes: true })
 
 describe('publish readiness', () => {
   it('found every package', () => {
-    expect(manifests).toHaveLength(6)
+    expect(manifests).toHaveLength(7)
   })
 
   it.each(manifests.map(({ name }) => name))('%s declares the metadata npm shows', (name) => {
     const { manifest } = manifests.find((entry) => entry.name === name)
 
-    expect(manifest.name).toBe(`@hymarkx/${name}`)
+    // `hymarkx` is the unscoped installer users type; everything else is scoped.
+    expect(manifest.name).toBe(name === 'hymarkx' ? 'hymarkx' : `@hymarkx/${name}`)
     expect(manifest.description).toBeTruthy()
     expect(manifest.license).toBe('MIT OR Apache-2.0')
     expect(manifest.type).toBe('module')
@@ -55,19 +56,41 @@ describe('publish readiness', () => {
   it.each(manifests.map(({ name }) => name))('%s ships its build and its README', (name) => {
     const { manifest } = manifests.find((entry) => entry.name === name)
 
-    expect(manifest.files).toContain('dist')
+    // The installer has no build of its own: it is a bin shim plus a dependency.
+    expect(manifest.files).toContain(name === 'hymarkx' ? 'bin.js' : 'dist')
     // npm renders README.md as the package page. Without it the page is blank, which reads as
     // an abandoned package rather than a pre-release one.
     expect(manifest.files).toContain('README.md')
     expect(existsSync(`${packagesDirectory}${name}/README.md`)).toBe(true)
   })
 
-  it.each(manifests.map(({ name }) => name))('%s resolves types and its entry point', (name) => {
-    const { manifest } = manifests.find((entry) => entry.name === name)
-    const main = manifest.exports?.['.']
+  it.each(manifests.filter(({ name }) => name !== 'hymarkx').map(({ name }) => name))(
+    '%s resolves types and its entry point',
+    (name) => {
+      const { manifest } = manifests.find((entry) => entry.name === name)
+      const main = manifest.exports?.['.']
 
-    expect(main?.import).toMatch(/^\.\/dist\/.+\.js$/)
-    expect(main?.types).toMatch(/^\.\/dist\/.+\.d\.ts$/)
+      expect(main?.import).toMatch(/^\.\/dist\/.+\.js$/)
+      expect(main?.types).toMatch(/^\.\/dist\/.+\.d\.ts$/)
+    },
+  )
+
+  /**
+   * The installer package, which exists only because `hmx` is unobtainable as an npm name.
+   *
+   * Its whole job is that `npm install hymarkx` puts an `hmx` binary on the path, so the two
+   * things that can break it are the bin path not existing and the dependency it forwards to
+   * not being declared.
+   */
+  it('the hymarkx installer forwards to the CLI', () => {
+    const { manifest } = manifests.find((entry) => entry.name === 'hymarkx')
+
+    expect(manifest.bin).toEqual({ hmx: './bin.js' })
+    expect(existsSync(`${packagesDirectory}hymarkx/bin.js`)).toBe(true)
+    expect(manifest.dependencies?.['@hymarkx/cli']).toBeTruthy()
+    // The shim imports a subpath, so the CLI has to export it.
+    const cli = manifests.find((entry) => entry.name === 'cli').manifest
+    expect(cli.exports['./bin']?.import).toBe('./dist/bin.js')
   })
 
   // CI runs Node 22 and 24. Declaring a floor below what is tested would be a guess, and
@@ -109,6 +132,14 @@ describe('publish readiness', () => {
   // consumer has any use for.
   it.each(manifests.map(({ name }) => name))('%s does not ship build cache', (name) => {
     expect(existsSync(`${packagesDirectory}${name}/dist/tsconfig.tsbuildinfo`)).toBe(false)
+  })
+
+  // They are published together and depend on each other by exact version, so a mismatch ships
+  // a package whose dependency does not exist yet.
+  it('every package carries the same version', () => {
+    const versions = [...new Set(manifests.map(({ manifest }) => manifest.version))]
+
+    expect(versions).toHaveLength(1)
   })
 
   it('every package README states the pre-release warning', () => {
