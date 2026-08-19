@@ -2,7 +2,7 @@ import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
 import { watch } from 'node:fs'
 import { extname, join, relative, resolve, sep } from 'node:path'
-import { renderDiagnostics } from '@hymarkx/compiler'
+import { renderDiagnostics, renderDocument } from '@hymarkx/compiler'
 import type { CompileResult, TrustMode } from '@hymarkx/compiler'
 
 /** Minimal writer the dev server needs, matching the CLI environment. */
@@ -91,10 +91,17 @@ async function documentFor(root: string, urlPath: string): Promise<string | unde
   ])
 }
 
-function page(result: CompileResult): string {
-  const styles = result.css === '' ? '' : `<style>\n${result.css}</style>\n`
-  const scripts = result.js === '' ? '' : `<script>\n${result.js}</script>\n`
-  return `${styles}${result.html}${scripts}${RELOAD_CLIENT}`
+/**
+ * Serves the same document `hmx build` writes, so what you see while writing is what ships.
+ *
+ * Inlined rather than linked: the dev server has no sidecar files on disk to point at. The
+ * reload client rides inside the body, which keeps the served page a valid document too.
+ */
+function page(result: CompileResult, from: string): string {
+  return renderDocument(
+    { ...result, html: `${result.html}\n${RELOAD_CLIENT}` },
+    { from, inline: true },
+  ).html
 }
 
 /** Renders a compile failure as a readable page rather than a blank screen. */
@@ -143,7 +150,7 @@ export async function startDevServer(
             io.stderr.write(renderDiagnostics(result.diagnostics, result.source, { from }))
           }
           response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-          response.end(page(result))
+          response.end(page(result, from))
         } catch (error) {
           const detail = error instanceof Error ? error.message : String(error)
           response.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' })

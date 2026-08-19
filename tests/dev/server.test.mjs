@@ -54,6 +54,21 @@ describe('hmx dev server', () => {
     expect(await (await fetch(base + path)).text()).toContain(expected)
   })
 
+  /**
+   * What the dev server shows must be what `hmx build` writes, or the server is previewing a
+   * different artefact than the one that ships. It inlines rather than links because there are
+   * no sidecar files on disk to point at.
+   */
+  it('serves a complete document with the reload client inside the body', async () => {
+    const body = await (await fetch(base)).text()
+
+    expect(body.startsWith('<!doctype html>')).toBe(true)
+    expect(body).toContain('<meta charset="utf-8">')
+    expect(body).toContain('<title>')
+    expect(body.indexOf('<style>')).toBeLessThan(body.indexOf('</head>'))
+    expect(body.indexOf('__hmx/reload')).toBeLessThan(body.indexOf('</body>'))
+  })
+
   it('injects the reload client into every response', async () => {
     for (const path of ['/', '/other', '/missing']) {
       expect(await (await fetch(base + path)).text()).toContain('__hmx/reload')

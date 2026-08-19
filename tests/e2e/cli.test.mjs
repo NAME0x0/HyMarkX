@@ -59,7 +59,10 @@ describe('built hmx CLI', () => {
     expect(result.status).toBe(0)
     expect(result.stdout).toBe('')
     expect(result.stderr).toBe('0 errors, 0 warnings in 1 file\n')
-    expect(actual).toBe(expected)
+    // The committed example is the fragment the document now wraps, so this checks the body
+    // content survived intact rather than re-asserting a shell three other tests already cover.
+    expect(actual.startsWith('<!doctype html>')).toBe(true)
+    expect(actual).toContain(expected.trim())
     // A document with no interactivity gets no JavaScript file at all. This used to assert a
     // 0-byte file existed, which is the same promise expressed as a file somebody then has to
     // explain or deploy.
@@ -195,7 +198,11 @@ describe('built hmx CLI', () => {
     expect(css).not.toContain('.hmx-grid')
     expect(html).not.toContain('<style>')
     expect(stdout.status).toBe(0)
-    expect(stdout.stdout.startsWith('<style>\n:where(:root)')).toBe(true)
+    // Piped output is a self-contained document: nothing on disk to link at, so the stylesheet
+    // is inlined in the head rather than referenced.
+    expect(stdout.stdout.startsWith('<!doctype html>')).toBe(true)
+    expect(stdout.stdout).toContain('<style>\n:where(:root)')
+    expect(stdout.stdout.indexOf('<style>')).toBeLessThan(stdout.stdout.indexOf('</head>'))
     expect(stdout.stdout).toContain('<aside class="hmx-note')
     expect(stdout.stdout).not.toContain('<script')
   })
@@ -481,5 +488,38 @@ describe('built hmx CLI', () => {
     expect(result.status).toBe(1)
     expect(JSON.parse(result.stdout).diagnostics[0].code).toBe('HMX5003')
     expect(existsSync(join(collisionRoot, 'examples/hello-world/index.html'))).toBe(false)
+  })
+})
+
+/**
+ * `build` should produce something a browser can open.
+ *
+ * Until 0.0.4 it produced a fragment — no doctype, no head, no title — so every user had to
+ * hand-write a shell around it. `--fragment` keeps that available for embedding into a host page.
+ */
+describe('document output', () => {
+  it('builds a complete document by default and a fragment on request', () => {
+    const project = mkdtempSync(join(tmpdir(), 'hmx-document-'))
+    writeFileSync(join(project, 'index.hmx'), '---\ntitle: Page\n---\n\n# Hello\n', 'utf8')
+    const run = (...args) =>
+      spawnSync(process.execPath, [cliPath, 'build', 'index.hmx', '--out', 'dist', ...args], {
+        cwd: project,
+        encoding: 'utf8',
+      })
+
+    expect(run().status).toBe(0)
+    const document = readFileSync(join(project, 'dist', 'index.html'), 'utf8')
+
+    expect(document.startsWith('<!doctype html>')).toBe(true)
+    expect(document).toContain('<title>Page</title>')
+    expect(document).toContain('<h1>Hello</h1>')
+
+    expect(run('--fragment').status).toBe(0)
+    const fragment = readFileSync(join(project, 'dist', 'index.html'), 'utf8')
+
+    expect(fragment.startsWith('<!doctype html>')).toBe(false)
+    expect(fragment.trim()).toBe('<h1>Hello</h1>')
+
+    rmSync(project, { recursive: true, force: true })
   })
 })

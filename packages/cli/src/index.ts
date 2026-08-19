@@ -1,7 +1,13 @@
 import { lstat, mkdir, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises'
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { parseArgs } from 'node:util'
-import { compile, compileComponents, diagnosticOrigin, renderDiagnostic } from '@hymarkx/compiler'
+import {
+  compile,
+  compileComponents,
+  diagnosticOrigin,
+  renderDiagnostic,
+  renderDocument,
+} from '@hymarkx/compiler'
 import { format } from '@hymarkx/formatter'
 import { startDevServer } from './dev.js'
 import type {
@@ -12,7 +18,7 @@ import type {
 } from '@hymarkx/compiler'
 
 /** Current CLI package version. */
-export const VERSION = '0.0.3'
+export const VERSION = '0.0.4'
 
 /** Injectable CLI environment used by the binary and subprocess tests. */
 export interface CliIo {
@@ -60,6 +66,7 @@ Commands:
 Options:
   --out <dir>                 Output directory; use - for stdout
   --check                     fmt only: report rather than rewrite; exit 1 if changed
+  --fragment                  build only: emit an HTML fragment, not a whole document
   --trust document|app        Host-selected trust mode (default: document)
   --no-gfm                    Disable GFM extensions
   --json                      Print diagnostics as JSON
@@ -513,6 +520,7 @@ export async function runCli(
         gfm: { type: 'boolean', default: true },
         json: { type: 'boolean', default: false },
         check: { type: 'boolean', default: false },
+        fragment: { type: 'boolean', default: false },
       },
     })
   } catch (error) {
@@ -673,8 +681,11 @@ export async function runCli(
       from: input,
       gfm: parsed.values.gfm,
       components: authored.registry,
-      inlineCss: command === 'build' && parsed.values.out === '-',
-      inlineJs: command === 'build' && parsed.values.out === '-',
+      // Only the fragment path asks the compiler to inline. When a document is being assembled,
+      // `renderDocument` places the style and script itself — letting both do it emitted two
+      // copies of the runtime into piped output.
+      inlineCss: command === 'build' && parsed.values.out === '-' && parsed.values.fragment,
+      inlineJs: command === 'build' && parsed.values.out === '-' && parsed.values.fragment,
     })
     records.push(
       ...result.diagnostics.map((diagnostic) => diagnosticRecord(diagnostic, result.source, input)),
@@ -684,7 +695,12 @@ export async function runCli(
       continue
     }
     if (parsed.values.out === '-') {
-      io.stdout.write(result.html)
+      // Nothing on disk to link at, so a piped page inlines its assets and stays self-contained.
+      const piped = parsed.values.fragment
+        ? { html: result.html, diagnostics: [] }
+        : renderDocument(result, { from: input, inline: true })
+      records.push(...piped.diagnostics.map((d) => diagnosticRecord(d, result.source, input)))
+      io.stdout.write(piped.html)
       continue
     }
     if (target === undefined) {
@@ -717,7 +733,16 @@ export async function runCli(
         })
         continue
       }
-      await writeFile(target.path, result.html, 'utf8')
+      // A document by default: `build` should produce something a browser can open. Sidecars are
+      // linked by bare filename because they are written beside this file.
+      const rendered = parsed.values.fragment
+        ? { html: result.html, diagnostics: [] }
+        : renderDocument(result, {
+            from: input,
+            assetName: basename(target.path, extname(target.path)),
+          })
+      records.push(...rendered.diagnostics.map((d) => diagnosticRecord(d, result.source, input)))
+      await writeFile(target.path, rendered.html, 'utf8')
       await writeSidecar(target.cssPath, result.css)
       await writeSidecar(target.jsPath, result.js)
     } catch (error) {

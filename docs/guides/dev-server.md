@@ -55,3 +55,12 @@ reachable from a network.
 
 Warnings and errors print to the terminal as you browse. A document that fails to compile
 serves a readable error page rather than a blank screen, and reloads when you fix it.
+
+## What it serves
+
+The same complete HTML document `hmx build` writes — doctype, `<head>`, title and all — with a
+live-reload client appended inside the body. The CSS and JavaScript are inlined rather than
+linked, because the dev server has no sidecar files on disk to point at.
+
+That equivalence is the point: a preview that assembled the page differently from the build
+would be previewing a different artefact than the one that ships.

@@ -150,7 +150,9 @@ for an honest account of what each does better and what HMX is actually claiming
 ```sh
 npm install -g hymarkx
 
-hmx build page.hmx --out -    # compile to stdout
+hmx build page.hmx            # a complete HTML document, plus CSS and JS if used
+hmx build page.hmx --fragment # just the fragment, to embed in an existing page
+hmx build page.hmx --out -    # compile to stdout, assets inlined
 hmx check page.hmx            # diagnostics only
 hmx fmt page.hmx --check      # formatting, CI mode
 hmx dev .                     # dev server with live reload

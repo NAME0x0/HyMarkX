@@ -294,6 +294,15 @@ The default backend emits HTML5. Rules:
   degradation over data loss.
 - Output MUST be deterministic: identical input plus identical options produces
   byte-identical output.
+
+A processor MAY emit a complete HTML document rather than a fragment. When it does:
+
+- The document MUST begin with `<!doctype html>` and MUST declare `charset=utf-8`.
+- `<title>` MUST be present, taken from frontmatter `title`, else the first heading's text,
+  else the input's base name. HTML requires it, so a processor MUST NOT omit it.
+- `lang` MUST come from frontmatter `lang` when it is a valid BCP-47-shaped tag, and MUST fall
+  back to `en` with `HMX2023` when it is not.
+- A stylesheet or script reference MUST be omitted when the corresponding output is empty.
 - The emitter MUST NOT include an HMX JavaScript runtime for documents that use no
   interactive construct.
 

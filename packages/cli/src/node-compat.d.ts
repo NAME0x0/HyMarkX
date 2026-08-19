@@ -48,6 +48,7 @@ declare module 'node:util' {
       readonly gfm: boolean
       readonly json: boolean
       readonly check: boolean
+      readonly fragment: boolean
     }
     readonly positionals: string[]
   }
