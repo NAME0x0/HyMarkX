@@ -90,7 +90,16 @@ as **0.0.4** and is stated plainly in the release notes rather than buried. It i
 default: the command is called `build`, and what it built until now could not be opened in a
 browser without someone hand-writing a shell around it.
 
-`hmx dev` serves the same document, so what you see while writing is what gets built.
+`hmx dev` serves the same document, so what you see while writing is what gets built. It keeps
+inlining the CSS and JS it already inlines — the dev server has no sidecar files to link — and
+keeps appending its live-reload client inside the body.
+
+`--out -` writes the document to stdout. With no files on disk to reference, that mode inlines
+the CSS and JS rather than linking them, so a piped page is self-contained.
+
+Stylesheet and script hrefs are bare filenames, not paths. The CLI already writes each sidecar
+beside its HTML and preserves the input's relative directory under `--out`, so `index.css` next
+to `index.html` resolves correctly at any depth without the emitter knowing where it sits.
 
 ## Security
 
@@ -109,9 +118,10 @@ a BCP-47 shape (letters, digits and hyphens, bounded length) and falls back to `
 not match, because a language tag is a constrained vocabulary rather than free text and
 validating is cheaper than trusting the escaper.
 
-A new diagnostic is needed for a rejected `lang`. It takes the next free code in the validation
-range and must be registered in `SPEC.md` Appendix B, which `tests/spec/diagnostic-codes.test.mjs`
-enforces.
+A rejected `lang` reports **`HMX2023`**, severity **warning** — it sits next to the existing
+frontmatter codes `HMX2020`–`HMX2022`, and it is a warning rather than an error because the
+document still renders correctly with the `en` fallback. Registered in `SPEC.md` Appendix B,
+which `tests/spec/diagnostic-codes.test.mjs` enforces in both directions.
 
 `docs/security-audit.md` gains these positions under T1 and T3, with the tests that cover them.
 
@@ -137,6 +147,9 @@ Every one of these must fail if the behaviour it covers is removed:
   which is the existing mechanism and is enough to find out whether it is sufficient.
 - No `<head>` extensibility — a document cannot add arbitrary tags. If the site needs one, that
   requirement will arrive with evidence attached.
+- No Open Graph or Twitter card tags, no favicon link, no canonical URL, no generator meta. All
+  are defensible and none is needed for a valid page. The site will say which of them it
+  actually wants, and that is a better basis than guessing now.
 - No multi-page awareness: no sitemap, no cross-page links, no collections. Out of scope.
 
 ## Why this is worth doing before the site
