@@ -1,0 +1,9 @@
+::state{count=14302}
+
+:::metric[Users]
+{{ count }}
+:::
+
+:::button{on-click="count = count + 1"}
+Add user
+:::

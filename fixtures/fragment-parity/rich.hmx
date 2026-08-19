@@ -1,0 +1,26 @@
+---
+title: Fragment parity
+description: Compared across versions
+lang: en-GB
+---
+
+# Heading
+
+Prose with *emphasis*, `code`, and a [link](https://example.test/).
+
+:::note{type=info}
+A note with :badge[shipped]{kind=success} inline.
+:::
+
+::::grid{columns=2}
+:::card{title="One"}
+First.
+:::
+:::card{title="Two"}
+Second.
+:::
+::::
+
+| a | b |
+|---|--:|
+| 1 | 2 |
