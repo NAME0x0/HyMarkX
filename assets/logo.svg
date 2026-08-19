@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="HyMarkX">
-  <rect width="100" height="100" rx="0" fill="#172033"/>
-  <g fill="none" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 23,48 V 84 M 23,74 Q 23,66 30,66 Q 37,66 37,74 V 84" stroke="#f8fafc"/>
-    <path d="M 45,84 V 74 Q 45,66 51,66 Q 57,66 57,74 V 84 M 57,74 Q 57,66 63,66 Q 69,66 69,74 V 84" stroke="#f8fafc"/>
-    <path d="M 77,66 L 90,84 M 90,66 L 77,84" stroke="#2563eb"/>
-  </g>
+<rect width="100" height="100" rx="0" fill="#172033"/>
+  <path transform="translate(33.23 88) scale(0.01660 -0.01660)" d="M778 0V640Q778 729 738.5 777Q699 825 625.7 825Q422 825 422 546L360 868H448Q463 975 521 1027.5Q579 1080 697 1080Q865 1080 957 978Q1049 876 1049 690V0ZM151 0V1500H422V0Z" fill="#f8fafc"/>
+  <path transform="translate(53.16 88) scale(0.01660 -0.01660)" d="M839 0V718Q839 828 775 828Q703 828 703 709L631 928H721Q730 999 776.5 1039.5Q823 1080 899 1080Q1006 1080 1055.5 1021Q1105 962 1105 830V0ZM95 0V1060H338L362 836V0ZM502 0V738Q502 828 438 828Q362 828 362 709L300 928H376Q398 1080 537 1080Q614.4 1080 658.7 1023Q703 966 703 850V0Z" fill="#f8fafc"/>
+  <path transform="translate(73.08 88) scale(0.01660 -0.01660)" d="M81 0 520 592 796 1060H1119L664 450L404 0ZM796 0 524 450 81 1060H404L680 592L1119 0Z" fill="#2563eb"/>
 </svg>
