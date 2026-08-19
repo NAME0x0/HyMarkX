@@ -71,6 +71,11 @@ Normative rules:
   fence, and the processor SHOULD recover by closing it at end of document.
 - A text directive with a name but neither label nor attributes (`:name:`) MUST NOT be
   recognized as a directive, to avoid colliding with `:emoji:` shortcodes.
+- A text directive MUST NOT be recognized when the character immediately preceding its `:` is
+  alphanumeric (ADR-0017). Start of line, whitespace, and punctuation all still open one. This
+  keeps `12:30`, `3:4`, and `a:b` as prose: without it, `:30` parses as a directive, finds no
+  component, and — having no label to render — destroys the text. Leaf and container directives
+  are unaffected, being block constructs with nothing before them.
 
 ### 4.2 Attributes *(Phase 2)*
 

@@ -116,3 +116,47 @@ describe('a failed directive attempt leaves the rest of the line alone', () => {
     },
   )
 })
+
+/**
+ * ADR-0017: a text directive may not follow an alphanumeric character.
+ *
+ * `12:30` used to parse `:30` as a directive, match no component, and — having no label to
+ * render — delete the time. The author had written no HMX at all, which made it a breach of the
+ * compatibility guarantee rather than a surprising-but-defensible parse.
+ */
+describe('a colon attached to a word is not a directive', () => {
+  it.each([
+    ['The meeting is at 12:30 tonight.\n', 'a time'],
+    ['Ratio 3:4 across the board.\n', 'a ratio'],
+    ['Use a:b as the key.\n', 'a namespaced key'],
+    ['Trains leave at 09:15, 12:30 and 18:45.\n', 'several times in one line'],
+    ['Scores were 3:4, 5:2 and 1:0.\n', 'several ratios'],
+  ])('leaves %j alone — %s', (source) => {
+    const result = compile(source, { trust: 'app' })
+
+    expect(normalize(result.html)).toBe(normalize(referenceHtml(source)))
+    // The old behaviour reported an unknown component the author never referenced.
+    expect(result.diagnostics).toEqual([])
+  })
+
+  // The rule is about what the colon is attached to, not about forbidding the bare form.
+  it.each([
+    [':badge[ok]{kind=success}\n', 'at the start of a line'],
+    ['Status: :badge[ok]{kind=success}\n', 'after a space'],
+    ['(:badge[ok]{kind=success})\n', 'after punctuation'],
+    ['- :badge[ok]{kind=success}\n', 'after a list marker'],
+  ])('still recognises a text directive %s', (source) => {
+    const result = compile(source, { trust: 'app' })
+
+    expect(result.html).toContain('hmx-badge')
+    expect(result.diagnostics).toEqual([])
+  })
+
+  // Block directives begin a line, so there is never a preceding character to test.
+  it('leaves leaf and container directives untouched', () => {
+    const container = compile(':::note{type=info}\nbody\n:::\n', { trust: 'app' })
+
+    expect(container.html).toContain('hmx-note')
+    expect(container.diagnostics).toEqual([])
+  })
+})

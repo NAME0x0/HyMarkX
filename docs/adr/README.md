@@ -22,6 +22,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0014](0014-state-and-events.md) | Component-local state, compiled reactivity, `@` family rejected | Accepted |
 | [0015](0015-developer-experience.md) | Conservative formatter, full-reparse language server | Accepted |
 | [0016](0016-foreign-components.md) | Foreign components are framework-agnostic islands, never run at build time | Accepted |
+| [0017](0017-text-directive-flanking.md) | A text directive may not follow an alphanumeric character | Accepted |
 
 ## Decisions still open
 

@@ -164,8 +164,11 @@ Done so far:
   incremental build cache and no licence text, and packages had no README, so every npm page
   would have been blank.
 
-Still open: the publish itself (see below), and one syntax decision the compatibility suite
-surfaced (`12:30` in prose loses `:30` — see `BACKLOG.md` P2).
+- **The `12:30` collision**, surfaced by the compatibility suite and closed by
+  [ADR-0017](docs/adr/0017-text-directive-flanking.md): a text directive is no longer recognised
+  when the character before its `:` is alphanumeric, so a time in prose stays a time.
+
+Phase 9 is complete.
 
 Publishing checklist: [`docs/publishing.md`](docs/publishing.md). Everything a test can hold
 is held by `tests/spec/publish-readiness.test.mjs`; what remains needs a person — removing

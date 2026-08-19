@@ -124,6 +124,20 @@ function guardDirectiveName(construct: Construct, type: DirectiveType): Construc
   }
 }
 
+/**
+ * ASCII letters and digits only.
+ *
+ * Deliberately not `\w` (which admits `_`) and not a Unicode property (which would make
+ * `café:badge[x]` behave differently from `cafe:badge[x]`). The rule exists to stop a colon
+ * gluing itself to a word, and directive names are ASCII anyway.
+ */
+function isAlphanumeric(code: number | null): boolean {
+  return (
+    code !== null &&
+    ((code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122))
+  )
+}
+
 /** Creates the upstream directive tokenizer with CommonMark angle-bracket precedence. */
 export function directiveTokenizer(): ReturnType<typeof directive> {
   const extension = directive()
@@ -154,6 +168,19 @@ export function directiveTokenizer(): ReturnType<typeof directive> {
         ...guardedTextColon,
         previous(code) {
           if (guardedTextColon.previous?.call(this, code) === false) {
+            return false
+          }
+
+          // A text directive may not follow an alphanumeric character (SPEC §4.1, ADR-0017).
+          //
+          // Without this, `12:30` parses `:30` as a directive. It matches no component, and a
+          // bare text directive has no label to fall back on, so the time is deleted — which
+          // breaks the compatibility guarantee for an author who wrote no HMX at all.
+          //
+          // A flanking rule rather than a syntax restriction: `:name` stays legal everywhere a
+          // colon is not already attached to a word, which is everywhere anyone would write one.
+          // CommonMark reasons the same way about emphasis delimiters.
+          if (isAlphanumeric(code)) {
             return false
           }
 
