@@ -111,6 +111,8 @@ export {
 export type { AuthoredComponent, CompileComponentsResult } from './components/authored.js'
 export type { DiagnosticOrigin } from './diagnostic-origin.js'
 export type { RenderDiagnosticOptions } from './diagnostics/render.js'
+export { renderDocument } from './emit/document.js'
+export type { DocumentOptions, DocumentResult } from './emit/document.js'
 export type { Backend, EmitResult } from './emit/backend.js'
 export type {
   CompileOptions,

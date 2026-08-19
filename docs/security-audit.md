@@ -44,6 +44,7 @@ mode is filtered against an element and attribute allowlist rather than a blockl
 | `tests/security/security.test.mjs` | `escapes allowed raw-HTML attribute values` |
 | `tests/security/security.test.mjs` | `escapes generated Markdown attribute values` |
 | `tests/fuzz/pipeline.test.mjs` | `never emits a script tag or dangerous scheme in document trust mode` |
+| `tests/security/security.test.mjs` | `cannot break out of the title element` |
 
 The fuzz case matters more than the unit tests here: the unit tests check the inputs somebody
 thought of, and 800 generated documents check the ones nobody did.
@@ -73,6 +74,14 @@ An expression result breaking out of the attribute it was interpolated into.
 |---|---|
 | `packages/compiler/test/expressions.test.ts` | `HTML-escapes interpolation results` |
 | `tests/security/security.test.mjs` | `escapes generated Markdown attribute values` |
+| `tests/security/security.test.mjs` | `cannot break out of the description attribute` |
+| `tests/security/security.test.mjs` | `cannot inject through the language attribute` |
+
+Document emission (0.0.4) routes frontmatter into `<title>` text, a `<meta content>` attribute
+and the `lang` attribute. `lang` is additionally validated against a BCP-47 shape rather than
+only escaped, because a language tag is a constrained vocabulary and escaping alone would leave a
+safe attribute containing nonsense. Each of the three tests above was confirmed to fail with its
+protection removed.
 
 ### T4 — Privilege escalation
 

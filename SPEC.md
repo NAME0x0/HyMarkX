@@ -160,6 +160,12 @@ undisturbed.
 A processor MUST parse YAML with entity expansion bounded, merge keys disabled, custom tags
 disabled, and string-only keys. See `SECURITY.md` threats T11–T13.
 
+The reserved keys `title`, `description`, and `lang` supply a document's `<title>`, its
+description meta, and its language when a processor emits a complete HTML document (§5). `lang`
+MUST be validated as a BCP-47-shaped tag and MUST fall back to `en` with `HMX2023` when it is
+not — a language tag is a constrained vocabulary, and escaping alone would leave a safe attribute
+containing nonsense.
+
 Reserved keys at this version: `title`, `description`, `layout`, `lang`, `draft`.
 Unknown keys are preserved and exposed to backends; they MUST NOT error.
 
@@ -373,6 +379,7 @@ different condition, and a retired code stays listed rather than being deleted.
 | `HMX2020` | error | Frontmatter is not a mapping |
 | `HMX2021` | error | Frontmatter is not valid YAML, including refusal to expand aliases |
 | `HMX2022` | error | Reserved frontmatter key holds the wrong type |
+| `HMX2023` | warning | Frontmatter `lang` is not a valid language tag; `en` is used instead |
 | `HMX2030` | error | Scoped CSS does not parse |
 | `HMX2031` | warning | Scoped style has no emitted elements to scope |
 | `HMX2040` | error | Expression reads an identifier that is not in scope |

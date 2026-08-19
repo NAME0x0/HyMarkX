@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { runCli } from '../../packages/cli/src/index.js'
+import { renderDocument } from '../../packages/compiler/src/emit/document.js'
 import { compile } from '../../packages/compiler/src/index.js'
 
 const temporaryDirectories = []
@@ -211,5 +212,36 @@ describe('CLI path confinement', () => {
     expect(exitCode).toBe(1)
     expect(payload.diagnostics.map((diagnostic) => diagnostic.code)).toContain('HMX3006')
     expect(stderr).toEqual([])
+  })
+})
+
+/**
+ * Document emission routes frontmatter into three positions it never reached before: `<title>`
+ * text, a `<meta content>` attribute, and the `lang` attribute. Frontmatter is
+ * document-controlled data, so these are threat T1 and T3 surface.
+ */
+describe('document emission escaping', () => {
+  it('cannot break out of the title element', () => {
+    const source = '---\ntitle: "</title><script>alert(1)</script>"\n---\n\n# H\n'
+    const { html } = renderDocument(compile(source, { trust: 'app' }))
+
+    expect(html).not.toContain('<script>alert(1)</script>')
+    expect(html).toContain('&lt;/title&gt;')
+  })
+
+  it('cannot break out of the description attribute', () => {
+    const source = '---\ndescription: \'x" onload="alert(1)\'\n---\n\n# H\n'
+    const { html } = renderDocument(compile(source, { trust: 'app' }))
+
+    expect(html).not.toContain('onload="alert(1)"')
+    expect(html).toContain('&quot;')
+  })
+
+  it('cannot inject through the language attribute', () => {
+    const source = '---\nlang: \'en" onload="alert(1)\'\n---\n\n# H\n'
+    const { html } = renderDocument(compile(source, { trust: 'app' }))
+
+    expect(html).toContain('<html lang="en">')
+    expect(html).not.toContain('onload')
   })
 })
