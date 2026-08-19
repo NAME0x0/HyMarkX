@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="" width="96" height="96">
+</p>
+
 # HyMarkX
 
 **Markdown that grows into a web app — and stops growing when you stop asking.**

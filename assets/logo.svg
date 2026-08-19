@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="HyMarkX">
+  <rect width="100" height="100" rx="0" fill="#172033"/>
+  <g fill="none" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 23,48 V 84 M 23,74 Q 23,66 30,66 Q 37,66 37,74 V 84" stroke="#f8fafc"/>
+    <path d="M 45,84 V 74 Q 45,66 51,66 Q 57,66 57,74 V 84 M 57,74 Q 57,66 63,66 Q 69,66 69,74 V 84" stroke="#f8fafc"/>
+    <path d="M 77,66 L 90,84 M 90,66 L 77,84" stroke="#2563eb"/>
+  </g>
+</svg>

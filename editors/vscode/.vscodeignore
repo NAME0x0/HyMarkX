@@ -7,3 +7,5 @@ build.mjs
 .vscodeignore
 **/*.map
 **/tsconfig.json
+
+# icon.png is referenced by the manifest and must stay in the package.

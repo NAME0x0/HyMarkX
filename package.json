@@ -16,7 +16,7 @@
     "format:check": "prettier --check .",
     "check": "pnpm build && pnpm lint && pnpm typecheck && pnpm test && node scripts/check-boundaries.mjs",
     "release:pack": "node scripts/pack.mjs",
-    "assets": "node scripts/generate-evolution-svg.mjs && node scripts/generate-dependency-graph.mjs",
+    "assets": "node scripts/generate-evolution-svg.mjs && node scripts/generate-dependency-graph.mjs && node scripts/generate-logo.mjs",
     "build:extension": "node editors/vscode/build.mjs"
   },
   "devDependencies": {

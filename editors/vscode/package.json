@@ -61,5 +61,10 @@
     "watch": "node build.mjs --watch",
     "package": "npx @vscode/vsce package --no-dependencies",
     "publish": "npx @vscode/vsce publish --no-dependencies"
+  },
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#172033",
+    "theme": "dark"
   }
 }
