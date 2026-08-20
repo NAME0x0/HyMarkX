@@ -313,7 +313,24 @@ export function directiveAttributes(types: AttributeTokenTypes, disallowEol: boo
       }
 
       const valueQuoted: State = (code) => {
+        // ADR-0018: a backslash escapes a backslash, a double quote or a single quote, so an
+        // escaped delimiter does not end the value. Anything else after a backslash stays
+        // literal, which is what keeps a Windows path in an attribute working.
+        if (code === 92) {
+          effects.consume(code)
+          return valueQuotedEscape
+        }
         if (code === marker || code === null || markdownLineEnding(code)) {
+          effects.exit(types.valueData)
+          return valueQuotedBetween(code)
+        }
+        effects.consume(code)
+        return valueQuoted
+      }
+
+      const valueQuotedEscape: State = (code) => {
+        if (code === null || markdownLineEnding(code)) {
+          // A backslash at the end of the line escapes nothing; fall back to the normal rules.
           effects.exit(types.valueData)
           return valueQuotedBetween(code)
         }

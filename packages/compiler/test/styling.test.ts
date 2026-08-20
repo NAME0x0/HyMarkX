@@ -301,7 +301,7 @@ describe('scoped style identity', () => {
       { trust: 'app', from: 'page.hmx' },
     )
 
-    const scopeOf = (css) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
+    const scopeOf = (css: string) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
 
     expect(scopeOf(before.css)).toBeDefined()
     expect(scopeOf(after.css)).toBe(scopeOf(before.css))
@@ -317,7 +317,7 @@ describe('scoped style identity', () => {
       trust: 'app',
       from: 'two.hmx',
     })
-    const scopeOf = (css) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
+    const scopeOf = (css: string) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
 
     expect(scopeOf(one.css)).not.toBe(scopeOf(two.css))
   })
@@ -330,7 +330,7 @@ describe('scoped style identity', () => {
   it('still separates anonymous documents by content', () => {
     const one = compile('<style scoped>\n.a { color: red }\n</style>\n\n# A\n', { trust: 'app' })
     const two = compile('<style scoped>\n.a { color: blue }\n</style>\n\n# B\n', { trust: 'app' })
-    const scopeOf = (css) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
+    const scopeOf = (css: string) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
 
     expect(scopeOf(one.css)).not.toBe(scopeOf(two.css))
   })

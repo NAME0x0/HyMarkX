@@ -97,6 +97,11 @@ Attribute syntax follows HTML conventions inside `{}`:
   rather than silently rendered as prose.
 - Unknown attributes on a known component MUST produce warning `HMX2001` — never a
   silent drop.
+- Inside a quoted value, a backslash followed by a backslash, a double quote, or a single quote
+  MUST produce that character literally (ADR-0018). A backslash followed by anything else is
+  itself, literally, so a Windows path in an attribute is unchanged. Without escapes a value
+  cannot contain its own delimiter, and a value containing both quote characters cannot be
+  written at all. Unquoted values are unaffected: they cannot contain a quote character.
 
 ### 4.2.1 Components and schemas *(Phase 2)*
 

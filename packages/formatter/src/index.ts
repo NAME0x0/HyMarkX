@@ -41,8 +41,40 @@ function formatAttribute(attribute: Attribute, source: string): string {
   if (attribute.value === null) {
     return attribute.name
   }
-  const quote = attribute.value.includes('"') ? "'" : '"'
-  return `${attribute.name}=${quote}${attribute.value}${quote}`
+  return `${attribute.name}="${escapeAttributeValue(attribute.value)}"`
+}
+
+/**
+ * Serialises a value into double quotes, escaping per ADR-0018.
+ *
+ * The previous version chose a quote character based on what the value contained and emitted the
+ * value raw. That worked while a value could hold only one kind of quote; once both became
+ * expressible it produced `'he said 'hi' and "bye"'`, which is broken markup — the formatter
+ * silently corrupting a document it was asked to tidy.
+ *
+ * One canonical quote is what a formatter should pick anyway. The AST records the decoded value
+ * and not how it was written, so preserving the author's original quoting is not possible today;
+ * normalising is honest, and `"` is the more common choice.
+ *
+ * Backslashes are escaped only where they would otherwise be read as an escape — before a quote,
+ * before another backslash, or at the end of the value. A blanket rule would rewrite every
+ * Windows path into a doubled-backslash version that means the same thing and reads worse.
+ */
+function escapeAttributeValue(value: string): string {
+  let escaped = ''
+  for (let index = 0; index < value.length; index += 1) {
+    const character = value[index] as string
+    const next = value[index + 1]
+    if (
+      character === '\\' &&
+      (next === undefined || next === '\\' || next === '"' || next === "'")
+    ) {
+      escaped += '\\\\'
+      continue
+    }
+    escaped += character === '"' ? '\\"' : character
+  }
+  return escaped
 }
 
 /**

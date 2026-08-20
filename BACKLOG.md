@@ -34,11 +34,6 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 *The first three were found by the HMX-P01 interactivity prototype. All are bounded design
 gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
 
-- **Attribute values cannot contain escaped quotes.** `on-click="last = \"Byron\""` fails to
-  parse — the backslash-escaped quote ends the attribute and the block degrades to prose
-  with `HMX1011`. Single quotes work as a workaround. String literals inside event handlers
-  are common enough that this needs deciding before Phase 4 syntax is settled; it is
-  evidence for that decision, not merely a bug.
 - **The AST records decoded attribute values but not how they were written.** Distinguishing
   `value=1` from `value="1"` currently requires re-reading the source through the
   attribute's spans. It works and stays AST-driven, but the expression phase would be

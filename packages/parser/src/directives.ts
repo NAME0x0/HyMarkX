@@ -221,6 +221,21 @@ declare module 'mdast-util-from-markdown' {
   }
 }
 
+/**
+ * Resolves ADR-0018 escapes in a quoted attribute value.
+ *
+ * Only a backslash, a double quote and a single quote are escapable. A backslash before anything
+ * else is literal, which is what keeps a Windows path working in an attribute — the alternative,
+ * a general rule where a backslash before any character yields that character, would have
+ * silently rewritten every such path.
+ *
+ * Runs before `decodeString`, so character references are still resolved afterwards and this
+ * rule stays independent of them.
+ */
+function resolveValueEscapes(value: string): string {
+  return value.replace(/\\([\\"'])/g, '$1')
+}
+
 function tokenSpan(token: Token, positions: SourcePositions): Span {
   return {
     start: positions.pointAt(token.start.offset),
@@ -471,7 +486,7 @@ export function directiveFromMarkdown(
       pending.value = serialized.slice(1, -1).trim()
       pending.valueSpan = offsetSpan(token.start.offset + 1, token.end.offset - 1, positions)
     } else {
-      pending.value = decodeString(serialized)
+      pending.value = decodeString(pending.quoted ? resolveValueEscapes(serialized) : serialized)
       pending.valueSpan = tokenSpan(token, positions)
     }
   }
