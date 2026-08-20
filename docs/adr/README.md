@@ -23,6 +23,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0015](0015-developer-experience.md) | Conservative formatter, full-reparse language server | Accepted |
 | [0016](0016-foreign-components.md) | Foreign components are framework-agnostic islands, never run at build time | Accepted |
 | [0017](0017-text-directive-flanking.md) | A text directive may not follow an alphanumeric character | Accepted |
+| [0018](0018-attribute-value-escapes.md) | Backslash escapes quotes inside attribute values | Accepted |
 
 ## Decisions still open
 
