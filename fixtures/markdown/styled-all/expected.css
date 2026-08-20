@@ -89,19 +89,19 @@
 :where(.hmx-badge-danger) { --hmx-status-color: var(--hmx-color-danger); }
 :where(.hmx-badge-success) { --hmx-status-color: var(--hmx-color-success); }
 
-.dashboard > .hmx-card[data-hmx-s-7afece63]:hover,
-.hmx-note[data-hmx-s-7afece63]::before {
+.dashboard > .hmx-card[data-hmx-s-ce57cbf6]:hover,
+.hmx-note[data-hmx-s-ce57cbf6]::before {
   outline-color: var(--hmx-color-info);
 }
 @media (min-width: 48rem) {
-  .dashboard[data-hmx-s-7afece63] { align-items: start; }
+  .dashboard[data-hmx-s-ce57cbf6] { align-items: start; }
 }
 @supports (text-wrap: balance) {
-  .hmx-card-title[data-hmx-s-7afece63] { text-wrap: balance; }
+  .hmx-card-title[data-hmx-s-ce57cbf6] { text-wrap: balance; }
 }
 @keyframes reveal {
   from { opacity: 0; }
   50% { opacity: 0.5; }
   to { opacity: 1; }
 }
-body .dashboard[data-hmx-s-7afece63] { margin-inline: auto; }
+body .dashboard[data-hmx-s-ce57cbf6] { margin-inline: auto; }

@@ -283,3 +283,55 @@ code
     expect(result.css).toContain('.hmx-note')
   })
 })
+
+/**
+ * A scope attribute names *which document* a style block belongs to, not what the document said
+ * at the time. Hashing the source meant a whitespace-only edit renamed every scope attribute and
+ * every selector that referenced it, so a reformat produced churn across the emitted CSS and
+ * HTML for a change that altered nothing.
+ */
+describe('scoped style identity', () => {
+  it('survives an edit that does not touch the styles', () => {
+    const before = compile('<style scoped>\n.a { color: red }\n</style>\n\n# Title\n\nProse.\n', {
+      trust: 'app',
+      from: 'page.hmx',
+    })
+    const after = compile(
+      '<style scoped>\n.a { color: red }\n</style>\n\n# Title\n\nProse, edited.\n',
+      { trust: 'app', from: 'page.hmx' },
+    )
+
+    const scopeOf = (css) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
+
+    expect(scopeOf(before.css)).toBeDefined()
+    expect(scopeOf(after.css)).toBe(scopeOf(before.css))
+  })
+
+  // Different documents must never share a scope, or one page's styles reach another's elements.
+  it('differs between documents', () => {
+    const one = compile('<style scoped>\n.a { color: red }\n</style>\n\n# A\n', {
+      trust: 'app',
+      from: 'one.hmx',
+    })
+    const two = compile('<style scoped>\n.a { color: red }\n</style>\n\n# A\n', {
+      trust: 'app',
+      from: 'two.hmx',
+    })
+    const scopeOf = (css) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
+
+    expect(scopeOf(one.css)).not.toBe(scopeOf(two.css))
+  })
+
+  /**
+   * With no filename there is nothing else to distinguish two documents, so the content stays in
+   * the hash. Anonymous compiles are embedding cases where output may be concatenated, and a
+   * shared scope attribute would leak one document's styles onto another's elements.
+   */
+  it('still separates anonymous documents by content', () => {
+    const one = compile('<style scoped>\n.a { color: red }\n</style>\n\n# A\n', { trust: 'app' })
+    const two = compile('<style scoped>\n.a { color: blue }\n</style>\n\n# B\n', { trust: 'app' })
+    const scopeOf = (css) => /data-hmx-s-[a-z0-9]+/.exec(css)?.[0]
+
+    expect(scopeOf(one.css)).not.toBe(scopeOf(two.css))
+  })
+})

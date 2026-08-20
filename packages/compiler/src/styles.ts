@@ -345,9 +345,19 @@ export function prepareStyles(
     const blocks = collectStyleBlocks(document)
     omittedNodes.set(document, new Set(blocks.map((block) => block.node)))
     for (const block of blocks) {
-      const attributeName = block.scoped
-        ? `data-hmx-s-${hashScope(`${options.from ?? ''}\0${source}\0${block.index}`)}`
-        : undefined
+      // Identity, not content. Hashing the source renamed every scope attribute and every
+      // selector referencing it whenever anything in the document changed, so a whitespace-only
+      // reformat produced churn across the emitted CSS and HTML for an edit that altered
+      // nothing. A path plus the block's index identifies the same block across edits.
+      //
+      // The content stays in the hash only when there is no path to identify the document by.
+      // An anonymous compile is an embedding case where outputs may be concatenated, and two
+      // documents sharing a scope attribute would leak one's styles onto the other's elements.
+      const identity =
+        options.from === undefined
+          ? `\0${source}\0${block.index}`
+          : `${options.from}\0${block.index}`
+      const attributeName = block.scoped ? `data-hmx-s-${hashScope(identity)}` : undefined
       const compiled = compileStyleBlock(block, attributeName, source, options.from)
       if (compiled.diagnostic !== undefined) {
         diagnostics.push(compiled.diagnostic)
