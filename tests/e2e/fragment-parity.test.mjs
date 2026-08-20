@@ -17,8 +17,15 @@ import { afterAll, describe, expect, it } from 'vitest'
  * against these inputs, then committed. So this compares against what users actually had, not
  * against what this repository believes it used to emit.
  *
- * If a legitimate change to Markdown rendering ever lands, this suite fails and the fixtures are
- * regenerated deliberately — which is the point. Fragment output is a compatibility surface now.
+ * What this guarantees, precisely: `--fragment` produces a fragment, not a document, and its
+ * shape does not drift by accident. It does not freeze rendering forever. When a deliberate
+ * rendering change lands, this suite fails, the change is confirmed to be the intended one, and
+ * the fixture is regenerated — that failure is the feature.
+ *
+ * Regenerations so far:
+ *
+ *   - 2026-08-20: `interactive.expected.html`, when `button` gained its `hmx-button` class. The
+ *     only difference was that class; verified by diffing before replacing the file.
  */
 const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url))
 const cliPath = resolve(repositoryRoot, 'packages/cli/dist/bin.js')
