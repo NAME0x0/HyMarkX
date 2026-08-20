@@ -34,11 +34,6 @@ Rejected items record *why*, so they are not relitigated without new evidence.
 *The first three were found by the HMX-P01 interactivity prototype. All are bounded design
 gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
 
-- **Render plans cannot emit void elements.** `RenderPlan.wrappers` describes paired tags
-  only, so a component rendering `<input>` produces `<input ...></input>`. Browsers
-  normalise it and behaviour is correct, but the serialised HTML is invalid. Needed before
-  any component emits `input`, `img`, `br`, or `hr`. Add a `void: true` flag to
-  `RenderedElement`.
 - **Attribute values cannot contain escaped quotes.** `on-click="last = \"Byron\""` fails to
   parse — the backslash-escaped quote ends the attribute and the block degrades to prose
   with `HMX1011`. Single quotes work as a workaround. String literals inside event handlers
@@ -56,11 +51,6 @@ gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
   `class` and `id`, which are structural. `title` is the odd one out because in HTML it means
   "tooltip" rather than "name". Decide deliberately with an ADR rather than during a review;
   changing it touches fixtures and e2e expectations.
-- **Scoped-style hashes derive from document content, not identity.** Reformatting a document
-  changes every `data-hmx-s-…` attribute and the matching selectors, so a whitespace-only
-  change produces churn across the emitted CSS and HTML. ADR-0011 says the hash comes from
-  *document identity*; content is not identity. Deriving it from the path plus block index
-  would make formatting diffs local. Found while testing meaning-preservation in HMX-011.
 - **`HMX1001` should suggest widening the outer fence.** The formatter cannot repair
   mis-nested containers — under recovery the tree describes the broken parse, so an automatic
   rewrite widens the wrong line (attempted and removed in HMX-011). The repair belongs in the

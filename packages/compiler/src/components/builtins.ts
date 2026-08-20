@@ -207,9 +207,13 @@ const renderers: ComponentRegistry['renderers'] = {
         tag: 'button',
         attributes: {
           type: typeof attributes.type === 'string' ? attributes.type : 'button',
+          class: 'hmx-button',
         },
       },
     ],
+    // `classBinding` rather than a literal class so an author's own `.primary` merges with the
+    // component's instead of replacing it.
+    attributeBindings: [classBinding('hmx-button', attributes)],
     flattenSingleParagraph: true,
   }),
   input: (_node, attributes) => ({
@@ -219,13 +223,18 @@ const renderers: ComponentRegistry['renderers'] = {
         attributes: {
           type: typeof attributes.type === 'string' ? attributes.type : 'text',
           value: typeof attributes.value === 'string' ? attributes.value : '',
+          class: 'hmx-input',
           ...(typeof attributes.name === 'string' ? { name: attributes.name } : {}),
         },
         void: true,
       },
     ],
+    attributeBindings: [classBinding('hmx-input', attributes)],
   }),
-  form: () => ({ wrappers: [{ tag: 'form', attributes: {} }] }),
+  form: (_node, attributes) => ({
+    wrappers: [{ tag: 'form', attributes: { class: 'hmx-form' } }],
+    attributeBindings: [classBinding('hmx-form', attributes)],
+  }),
 }
 
 /** The built-in component schemas and their separate trusted renderers. */

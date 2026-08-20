@@ -27,6 +27,43 @@ const TOKENS = `:where(:root) {
 }`
 
 const COMPONENT_STYLES: Readonly<Record<string, string>> = {
+  button: `:where(.hmx-button) {
+  font: inherit;
+  padding: var(--hmx-space-sm) var(--hmx-space-md);
+  border: var(--hmx-border);
+  border-radius: var(--hmx-radius);
+  background: var(--hmx-color-surface);
+  color: var(--hmx-color-text);
+  cursor: pointer;
+}
+:where(.hmx-button):hover {
+  border-color: var(--hmx-color-info);
+}
+:where(.hmx-button):focus-visible {
+  outline: 0.125rem solid var(--hmx-color-info);
+  outline-offset: 0.125rem;
+}
+:where(.hmx-button):disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}`,
+  input: `:where(.hmx-input) {
+  font: inherit;
+  padding: var(--hmx-space-sm);
+  border: var(--hmx-border);
+  border-radius: var(--hmx-radius);
+  background: var(--hmx-color-surface);
+  color: var(--hmx-color-text);
+}
+:where(.hmx-input):focus-visible {
+  outline: 0.125rem solid var(--hmx-color-info);
+  outline-offset: 0.125rem;
+}`,
+  form: `:where(.hmx-form) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hmx-space-md);
+}`,
   note: `:where(.hmx-note) {
   --hmx-status-color: var(--hmx-color-info);
   border: var(--hmx-border);
@@ -92,7 +129,18 @@ const COMPONENT_STYLES: Readonly<Record<string, string>> = {
 :where(.hmx-badge-success) { --hmx-status-color: var(--hmx-color-success); }`,
 }
 
-const COMPONENT_ORDER = ['note', 'card', 'grid', 'metric', 'badge'] as const
+// Order is emission order, so a later rule can rely on winning a specificity tie. Every
+// component with styles must appear here: this list, not COMPONENT_STYLES, decides what ships.
+const COMPONENT_ORDER = [
+  'note',
+  'card',
+  'grid',
+  'metric',
+  'badge',
+  'form',
+  'button',
+  'input',
+] as const
 
 /** Returns design tokens and only the built-in rules selected by a document. */
 export function builtinStylesFor(usedComponents: ReadonlySet<string>): string {

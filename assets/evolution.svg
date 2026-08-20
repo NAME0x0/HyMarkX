@@ -157,8 +157,8 @@ Users grew to 14,302.</text>
       <text x="488" y="136" class="r-value">14302</text>
       <rect x="476" y="156" width="84" height="28" rx="6" fill="#2563eb"/>
       <text x="518" y="174" class="r-btn" text-anchor="middle">Add user</text>
-      <text x="44" y="470" class="meter">HTML 164 B</text>
-      <text x="150" y="470" class="meter">CSS 1154 B</text>
+      <text x="44" y="470" class="meter">HTML 183 B</text>
+      <text x="150" y="470" class="meter">CSS 1659 B</text>
       <text x="240" y="470" class="meter live">JS 996 B</text>
     </g>
 

@@ -335,3 +335,44 @@ describe('scoped style identity', () => {
     expect(scopeOf(one.css)).not.toBe(scopeOf(two.css))
   })
 })
+
+/**
+ * The interactive components shipped unstyled.
+ *
+ * `note`, `card`, `grid`, `metric` and `badge` all carried styles; `button`, `input` and `form`
+ * emitted bare elements with no class and no CSS at all. So the one part of the language that
+ * distinguishes it — the interactive surface — rendered as unstyled browser defaults, and a
+ * document could not target them without reaching for raw HTML.
+ */
+describe('interactive component styles', () => {
+  it.each([
+    ['button', '::state{n=0}\n\n:::button{on-click="n = n + 1"}\nGo\n:::\n', 'hmx-button'],
+    // Writing the same name on both sides is how a direct binding is expressed (guide §67).
+    ['input', '::state{v=""}\n\n::input{on-input="v = v"}\n', 'hmx-input'],
+    ['form', ':::form\ncontent\n:::\n', 'hmx-form'],
+  ])('%s carries a class and ships styles', (_name, source, className) => {
+    const result = compile(source, { trust: 'app' })
+
+    expect(result.html).toContain(className)
+    expect(result.css).toContain(`.${className}`)
+    expect(result.diagnostics.filter(({ severity }) => severity === 'error')).toEqual([])
+  })
+
+  // Output proportionality still holds: a document that uses none of them gets none of their CSS.
+  it('emits no interactive styles for a document that uses none', () => {
+    const result = compile('# Just a heading\n', { trust: 'app' })
+
+    expect(result.css).not.toContain('hmx-button')
+    expect(result.css).not.toContain('hmx-input')
+  })
+
+  // A user class must merge with the component's own, not replace it.
+  it('keeps the component class when the author adds one', () => {
+    const result = compile('::state{n=0}\n\n:::button{on-click="n = n + 1" .primary}\nGo\n:::\n', {
+      trust: 'app',
+    })
+
+    expect(result.html).toContain('hmx-button')
+    expect(result.html).toContain('primary')
+  })
+})
