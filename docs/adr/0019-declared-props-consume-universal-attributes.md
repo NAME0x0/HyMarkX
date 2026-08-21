@@ -90,13 +90,19 @@ is the whole point.
 
 ## Consequences
 
-**The authored-component fixture stops duplicating its heading.** `Card.hmx` passes
-`title={title}` into the built-in `card`; after this, the `<article>` loses its tooltip and keeps
-its heading. The fixture is regenerated deliberately, and the diff is expected to be exactly the
-removed attribute.
+**The authored-component fixture stops duplicating its heading — but not by this rule.**
+`Card.hmx` forwards `title={title}` to the built-in `card`, and `card` does not declare `title`
+(its heading comes from the directive label), so the forwarded value is an author writing a
+tooltip explicitly and the rule leaves it alone. The duplication there is fixed by deleting the
+forward, which is the correct fix: the heading is already rendered from `{{ title }}` one line
+below. Worth recording because the first reading of this ADR predicted the rule would remove it
+on its own, and measuring showed otherwise.
 
-**`docs/guides/components.md` needs revisiting**, since it teaches the pattern that produced the
-duplication.
+Where the rule does bite is the call site: `:::Card{title="First card"}` no longer puts
+`title="First card"` on the article, because `Card` declares the prop.
+
+**`docs/guides/components.md` needs revisiting**, since it teaches the forwarding pattern that
+produced the duplication.
 
 **`SPEC.md` §4.2.1 gains the rule.** The current sentence — "`id`, `class`, and `title` are
 accepted on every component without declaration" — stays true, and is qualified: a declared name

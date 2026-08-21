@@ -2,6 +2,7 @@ import { createDiagnostic, visit } from '@hymarkx/ast'
 import type { Definition, Diagnostic, Html, Node, Root, Span, TableCell } from '@hymarkx/ast'
 import type { AnalyzedDocument } from '../analyze/index.js'
 import type { TrustMode } from '../types.js'
+import type { AnalyzedComponent } from '../components/validate.js'
 import type { DirectiveNode, RenderedElement, RenderPlan } from '../components/types.js'
 import { setDiagnosticOrigin } from '../diagnostic-origin.js'
 import type { InteractivityPlan } from '../runtime.js'
@@ -111,6 +112,32 @@ function universalAttributeValues(
   )
 }
 
+/**
+ * Universal attributes that keep merging even when a schema declares them.
+ *
+ * Both are structural and mean the same thing on any element, so an author writing one intends
+ * it to reach the element alongside whatever the component sets. There is nothing to
+ * disambiguate — see ADR-0019.
+ */
+const mergedUniversalAttributes: ReadonlySet<string> = new Set(['class', 'id'])
+
+/**
+ * Attribute values that still reach the HTML after the component has taken its props.
+ *
+ * A name the schema declares belongs to the component: it is passed to the renderer as a prop
+ * and is not also emitted as an HTML attribute of the same name. Without this a component with
+ * a `title` prop renders `<h2 title="Revenue">Revenue</h2>` — a tooltip duplicating the visible
+ * heading, which MDN calls out and Charter §28 rules against.
+ */
+function hostAttributes(component: AnalyzedComponent): Readonly<Record<string, unknown>> {
+  const declared = component.schema.attributes
+  return Object.fromEntries(
+    Object.entries(component.attributes).filter(
+      ([name]) => mergedUniversalAttributes.has(name) || !Object.hasOwn(declared, name),
+    ),
+  )
+}
+
 function elementStart(element: RenderedElement, scope: string): string {
   let output = `<${element.tag}`
   for (const [name, value] of Object.entries(element.attributes)) {
@@ -204,7 +231,7 @@ function directiveActions(
         kind: 'componentEnd',
         boundary,
         attributes: {
-          ...universalAttributeValues(component?.attributes ?? {}),
+          ...universalAttributeValues(component === undefined ? {} : hostAttributes(component)),
           ...interactionAttributes(node, document, options),
         },
         scope: scopeFor(expansion.document, options),
@@ -227,7 +254,10 @@ function directiveActions(
   }
 
   const plan = withOuterAttributes(
-    withUniversalAttributes(component.renderer(node, component.attributes), component.attributes),
+    withUniversalAttributes(
+      component.renderer(node, component.attributes),
+      hostAttributes(component),
+    ),
     interactionAttributes(node, document, options),
   )
   const actions: EmitAction[] = plan.wrappers.map((wrapper) => write(elementStart(wrapper, scope)))

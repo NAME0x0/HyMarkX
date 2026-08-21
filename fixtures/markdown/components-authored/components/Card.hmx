@@ -7,7 +7,7 @@ props:
 .authored-card { border-color: currentColor; }
 </style>
 
-:::card{class=authored-card title={title}}
+:::card{class=authored-card}
 ## {{ title }}
 
 Tone: {{ tone }}

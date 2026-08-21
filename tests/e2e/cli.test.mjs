@@ -286,8 +286,11 @@ describe('built hmx CLI', () => {
 
     expect(result.status).toBe(0)
     expect(result.stderr).toBe('0 errors, 0 warnings in 1 file\n')
-    expect(html).toMatch(/<h2 data-hmx-s-[a-f0-9-]+ title="First">First<\/h2>/)
-    expect(html).toMatch(/<h2 data-hmx-s-[a-f0-9-]+ title="Second">Second<\/h2>/)
+    expect(html).toMatch(/<h2 data-hmx-s-[a-f0-9-]+>First<\/h2>/)
+    expect(html).toMatch(/<h2 data-hmx-s-[a-f0-9-]+>Second<\/h2>/)
+    // The component declares `title`, so the value is its prop and not also a tooltip that
+    // reads back the heading beside it (ADR-0019).
+    expect(html).not.toContain('title="First"')
     expect(html).toContain('<p>Alpha</p>')
     expect(html).toContain('<p>Beta</p>')
     expect(css.match(/color: rebeccapurple/g)).toHaveLength(1)

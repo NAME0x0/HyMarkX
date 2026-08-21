@@ -18,7 +18,7 @@ props:
 .authored-card { border-color: currentColor; }
 </style>
 
-:::card{class=authored-card title={title}}
+:::card{class=authored-card}
 ## {{ title }}
 
 Tone: {{ tone }}
@@ -40,10 +40,18 @@ applied and values have already been validated and coerced. Page frontmatter, pr
 to a calling component, and non-`props` keys in the component's own frontmatter are not in
 scope; pass every required value explicitly as a prop.
 
-The universal `id`, `class`, and `title` attributes remain available whether or not they are
-declared as props. On an authored component call, they are merged onto the component's first
+The universal `id`, `class`, and `title` attributes are accepted on every component without
+being declared. On an authored component call, they are merged onto the component's first
 emitted element. If an attributed component emits no element, HMX creates a `div` to carry
 them.
+
+Declaring one of those names as a prop takes it over. `Card` above declares `title`, so
+`:::Card{title="First card"}` passes the string to the component and does not also emit
+`title="First card"` on the article — the heading already says it, and a tooltip repeating
+the text beside it is an accessibility anti-pattern (ADR-0019). `class` and `id` are the
+exceptions: both keep reaching the element whether declared or not, because an author writing
+either means it to apply alongside whatever the component sets. A component that does want a
+tooltip from a declared prop writes one into the element it renders.
 
 ## Use the component
 

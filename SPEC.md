@@ -123,6 +123,12 @@ independent URL policy.
 values MUST be restricted to a safe character set rather than escaped into the attribute,
 and `id` MUST satisfy the `identifier` rule.
 
+When a component's schema declares an attribute, that attribute belongs to the component:
+the value MUST be passed to the component and MUST NOT also be emitted as an HTML attribute
+of the same name. `class` and `id` are exceptions and continue to reach the element whether
+declared or not, because both are structural — an author writing either intends it to apply
+alongside whatever the component sets. See ADR-0019.
+
 Validation diagnostics:
 
 | Code | Severity | Condition |

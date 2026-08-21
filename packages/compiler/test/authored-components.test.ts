@@ -307,9 +307,32 @@ props:
     expect(missing.diagnostics.map(({ message }) => message).join('\n')).toContain('"id"')
     expect(missing.diagnostics.map(({ message }) => message).join('\n')).toContain('"title"')
     expect(valid.diagnostics).toEqual([])
+    // `class` and `id` still merge because both are structural; `title` is declared, so it is
+    // the component's prop and is not also emitted as a tooltip (ADR-0019).
     expect(valid.html).toBe(
-      '<p class="default-class" id="main" title="Greeting">main / default-class / Greeting</p>\n',
+      '<p class="default-class" id="main">main / default-class / Greeting</p>\n',
     )
+  })
+
+  it('does not emit a declared prop as an HTML attribute of the same name', () => {
+    // The prop is rendered as a visible heading. Emitting it again as `title` produced a
+    // tooltip that read back the text next to it, which MDN calls out and Charter §28 rules
+    // against — so a declared name belongs to the component and stops there.
+    const declared = components(
+      component(
+        'Titled',
+        '---\nprops:\n  title: { type: string, required: true }\n---\n## {{ title }}\n',
+      ),
+    )
+    const undeclared = components(component('Plain', '## Fixed\n'))
+
+    const consumed = compile(':::Titled{title="Revenue"}\n:::\n', { components: declared })
+    const passed = compile(':::Plain{title="Revenue"}\n:::\n', { components: undeclared })
+
+    expect(consumed.diagnostics).toEqual([])
+    expect(consumed.html).toBe('<h2>Revenue</h2>\n')
+    expect(passed.diagnostics).toEqual([])
+    expect(passed.html).toBe('<h2 title="Revenue">Fixed</h2>\n')
   })
 
   it('enforces universal identifier and class constraints on declared props', () => {
