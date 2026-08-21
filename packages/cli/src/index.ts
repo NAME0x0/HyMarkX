@@ -18,7 +18,7 @@ import type {
 } from '@hymarkx/compiler'
 
 /** Current CLI package version. */
-export const VERSION = '0.0.5'
+export const VERSION = '0.0.6'
 
 /** Injectable CLI environment used by the binary and subprocess tests. */
 export interface CliIo {
