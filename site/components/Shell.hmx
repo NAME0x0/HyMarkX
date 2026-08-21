@@ -1,0 +1,246 @@
+<style scoped>
+:global(:root) {
+  --site-ink: #172033;
+  --site-blue: #2563eb;
+  --site-paper: #f8fafc;
+  --site-muted: #526176;
+  --site-line: #e2e8f0;
+  --site-code: #0f172a;
+  --hmx-radius: 0.75rem;
+}
+
+:global(body) {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: var(--site-ink);
+  font: 1rem/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:global(main),
+:global(.band) {
+  max-width: 62rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+:global(h1),
+:global(h2),
+:global(h3) {
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+:global(h1) {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  margin: 0 0 1rem;
+}
+
+:global(h2) {
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+  margin: 0 0 0.75rem;
+}
+
+:global(h3) {
+  font-size: 1.05rem;
+  margin: 0 0 0.4rem;
+}
+
+:global(p) {
+  margin: 0 0 1rem;
+}
+
+:global(a) {
+  color: var(--site-blue);
+  text-underline-offset: 0.15em;
+}
+
+:global(code) {
+  font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+:global(pre) {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  background: var(--site-code);
+  color: #e2e8f0;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+:global(pre code) {
+  font-size: inherit;
+}
+
+:global(hr) {
+  border: 0;
+  border-top: 1px solid var(--site-line);
+  margin: 4rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(body) {
+    background: #0b1120;
+    color: var(--site-paper);
+  }
+
+  :global(:root) {
+    --site-ink: #f8fafc;
+    --site-muted: #94a3b8;
+    --site-line: #1e293b;
+    --site-blue: #60a5fa;
+  }
+}
+
+/* ---- hero ---- */
+
+:global(.hero) {
+  padding: 3.5rem 0 1rem;
+}
+
+:global(.lede) {
+  max-width: 34rem;
+  font-size: 1.2rem;
+  color: var(--site-muted);
+}
+
+:global(.cta p) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 1.5rem 0 0;
+}
+
+:global(.cta code) {
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--site-line);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--site-line) 30%, transparent);
+}
+
+/* ---- the progression stepper ---- */
+
+:global(.stepper) {
+  border: 1px solid var(--site-line);
+  border-radius: 0.9rem;
+  overflow: hidden;
+  margin: 2.5rem 0 0;
+}
+
+:global(.stepper-bar) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--site-line);
+  background: color-mix(in srgb, var(--site-line) 22%, transparent);
+}
+
+:global(.stepper-bar p) {
+  margin: 0 auto 0 0;
+  font-size: 0.85rem;
+  color: var(--site-muted);
+}
+
+:global(.stepper .hmx-button) {
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/*
+ * Every step is emitted and CSS shows the live one. HMX has conditional
+ * operators inside expressions but no conditional blocks, so a reactive class
+ * is the honest way to express this — and it means the page is correct with
+ * JavaScript switched off, showing step one.
+ */
+:global(.step) {
+  display: none;
+  padding: 1.4rem;
+}
+
+:global(.step.live) {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 46rem) {
+  :global(.step.live) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+:global(.step h3) {
+  margin: 0 0 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--site-muted);
+}
+
+:global(.step pre) {
+  font-size: 0.8rem;
+}
+
+:global(.preview) {
+  padding: 1rem 1.1rem;
+  border: 1px dashed var(--site-line);
+  border-radius: 0.6rem;
+}
+
+:global(.preview > :last-child) {
+  margin-bottom: 0;
+}
+
+/* ---- feature row and proof numbers ---- */
+
+:global(.features) {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+  margin: 1.5rem 0 0;
+}
+
+@media (min-width: 46rem) {
+  :global(.features) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+:global(.numbers) {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 1.5rem 0 0;
+}
+
+@media (min-width: 46rem) {
+  :global(.numbers) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+:global(.site-footer) {
+  margin-top: 4rem;
+  padding: 2rem 1.5rem 3rem;
+  border-top: 1px solid var(--site-line);
+  font-size: 0.9rem;
+  color: var(--site-muted);
+}
+
+:global(.site-footer p) {
+  max-width: 62rem;
+  margin-inline: auto;
+}
+</style>

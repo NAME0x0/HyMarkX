@@ -31,6 +31,15 @@ interface PreparedScopedBlock {
   readonly attribute: string
   readonly source: string
   readonly from?: string
+  /**
+   * Whether any rule in the block actually asked to be scoped.
+   *
+   * A block whose every selector is `:global(...)` — or which holds only keyframes — emits real
+   * CSS while requesting no scope attribute at all. Warning that it found nothing to scope is
+   * true and useless: it never wanted one. This is measured from the compiled output rather
+   * than re-derived from the selectors, so it cannot disagree with what was emitted.
+   */
+  readonly scopes: boolean
 }
 
 const EMPTY_STYLES: PreparedStyles = {
@@ -372,6 +381,7 @@ export function prepareStyles(
           block,
           attribute: attributeName,
           source,
+          scopes: compiled.css.includes(`[${attributeName}]`),
           ...(options.from === undefined ? {} : { from: options.from }),
         })
       }
@@ -422,6 +432,7 @@ export function prepareStyles(
         block,
         attribute: attributeName,
         source: definition.source,
+        scopes: compiled.css.includes(`[${attributeName}]`),
         ...(definition.from === undefined ? {} : { from: definition.from }),
       })
     }
@@ -452,8 +463,8 @@ export function prepareStyles(
 /** Warns for valid scoped blocks when no generated element received their scope attribute. */
 export function emptyScopeDiagnostics(styles: PreparedStyles, html: string): readonly Diagnostic[] {
   const diagnostics: Diagnostic[] = []
-  for (const { block, attribute, source, from } of styles.scopedBlocks) {
-    if (html.includes(` ${attribute}`)) {
+  for (const { block, attribute, source, from, scopes } of styles.scopedBlocks) {
+    if (!scopes || html.includes(` ${attribute}`)) {
       continue
     }
     const diagnostic = createDiagnostic({

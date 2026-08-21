@@ -1,0 +1,51 @@
+<style scoped>
+:global(.site-nav) {
+  max-width: 62rem;
+  margin-inline: auto;
+  padding: 1.25rem 1.5rem;
+}
+
+/* The links are one Markdown paragraph, so the paragraph is the flex row. */
+:global(.site-nav p) {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+:global(.site-nav p > a:first-child) {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-right: auto;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: inherit;
+  text-decoration: none;
+}
+
+:global(.site-nav img) {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.35rem;
+}
+
+:global(.site-nav a) {
+  color: var(--site-muted);
+  text-decoration: none;
+}
+
+:global(.site-nav a:hover) {
+  color: var(--site-blue);
+}
+</style>
+
+:::box{class=site-nav}
+[![HyMarkX](/logo-32.png) HyMarkX](/)
+[Docs](https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides)
+[npm](https://www.npmjs.com/package/hymarkx)
+[VS Code](https://marketplace.visualstudio.com/items?itemName=name0x0.hymarkx)
+[GitHub](https://github.com/NAME0x0/HyMarkX)
+:::

@@ -31,6 +31,23 @@ const schemas: ComponentRegistry['schemas'] = {
     label: 'optional',
     description: 'A grouped card of content.',
   },
+  /**
+   * The neutral wrapper. Emits a `div` carrying only the author's own `class` and `id`, with no
+   * default class and no stylesheet of its own.
+   *
+   * Added because building this project's site had nothing else to reach for: `grid` was the
+   * only generic container, so every layout wrapper became a grid that then had to be overridden
+   * back, and every one of them emitted `--hmx-grid-columns` it did not use. Output
+   * proportionality is a claim this project makes; a wrapper that costs nothing keeps it true.
+   */
+  box: {
+    name: 'box',
+    kinds: ['container'],
+    attributes: {},
+    children: 'block',
+    label: 'forbidden',
+    description: 'A plain block wrapper with no styling of its own.',
+  },
   grid: {
     name: 'grid',
     kinds: ['container'],
@@ -168,6 +185,7 @@ const renderers: ComponentRegistry['renderers'] = {
     classPlan('article', 'hmx-card', 'h3', 'hmx-card-title', [
       classBinding('hmx-card', attributes),
     ]),
+  box: () => ({ wrappers: [{ tag: 'div', attributes: {} }] }),
   grid: (_node, attributes: ResolvedAttributes) => {
     const numericStyle =
       typeof attributes.columns === 'number' && typeof attributes.gap === 'number'

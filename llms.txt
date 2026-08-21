@@ -4,7 +4,7 @@
 > styled, component-based, interactive pages. Ordinary Markdown is already valid HMX.
 > Static documents emit zero JavaScript; interactivity costs about 1 KB.
 
-Pre-alpha. Phases 0–7 of 10 complete. Nothing published to npm. Syntax may still change.
+Alpha. Phases 0–8 of 10 complete. Published to npm as `hymarkx`; syntax may still change.
 
 **If you are generating or editing `.hmx` files, read "Rules that prevent the common
 mistakes" below. Most errors come from four things, all listed there.**
@@ -74,6 +74,7 @@ Attributes: `{key=value}`, `{key="quoted value"}`, `{flag}` (bare, means true), 
 |---|---|---|
 | `note` | container | `type`: info \| warning \| danger \| success (default info) |
 | `card` | container | — |
+| `box` | container | — (a plain `div`; no class, no CSS — use it for layout wrappers) |
 | `grid` | container | `columns`: number (default 3), `gap`: number (default 4) |
 | `metric` | container | — |
 | `badge` | text | `kind`: info \| warning \| danger \| success (default info) |
@@ -81,7 +82,9 @@ Attributes: `{key=value}`, `{key="quoted value"}`, `{flag}` (bare, means true), 
 | `input` | leaf or container | `type`: text, `value`: string, `name`: string |
 | `form` | container | — |
 
-`id`, `class`, and `title` are accepted on every component without being declared.
+`id`, `class`, and `title` are accepted on every component without being declared. If a
+component's schema declares one of those names, it becomes that component's prop and is no
+longer also emitted as an HTML attribute — `class` and `id` are the exceptions and always merge.
 
 ## Authoring a reusable component
 

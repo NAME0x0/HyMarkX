@@ -265,6 +265,21 @@ code
     expect(result.diagnostics.map(({ code }) => code)).toEqual(['HMX2031'])
   })
 
+  /**
+   * Found while building the project's own site, where a styles-only component carries the
+   * page's global CSS. Warning that a `:global`-only block found nothing to scope is true and
+   * useless — it asked for no scope attribute in the first place.
+   */
+  it('does not warn when every rule in the block is global', () => {
+    const result = compile('<style scoped>:global(body) { margin: 0; }</style>\n', {
+      trust: 'app',
+      from: 'globals.hmx',
+    })
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.css).toContain('body {')
+  })
+
   it('inlines CSS ahead of content without removing result.css', () => {
     const separate = compile(':::note\nBody\n:::\n')
     const result = compile(':::note\nBody\n:::\n', { inlineCss: true })

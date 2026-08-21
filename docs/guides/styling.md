@@ -12,6 +12,18 @@ Deployment starts at 8 PM UTC.
 
 This emits the note rules and shared tokens, but no card, grid, metric, or badge rules.
 
+When you want a wrapper to hang your own layout on, use `:::box`. It emits a plain `div`
+carrying only the `class` and `id` you gave it — no default class and no stylesheet, so it
+costs nothing:
+
+```md
+:::box{class=hero}
+# Ship it
+:::
+```
+
+Reach for `:::grid` when you actually want its columns, and `:::box` the rest of the time.
+
 ## Design tokens
 
 Override tokens with ordinary CSS. Put the opening tag of a non-empty plain style block on

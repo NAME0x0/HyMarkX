@@ -47,6 +47,21 @@ describe('built-in components', () => {
     )
   })
 
+  /**
+   * The neutral wrapper: no default class, no stylesheet, nothing but the author's own
+   * attributes. Building this project's site had only `grid` to reach for, so every layout
+   * wrapper emitted `--hmx-grid-columns` it never used — the opposite of the proportionality
+   * the project claims.
+   */
+  it('renders box as a bare div and emits no CSS for it', () => {
+    const result = compile(':::box{class=hero #top}\nBody\n:::\n')
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.html).toBe('<div class="hero" id="top"><p>Body</p>\n</div>\n')
+    expect(result.css).toBe('')
+    expect(result.js).toBe('')
+  })
+
   it.each(['info', 'warning', 'danger', 'success'])('renders badge kind %s', (kind) => {
     const result = compile(`A :badge[new]{kind=${kind}} badge.\n`)
     expect(result.diagnostics).toEqual([])

@@ -214,7 +214,9 @@ A processor MUST emit style rules only for the components a document actually us
 
 Diagnostics: `HMX2030` (error) for a CSS syntax error, whose span MUST point into the
 document rather than to the start of the style block; `HMX2031` (warning) for a scoped
-block in a document with nothing to scope.
+block in a document with nothing to scope. A block that requested no scoping — every rule
+`:global(...)`, or keyframes only — MUST NOT be reported: it emits real CSS and asked for no
+scope attribute, so there is nothing missing.
 
 Styling of untrusted documents by their authors is **not** available at this version. It
 requires a CSS threat model covering `@import`, `url()` exfiltration, overlay attacks, and

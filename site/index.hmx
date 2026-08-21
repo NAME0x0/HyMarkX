@@ -1,0 +1,213 @@
+---
+title: HyMarkX — Markdown that grows with you
+description: A Markdown-compatible language that stays Markdown until you need more. 692 conformance examples, a 591-byte runtime, and zero JavaScript for documents that do not use any.
+canonical: https://hymarkx.afsah.xyz/
+icon: /logo-32.png
+image: https://hymarkx.afsah.xyz/social-preview.png
+siteName: HyMarkX
+lang: en
+---
+
+:::Shell
+:::
+
+:::Nav
+:::
+
+::state{step=1 count=0}
+
+::::::box{class=hero}
+
+# Markdown that grows with you
+
+:::::box{class=lede}
+Every HyMarkX document is a Markdown document. It stays one until the day you need a
+component, a value, or a button — and then it is still the same file.
+:::::
+
+:::::box{class=cta}
+`npm install hymarkx` — [read the docs](https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides) — [browse the source](https://github.com/NAME0x0/HyMarkX)
+:::::
+
+::::::
+
+::::::box{class=stepper}
+
+:::::box{class=stepper-bar}
+Step {{ step }} of 4 — the same file, gaining one capability at a time
+
+::::button{on-click="step = step - 1 < 1 ? 4 : step - 1"}
+Back
+::::
+
+::::button{on-click="step = step + 1 > 4 ? 1 : step + 1"}
+Next
+::::
+
+:::::
+
+:::::box{class={step == 1 ? "step live" : "step"}}
+
+::::box{class=pane}
+### You write
+
+```md
+## Release notes
+
+Shipping on **Friday**.
+```
+::::
+
+::::box{class=preview}
+### You get
+
+## Release notes
+
+Shipping on **Friday**.
+::::
+
+:::::
+
+:::::box{class={step == 2 ? "step live" : "step"}}
+
+::::box{class=pane}
+### You write
+
+```md
+## Release notes
+
+:::note[Heads up]{type=warning}
+Deployment starts at 8 PM UTC.
+:::
+```
+::::
+
+::::box{class=preview}
+### You get
+
+## Release notes
+
+:::note[Heads up]{type=warning}
+Deployment starts at 8 PM UTC.
+:::
+::::
+
+:::::
+
+:::::box{class={step == 3 ? "step live" : "step"}}
+
+::::box{class=pane}
+### You write
+
+```md
+---
+quarter: Q3
+revenue: 42500
+---
+
+## Results for {{ quarter }}
+
+Revenue was {{ revenue }}.
+```
+::::
+
+::::box{class=preview}
+### You get
+
+## Results for Q3
+
+Revenue was 42500.
+::::
+
+:::::
+
+:::::box{class={step == 4 ? "step live" : "step"}}
+
+::::box{class=pane}
+### You write
+
+```md
+::state{count=0}
+
+:::button{on-click="count = count + 1"}
+Increment
+:::
+
+Clicked {{ count }} times.
+```
+::::
+
+::::box{class=preview}
+### You get
+
+:::button{on-click="count = count + 1"}
+Increment
+:::
+
+Clicked {{ count }} times.
+::::
+
+:::::
+
+::::::
+
+---
+
+## Why it is built this way
+
+::::::box{class=features}
+
+:::::card[Markdown first, not Markdown-shaped]{}
+A document containing no HyMarkX construct renders as CommonMark plus GFM. That is not a goal,
+it is a test: 692 conformance examples run as a build gate, and a regression fails the build.
+:::::
+
+:::::card[The output is proportional]{}
+A document that uses no component emits no component CSS. A document with no interactive
+construct emits no JavaScript at all — not a smaller runtime, none.
+:::::
+
+:::::card[Safe by default, not by discipline]{}
+Trust mode is chosen by the host, and no construct inside a document can raise it. Expressions
+cannot reach the network, storage, timers, or any host object.
+:::::
+
+::::::
+
+## What that costs you
+
+::::::box{class=numbers}
+
+:::::metric[692]{}
+conformance examples, green
+:::::
+
+:::::metric[591 B]{}
+gzipped runtime, when used
+:::::
+
+:::::metric[0 B]{}
+JavaScript for a static document
+:::::
+
+:::::metric[7]{}
+packages, one boundary each
+:::::
+
+::::::
+
+## Start
+
+```sh
+npm install hymarkx
+npx hmx build index.md --out dist
+```
+
+`hmx` also gives you `check`, `fmt`, and a `dev` server with live reload. There is a
+[VS Code extension](https://marketplace.visualstudio.com/items?itemName=name0x0.hymarkx) with a
+language server behind it — diagnostics, completion, hover, and formatting.
+
+::::::box{class=site-footer}
+HyMarkX is MIT/Apache-2.0 dual licensed. Built in the open on
+[GitHub](https://github.com/NAME0x0/HyMarkX). This page is a HyMarkX document.
+::::::
