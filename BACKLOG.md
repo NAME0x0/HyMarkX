@@ -38,14 +38,6 @@ gaps, not blockers — see the gate verdict in `ROADMAP.md`.*
   `value=1` from `value="1"` currently requires re-reading the source through the
   attribute's spans. It works and stays AST-driven, but the expression phase would be
   cleaner with an explicit literal-kind field on `Attribute`.
-- **A declared `title` prop also becomes an HTML `title` tooltip.** `:::Card{title="Revenue"}`
-  on a component declaring a `title` prop renders the value *and* sets `title="Revenue"` on
-  the wrapper, so a tooltip duplicates visible text — a known accessibility annoyance, and
-  charter §28 says HMX should make accessible output easier. This is current specified
-  behaviour (HMX-009's brief said universal attributes still apply) and merging is right for
-  `class` and `id`, which are structural. `title` is the odd one out because in HTML it means
-  "tooltip" rather than "name". Decide deliberately with an ADR rather than during a review;
-  changing it touches fixtures and e2e expectations.
 - **`HMX1001` should suggest widening the outer fence.** The formatter cannot repair
   mis-nested containers — under recovery the tree describes the broken parse, so an automatic
   rewrite widens the wrong line (attempted and removed in HMX-011). The repair belongs in the

@@ -2,7 +2,7 @@
   "name": "hymarkx",
   "displayName": "HyMarkX",
   "description": "Language support for HyMarkX (.hmx): syntax highlighting, diagnostics, completion, hover and formatting.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT OR Apache-2.0",
   "publisher": "name0x0",
   "engines": {
