@@ -1,6 +1,7 @@
 import { createDiagnostic } from '@hymarkx/ast'
-import { escapeHtml } from './escape.js'
-import type { CompileResult } from '../types.js'
+import { encodeUrl, escapeHtml } from './escape.js'
+import { isAllowedDocumentUrl } from './sanitize.js'
+import type { CompileResult, TrustMode } from '../types.js'
 import type { Diagnostic } from '@hymarkx/ast'
 
 /**
@@ -25,6 +26,13 @@ export interface DocumentOptions {
   readonly inline?: boolean
   /** Base name for sidecar links. Defaults to `index`. */
   readonly assetName?: string
+  /**
+   * Scheme policy applied to head URLs. Defaults to `document`.
+   *
+   * Defaulting to the stricter mode means a caller that forgets to pass it gets the safe
+   * policy rather than the permissive one.
+   */
+  readonly trust?: TrustMode
 }
 
 export interface DocumentResult {
@@ -85,6 +93,53 @@ function resolveTitle(result: CompileResult, from: string | undefined): string {
   return name.replace(/\.[^.]+$/, '') || 'index'
 }
 
+/** The four keys whose presence opts a document into social metadata (ADR-0020). */
+const SOCIAL_KEYS = ['canonical', 'icon', 'image', 'siteName'] as const
+
+/**
+ * A head URL, checked against the active trust mode's scheme policy.
+ *
+ * The policy is the one links already use — §4.2.1 forbids a second, independent URL policy,
+ * and a `javascript:` favicon is the same event as a `javascript:` link. A rejected value is
+ * an error and its tag is dropped, rather than falling back to something the author did not
+ * write.
+ */
+function headUrl(
+  result: CompileResult,
+  key: string,
+  trust: TrustMode,
+  diagnostics: Diagnostic[],
+): string | undefined {
+  const value = frontmatterString(result, key)
+  if (value === undefined) {
+    return undefined
+  }
+  if (trust === 'document' && !isAllowedDocumentUrl(value)) {
+    diagnostics.push(
+      createDiagnostic({
+        code: 'HMX3003',
+        severity: 'error',
+        message: `URL "${value}" uses a scheme that is not allowed in document mode.`,
+        span: ZERO_SPAN,
+      }),
+    )
+    return undefined
+  }
+  return value
+}
+
+function meta(name: string, content: string): string {
+  return `<meta name="${name}" content="${escapeHtml(content)}">`
+}
+
+function property(name: string, content: string): string {
+  return `<meta property="${name}" content="${escapeHtml(content)}">`
+}
+
+function link(rel: string, href: string): string {
+  return `<link rel="${rel}" href="${escapeHtml(encodeUrl(href))}">`
+}
+
 export function renderDocument(
   result: CompileResult,
   options: DocumentOptions = {},
@@ -111,15 +166,56 @@ export function renderDocument(
     }
   }
 
+  const title = resolveTitle(result, options.from)
   const head = [
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
-    `<title>${escapeHtml(resolveTitle(result, options.from))}</title>`,
+    `<title>${escapeHtml(title)}</title>`,
   ]
 
   const description = frontmatterString(result, 'description')
   if (description !== undefined) {
-    head.push(`<meta name="description" content="${escapeHtml(description)}">`)
+    head.push(meta('description', description))
+  }
+
+  const author = frontmatterString(result, 'author')
+  if (author !== undefined) {
+    head.push(meta('author', author))
+  }
+
+  const trust = options.trust ?? 'document'
+  const canonical = headUrl(result, 'canonical', trust, diagnostics)
+  const icon = headUrl(result, 'icon', trust, diagnostics)
+  const image = headUrl(result, 'image', trust, diagnostics)
+  const siteName = frontmatterString(result, 'siteName')
+
+  if (canonical !== undefined) {
+    head.push(link('canonical', canonical))
+  }
+  if (icon !== undefined) {
+    head.push(link('icon', icon))
+  }
+
+  // Output proportionality, the rule that already governs CSS and JavaScript: a document that
+  // asked for none of this gets the head it got before the feature existed.
+  if (SOCIAL_KEYS.some((key) => frontmatterString(result, key) !== undefined)) {
+    head.push(property('og:type', 'website'), property('og:title', title))
+    if (description !== undefined) {
+      head.push(property('og:description', description))
+    }
+    if (canonical !== undefined) {
+      head.push(property('og:url', encodeUrl(canonical)))
+    }
+    if (siteName !== undefined) {
+      head.push(property('og:site_name', siteName))
+    }
+    if (image !== undefined) {
+      head.push(
+        property('og:image', encodeUrl(image)),
+        meta('twitter:card', 'summary_large_image'),
+        meta('twitter:image', encodeUrl(image)),
+      )
+    }
   }
 
   // No file, no reference — the same rule the sidecar writer follows.

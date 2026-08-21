@@ -698,7 +698,7 @@ export async function runCli(
       // Nothing on disk to link at, so a piped page inlines its assets and stays self-contained.
       const piped = parsed.values.fragment
         ? { html: result.html, diagnostics: [] }
-        : renderDocument(result, { from: input, inline: true })
+        : renderDocument(result, { from: input, inline: true, trust })
       records.push(...piped.diagnostics.map((d) => diagnosticRecord(d, result.source, input)))
       io.stdout.write(piped.html)
       continue
@@ -740,6 +740,7 @@ export async function runCli(
         : renderDocument(result, {
             from: input,
             assetName: basename(target.path, extname(target.path)),
+            trust,
           })
       records.push(...rendered.diagnostics.map((d) => diagnosticRecord(d, result.source, input)))
       await writeFile(target.path, rendered.html, 'utf8')

@@ -90,3 +90,109 @@ describe('document language', () => {
     expect(document.diagnostics[0]?.severity).toBe('warning')
   })
 })
+
+describe('document head metadata', () => {
+  /**
+   * Output proportionality, the rule that already governs CSS and JavaScript. A document that
+   * declares none of the head keys must get the head it got before the feature existed —
+   * otherwise every plain Markdown file silently grows five meta tags it never asked for.
+   */
+  it('emits nothing social when the document declares nothing', () => {
+    const result = compile('---\ntitle: Plain\ndescription: Just a page.\n---\n\n# H\n', {
+      trust: 'app',
+    })
+    const { html, diagnostics } = renderDocument(result)
+
+    expect(diagnostics).toEqual([])
+    expect(html).toContain('<meta name="description" content="Just a page.">')
+    expect(html).not.toContain('og:')
+    expect(html).not.toContain('twitter:')
+    expect(html).not.toContain('rel="canonical"')
+  })
+
+  it('derives og:title and og:description rather than asking for them twice', () => {
+    const result = compile(
+      '---\ntitle: HyMarkX\ndescription: Markdown that grows.\nsiteName: HyMarkX\n---\n\n# H\n',
+      { trust: 'app' },
+    )
+    const { html } = renderDocument(result)
+
+    expect(html).toContain('<meta property="og:type" content="website">')
+    expect(html).toContain('<meta property="og:title" content="HyMarkX">')
+    expect(html).toContain('<meta property="og:description" content="Markdown that grows.">')
+    expect(html).toContain('<meta property="og:site_name" content="HyMarkX">')
+  })
+
+  it('emits the full card for canonical, icon, image, and author', () => {
+    const result = compile(
+      [
+        '---',
+        'title: HyMarkX',
+        'canonical: https://hymarkx.afsah.xyz/',
+        'icon: /favicon.png',
+        'image: https://hymarkx.afsah.xyz/social.png',
+        'author: Afsah',
+        '---',
+        '',
+        '# H',
+        '',
+      ].join('\n'),
+      { trust: 'app' },
+    )
+    const { html, diagnostics } = renderDocument(result)
+
+    expect(diagnostics).toEqual([])
+    expect(html).toContain('<meta name="author" content="Afsah">')
+    expect(html).toContain('<link rel="canonical" href="https://hymarkx.afsah.xyz/">')
+    expect(html).toContain('<link rel="icon" href="/favicon.png">')
+    expect(html).toContain('<meta property="og:url" content="https://hymarkx.afsah.xyz/">')
+    expect(html).toContain(
+      '<meta property="og:image" content="https://hymarkx.afsah.xyz/social.png">',
+    )
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image">')
+  })
+
+  /**
+   * The same policy links use, not a second one — SPEC §4.2.1 forbids a second, independent URL
+   * policy, and a `javascript:` favicon is the same event as a `javascript:` link. The tag is
+   * dropped rather than replaced with a default the author never wrote.
+   */
+  it('rejects a head URL that document mode would reject in a link', () => {
+    const result = compile('---\ntitle: T\nicon: "javascript:alert(1)"\n---\n\n# H\n', {
+      trust: 'app',
+    })
+    const { html, diagnostics } = renderDocument(result, { trust: 'document' })
+
+    expect(diagnostics.map(({ code }) => code)).toEqual(['HMX3003'])
+    expect(diagnostics[0]?.severity).toBe('error')
+    expect(html).not.toContain('javascript:')
+    expect(html).not.toContain('rel="icon"')
+  })
+
+  it('defaults to the stricter policy when the caller passes no trust', () => {
+    const result = compile('---\ntitle: T\nimage: "javascript:alert(1)"\n---\n\n# H\n', {
+      trust: 'app',
+    })
+
+    expect(renderDocument(result).diagnostics.map(({ code }) => code)).toEqual(['HMX3003'])
+    expect(renderDocument(result, { trust: 'app' }).diagnostics).toEqual([])
+  })
+
+  it('escapes head values rather than trusting them', () => {
+    const result = compile(
+      "---\ntitle: T\nsiteName: 'a\" onload=\"x'\nauthor: '<script>'\n---\n\n# H\n",
+      { trust: 'app' },
+    )
+    const { html } = renderDocument(result)
+
+    expect(html).not.toContain('onload="x"')
+    expect(html).toContain('&quot;')
+    expect(html).not.toContain('<meta name="author" content="<script>">')
+  })
+
+  it('reports a non-string head key as HMX2022', () => {
+    const result = compile('---\ntitle: T\ncanonical: 42\n---\n\n# H\n', { trust: 'app' })
+
+    expect(result.diagnostics.map(({ code }) => code)).toContain('HMX2022')
+  })
+})

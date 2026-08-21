@@ -42,6 +42,40 @@ That rule has a trap in it, and the compiler covers the trap: if the block *look
 frontmatter — it contains a `key:` line — but fails to parse, you get `HMX2021` rather than
 silence. A typo in real frontmatter is reported; genuine Markdown is left alone.
 
+## Head metadata
+
+Ten keys are reserved. Five of them describe the document itself — `title`, `description`,
+`lang`, `layout`, `draft` — and five describe how it appears when it is shared:
+
+```md
+---
+title: HyMarkX
+description: Markdown that grows with you.
+canonical: https://hymarkx.afsah.xyz/
+icon: /favicon.png
+image: https://hymarkx.afsah.xyz/social.png
+siteName: HyMarkX
+author: Afsah
+---
+
+# HyMarkX
+```
+
+`hmx build` turns those into a canonical link, an icon link, an author meta, and the Open Graph
+and Twitter card tags a link preview needs. `og:title` and `og:description` come from `title`
+and `description`, so you never write either twice.
+
+Nothing social is emitted unless the document asks: declare none of `canonical`, `icon`,
+`image`, or `siteName` and the head is exactly what it was before — the same rule that keeps a
+document without components from emitting component CSS.
+
+`canonical`, `icon`, and `image` are URLs, and they go through the same scheme check as a link
+in the body. In `document` mode a `javascript:` URL is `HMX3003` and its tag is dropped.
+
+There is deliberately no way to put arbitrary tags in the head. `http-equiv` reaches page
+redirects and content security policy, and a document may not reach either — see
+[ADR-0020](../adr/0020-document-head-frontmatter.md).
+
 ## Interpolation
 
 `{{ expression }}` in text or in an attribute value.

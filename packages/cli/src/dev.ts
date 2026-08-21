@@ -97,10 +97,10 @@ async function documentFor(root: string, urlPath: string): Promise<string | unde
  * Inlined rather than linked: the dev server has no sidecar files on disk to point at. The
  * reload client rides inside the body, which keeps the served page a valid document too.
  */
-function page(result: CompileResult, from: string): string {
+function page(result: CompileResult, from: string, trust: TrustMode): string {
   return renderDocument(
     { ...result, html: `${result.html}\n${RELOAD_CLIENT}` },
-    { from, inline: true },
+    { from, inline: true, trust },
   ).html
 }
 
@@ -150,7 +150,7 @@ export async function startDevServer(
             io.stderr.write(renderDiagnostics(result.diagnostics, result.source, { from }))
           }
           response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-          response.end(page(result, from))
+          response.end(page(result, from, options.trust))
         } catch (error) {
           const detail = error instanceof Error ? error.message : String(error)
           response.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' })

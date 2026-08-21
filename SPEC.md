@@ -177,7 +177,12 @@ MUST be validated as a BCP-47-shaped tag and MUST fall back to `en` with `HMX202
 not — a language tag is a constrained vocabulary, and escaping alone would leave a safe attribute
 containing nonsense.
 
-Reserved keys at this version: `title`, `description`, `layout`, `lang`, `draft`.
+The reserved keys `canonical`, `icon`, `image`, `siteName`, and `author` supply the document's
+head metadata when a processor emits a complete HTML document (§5). All five are strings; a
+value of another type MUST report `HMX2022`, as every reserved key does.
+
+Reserved keys at this version: `title`, `description`, `layout`, `lang`, `draft`, `canonical`,
+`icon`, `image`, `siteName`, `author`.
 Unknown keys are preserved and exposed to backends; they MUST NOT error.
 
 ### 4.4 Styles *(Phase 3)*
@@ -316,6 +321,21 @@ A processor MAY emit a complete HTML document rather than a fragment. When it do
 - A stylesheet or script reference MUST be omitted when the corresponding output is empty.
 - The emitter MUST NOT include an HMX JavaScript runtime for documents that use no
   interactive construct.
+- The head keys `canonical`, `icon`, `image`, `siteName`, and `author` supply, respectively, a
+  canonical link and `og:url`, an icon link, `og:image` with `twitter:image` and a
+  `twitter:card` of `summary_large_image`, `og:site_name`, and an author meta. `og:title`,
+  `og:description`, and `og:type` MUST be derived from the resolved title and description
+  rather than declared again.
+- Social metadata MUST be emitted only when the document declares at least one of `canonical`,
+  `icon`, `image`, or `siteName`. A document declaring none MUST produce the head it would
+  have produced without this feature.
+- `canonical`, `icon`, and `image` are URL-valued and MUST be subject to the same scheme policy
+  as a Markdown link destination in the active trust mode (§7). A rejected value MUST report
+  `HMX3003` and MUST omit its tag; a processor MUST NOT substitute a default.
+
+A processor MUST NOT provide a general mechanism for placing arbitrary elements or arbitrary
+`meta` names into the head. `http-equiv` reaches page navigation and content security policy,
+and trust mode is host-selected: no document construct may escalate it (§7). See ADR-0020.
 
 ## 6. Diagnostics
 

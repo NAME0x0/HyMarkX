@@ -56,6 +56,14 @@ const reservedTypes = {
   layout: 'string',
   lang: 'string',
   draft: 'boolean',
+  // Head metadata (ADR-0020). Named one per intent rather than a general `head:` mapping,
+  // which would put `http-equiv` — page navigation and content security policy — inside a
+  // document's reach.
+  canonical: 'string',
+  icon: 'string',
+  image: 'string',
+  siteName: 'string',
+  author: 'string',
 } as const
 
 function pointAt(source: string, offset: number): Point {

@@ -25,6 +25,7 @@ immutable once accepted; a reversal is a new ADR that supersedes the old one.
 | [0017](0017-text-directive-flanking.md) | A text directive may not follow an alphanumeric character | Accepted |
 | [0018](0018-attribute-value-escapes.md) | Backslash escapes quotes inside attribute values | Accepted |
 | [0019](0019-declared-props-consume-universal-attributes.md) | A declared prop consumes its attribute instead of also emitting HTML | Accepted |
+| [0020](0020-document-head-frontmatter.md) | Named reserved frontmatter keys supply the document head; no general `head:` mapping | Accepted |
 
 ## Decisions still open
 
