@@ -26,7 +26,7 @@ component, a value, or a button — and then it is still the same file.
 :::::
 
 :::::box{class=cta}
-`npm install hymarkx` — [read the docs](https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides) — [browse the source](https://github.com/NAME0x0/HyMarkX)
+`npm install hymarkx` [read the docs](https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides) [browse the source](https://github.com/NAME0x0/HyMarkX)
 :::::
 
 ::::::
@@ -52,7 +52,7 @@ Next
 ### You write
 
 ```md
-## Release notes
+### Release notes
 
 Shipping on **Friday**.
 ```
@@ -61,7 +61,7 @@ Shipping on **Friday**.
 ::::box{class=preview}
 ### You get
 
-## Release notes
+### Release notes
 
 Shipping on **Friday**.
 ::::
@@ -74,7 +74,7 @@ Shipping on **Friday**.
 ### You write
 
 ```md
-## Release notes
+### Release notes
 
 :::note[Heads up]{type=warning}
 Deployment starts at 8 PM UTC.
@@ -85,7 +85,7 @@ Deployment starts at 8 PM UTC.
 ::::box{class=preview}
 ### You get
 
-## Release notes
+### Release notes
 
 :::note[Heads up]{type=warning}
 Deployment starts at 8 PM UTC.
@@ -105,7 +105,7 @@ quarter: Q3
 revenue: 42500
 ---
 
-## Results for {{ quarter }}
+### Results for {{ quarter }}
 
 Revenue was {{ revenue }}.
 ```
@@ -114,7 +114,7 @@ Revenue was {{ revenue }}.
 ::::box{class=preview}
 ### You get
 
-## Results for Q3
+### Results for Q3
 
 Revenue was 42500.
 ::::
@@ -178,20 +178,20 @@ cannot reach the network, storage, timers, or any host object.
 
 ::::::box{class=numbers}
 
-:::::metric[692]{}
-conformance examples, green
+:::::metric[conformance examples, green]{}
+692
 :::::
 
-:::::metric[591 B]{}
-gzipped runtime, when used
+:::::metric[gzipped runtime, when used]{}
+591 B
 :::::
 
-:::::metric[0 B]{}
-JavaScript for a static document
+:::::metric[JavaScript for a static document]{}
+0 B
 :::::
 
-:::::metric[7]{}
-packages, one boundary each
+:::::metric[packages, one boundary each]{}
+7
 :::::
 
 ::::::
