@@ -8,6 +8,12 @@
     "dev": "hmx dev . --trust document"
   },
   "dependencies": {
-    "hymarkx": "0.0.6"
+    "@designcodeio/threeui": "^0.3.0",
+    "hymarkx": "0.0.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }

@@ -1,20 +1,33 @@
 /**
  * Builds the site.
  *
- * Two steps, and the second exists because `hmx build` compiles documents and does not copy
- * static files — which is the right split, but a site still needs its favicon on disk.
+ * Three steps: compile the documents, bundle whatever islands they declared, copy the static
+ * files. `hmx build` does the first and deliberately not the others — the compiler is not a
+ * bundler (ADR-0016) and does not copy assets, which is the right split even though it means
+ * this file exists.
  *
  * Deliberately not a workspace member: the site installs `hymarkx` from the registry like any
  * other user, so a broken publish fails here before it reaches anyone else.
  */
 import { spawnSync } from 'node:child_process'
-import { cp, mkdir, readdir, rm } from 'node:fs/promises'
+import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { build as esbuild } from 'esbuild'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const out = join(root, 'dist')
+
+/**
+ * Documents that declare an island, and therefore must compile in `app` trust.
+ *
+ * Islands are `app`-mode only, so the landing page cannot build in `document` mode. Rather
+ * than promote the whole site, the two are built in separate passes and this list is the
+ * exception — kept explicit so that adding an island to a page is a visible decision.
+ */
+const APP_TRUST = new Set(['index.hmx'])
 
 /** Every `.hmx` document at the site root, plus anything under `docs/`. */
 async function documents() {
@@ -36,6 +49,33 @@ async function documents() {
   return found.sort()
 }
 
+// Resolved rather than shelled out to. The first version ran `npx hmx`, which failed on a
+// clean install with no output at all: spawn errors leave `status` null, so the script exited
+// 1 in silence. Running the package's own entry point with this Node removes the shell, the
+// PATH lookup, and the platform branch in one go.
+// `HMX_CLI` points the build at a working copy of the compiler. The site otherwise consumes
+// the registry like any other user, which is the point of it — but that also means it cannot
+// exercise an unreleased fix, and this site is where those get found.
+const cli = process.env.HMX_CLI ?? createRequire(import.meta.url).resolve('hymarkx/bin.js')
+
+function compile(inputs, trust) {
+  if (inputs.length === 0) {
+    return
+  }
+  const result = spawnSync(
+    process.execPath,
+    [cli, 'build', ...inputs, '--out', 'dist', '--trust', trust],
+    { cwd: root, stdio: 'inherit' },
+  )
+  if (result.error !== undefined) {
+    console.error(`could not run the HyMarkX CLI: ${result.error.message}`)
+    process.exit(1)
+  }
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1)
+  }
+}
+
 await rm(out, { recursive: true, force: true })
 await mkdir(out, { recursive: true })
 
@@ -45,25 +85,46 @@ if (inputs.length === 0) {
   process.exit(1)
 }
 
-// Resolved rather than shelled out to. The first version ran `npx hmx`, which failed on a
-// clean install with no output at all: spawn errors leave `status` null, so the script exited
-// 1 in silence. Running the package's own entry point with this Node removes the shell, the
-// PATH lookup, and the platform branch in one go.
-const cli = createRequire(import.meta.url).resolve('hymarkx/bin.js')
-
-// `--trust document` deliberately: the site demonstrates the mode a host uses for content it
-// did not write. Building it in `app` mode would prove nothing about the safe path.
-const built = spawnSync(
-  process.execPath,
-  [cli, 'build', ...inputs, '--out', 'dist', '--trust', 'document'],
-  { cwd: root, stdio: 'inherit' },
+// `document` is the default and the mode a host uses for content it did not write. Only pages
+// that actually need an island are promoted, and only they carry the cost.
+compile(
+  inputs.filter((input) => !APP_TRUST.has(input)),
+  'document',
 )
-if (built.error !== undefined) {
-  console.error(`could not run the HyMarkX CLI: ${built.error.message}`)
-  process.exit(1)
-}
-if (built.status !== 0) {
-  process.exit(built.status ?? 1)
+compile(
+  inputs.filter((input) => APP_TRUST.has(input)),
+  'app',
+)
+
+// Only bundle when a page actually declared an island. `hmx build` writes the manifest beside
+// the page and removes it when the island goes, so its presence is the whole condition.
+if (existsSync(join(out, 'index.islands.json'))) {
+  const bundled = await esbuild({
+    entryPoints: [join(root, 'islands/mount.jsx')],
+    outfile: join(out, 'islands.js'),
+    bundle: true,
+    minify: true,
+    format: 'iife',
+    jsx: 'automatic',
+    target: 'es2022',
+    define: { 'process.env.NODE_ENV': '"production"' },
+    logLevel: 'warning',
+    metafile: true,
+  })
+  const bytes = Object.values(bundled.metafile.outputs)[0]?.bytes ?? 0
+  console.log(`bundled islands: ${(bytes / 1024).toFixed(0)} kB minified`)
+
+  // The host wires its own runtime in. A document cannot ask for a script — ADR-0020 rejected
+  // a `scripts:` frontmatter key deliberately, because a document that can introduce
+  // JavaScript is the escape hatch the trust boundary exists to refuse. Mounting islands is
+  // the host's job (ADR-0016), so the host adds the tag.
+  const page = join(out, 'index.html')
+  const html = await readFile(page, 'utf8')
+  await writeFile(
+    page,
+    html.replace('</body>', '<script src="/islands.js" defer></script>\n</body>'),
+    'utf8',
+  )
 }
 
 await cp(join(root, 'public'), out, { recursive: true })

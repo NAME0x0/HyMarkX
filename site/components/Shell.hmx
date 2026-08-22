@@ -113,14 +113,62 @@
 
 /* ---- hero ---- */
 
+/*
+ * The band is dark in both colour schemes, because the shader behind it is. Everything a
+ * reader needs is ordinary HTML stacked above the island — the island is empty until
+ * JavaScript mounts it, and a headline nobody can read without JavaScript is not a headline.
+ */
 :global(.hero) {
-  padding: 3.5rem 0 1rem;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  padding: 5rem 2.5rem 4rem;
+  border-radius: 1.25rem;
+  background: #080d1a;
+  color: #f8fafc;
+}
+
+:global(.hero [data-hmx-island]) {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+/*
+ * The one rule DotMatrixBackground needs, rather than the package's whole stylesheet.
+ *
+ * `@designcodeio/threeui/style.css` is 57 kB — 24 kB gzipped — and covers all 109 of its
+ * components; this page uses one class from it. Importing the sheet to get three declarations
+ * would cost more than the argument this page makes about proportional output is worth.
+ * Reproduced under the package's MIT licence, © Meng To.
+ */
+:global(.threeui-background) {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* A readable floor under the text, so the headline never depends on what the shader drew. */
+:global(.hero::after) {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, #080d1a 22%, rgba(8, 13, 26, 0.55) 62%, rgba(8, 13, 26, 0.2));
+}
+
+:global(.hero h1) {
+  max-width: 16ch;
 }
 
 :global(.lede) {
   max-width: 34rem;
   font-size: 1.2rem;
-  color: var(--site-muted);
+  color: #b6c2d4;
 }
 
 :global(.cta p) {
@@ -128,14 +176,25 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.9rem;
-  margin: 1.5rem 0 0;
+  margin: 1.75rem 0 0;
 }
 
 :global(.cta code) {
   padding: 0.55rem 0.85rem;
-  border: 1px solid var(--site-line);
+  border: 1px solid #26324c;
   border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--site-line) 30%, transparent);
+  background: #0f1729;
+  color: #e2e8f0;
+}
+
+:global(.cta a) {
+  color: #93b4fd;
+}
+
+@media (max-width: 40rem) {
+  :global(.hero) {
+    padding: 3.5rem 1.5rem 3rem;
+  }
 }
 
 /* ---- the progression stepper ---- */

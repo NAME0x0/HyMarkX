@@ -18,6 +18,8 @@ lang: en
 
 ::::::box{class=hero}
 
+::island{from="./islands/Hero.jsx" export="Hero"}
+
 # Markdown that grows with you
 
 :::::box{class=lede}
@@ -164,7 +166,9 @@ it is a test: 692 conformance examples run as a build gate, and a regression fai
 
 :::::card[The output is proportional]{}
 A document that uses no component emits no component CSS. A document with no interactive
-construct emits no JavaScript at all — not a smaller runtime, none.
+construct emits no JavaScript at all — not a smaller runtime, none. The decorative field behind
+this page's headline is a foreign component, and it costs 186 kB; the compiler made us name it
+before it would emit it.
 :::::
 
 :::::card[Safe by default, not by discipline]{}
@@ -188,6 +192,10 @@ cannot reach the network, storage, timers, or any host object.
 
 :::::metric[JavaScript for a static document]{}
 0 B
+:::::
+
+:::::metric[the decorative hero, gzipped]{}
+186 kB
 :::::
 
 :::::metric[packages, one boundary each]{}

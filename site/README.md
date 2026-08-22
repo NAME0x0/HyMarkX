@@ -12,8 +12,10 @@ npm run build     # → dist/
 npm run dev       # hmx dev, live reload
 ```
 
-Everything is built in `--trust document`, the mode a host uses for content it did not write.
-Building in `app` mode would prove nothing about the safe path.
+Documents build in `--trust document` by default — the mode a host uses for content it did not
+write. `index.hmx` is the exception: it declares an island, islands are `app`-mode only, so it
+compiles in a second pass. The exception is one named entry in `build.mjs` rather than a flag on
+the whole site, so promoting a page stays a visible decision.
 
 ## Layout
 
@@ -22,8 +24,32 @@ Building in `app` mode would prove nothing about the safe path.
 | `index.hmx` | The landing page, including the four-step progression demo |
 | `components/Shell.hmx` | Every global rule on the site, via `:global(...)` inside `<style scoped>` |
 | `components/Nav.hmx` | The header, reused by every page |
+| `islands/` | The hero's WebGL field and the host adapter that mounts it |
 | `public/` | Static files copied verbatim into `dist/` |
-| `build.mjs` | `hmx build` over every document, then the copy step |
+| `build.mjs` | Compile, bundle islands, copy static files |
+
+## The hero island
+
+The field behind the headline is [`@designcodeio/threeui`](https://threeui.com) (MIT, © Meng To)
+mounted through a HyMarkX island. HyMarkX emits `<div data-hmx-island="0">` and a manifest; it
+never imports or evaluates the module. `build.mjs` bundles the adapter with esbuild and adds the
+script tag, because mounting is the host's job (ADR-0016) and a document deliberately cannot ask
+for a script (ADR-0020).
+
+It costs **186 kB gzipped**, which the page says out loud rather than hiding.
+
+Two deliberate constraints follow from islands having no server rendering:
+
+- the hero is **decorative only** — the headline, the install command and the links are ordinary
+  HTML above it, so the page is complete before any of this loads;
+- it is skipped entirely for `prefers-reduced-motion`, and mounted after `load` so it is never
+  what a reader waits on.
+
+The package's stylesheet is 57 kB for 109 components and this page uses one class from it, so
+the single rule it needs is reproduced in `Shell.hmx` under the package's MIT licence instead.
+
+This needs `hymarkx` **0.0.7 or later**: earlier versions emitted the island placeholder without
+a manifest, so there was nothing for the host to mount.
 
 ## Why the CSS lives in a component
 
