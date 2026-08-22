@@ -9,6 +9,7 @@
  */
 import { spawnSync } from 'node:child_process'
 import { cp, mkdir, readdir, rm } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -44,13 +45,23 @@ if (inputs.length === 0) {
   process.exit(1)
 }
 
+// Resolved rather than shelled out to. The first version ran `npx hmx`, which failed on a
+// clean install with no output at all: spawn errors leave `status` null, so the script exited
+// 1 in silence. Running the package's own entry point with this Node removes the shell, the
+// PATH lookup, and the platform branch in one go.
+const cli = createRequire(import.meta.url).resolve('hymarkx/bin.js')
+
 // `--trust document` deliberately: the site demonstrates the mode a host uses for content it
 // did not write. Building it in `app` mode would prove nothing about the safe path.
 const built = spawnSync(
-  process.platform === 'win32' ? 'npx.cmd' : 'npx',
-  ['hmx', 'build', ...inputs, '--out', 'dist', '--trust', 'document'],
+  process.execPath,
+  [cli, 'build', ...inputs, '--out', 'dist', '--trust', 'document'],
   { cwd: root, stdio: 'inherit' },
 )
+if (built.error !== undefined) {
+  console.error(`could not run the HyMarkX CLI: ${built.error.message}`)
+  process.exit(1)
+}
 if (built.status !== 0) {
   process.exit(built.status ?? 1)
 }
