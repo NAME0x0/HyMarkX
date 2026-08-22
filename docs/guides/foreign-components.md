@@ -29,7 +29,10 @@ read the file and does not know whether React, Vue, or nothing at all will rende
 Two consequences worth being blunt about:
 
 1. **`hmx build` output for a document with an island is not runnable on its own.** You need a
-   host that resolves the manifest, bundles the modules, and mounts them.
+   host that resolves the manifest, bundles the modules, and mounts them. `hmx build` writes
+   the manifest beside the page as `<name>.islands.json`, on the same rule as the CSS and JS
+   sidecars: a document with no island produces no file, and one that loses its island loses
+   the file with it. From the API the same data is `result.islands`.
 2. **HMX has no framework dependency**, and never gains one. That is what keeps framework
    neutrality a property rather than a slogan (ADR-0016).
 

@@ -42,6 +42,7 @@ interface OutputTarget {
   readonly path: string
   readonly cssPath: string
   readonly jsPath: string
+  readonly islandsPath: string
 }
 
 interface ComponentResolution {
@@ -246,6 +247,7 @@ function outputTarget(
       path: resolve(root, outputName(inputPath, '.html')),
       cssPath: resolve(root, outputName(inputPath, '.css')),
       jsPath: resolve(root, outputName(inputPath, '.js')),
+      islandsPath: resolve(root, `${basename(inputPath, extname(inputPath))}.islands.json`),
     }
   }
   if (out === '-') {
@@ -261,6 +263,7 @@ function outputTarget(
     path: resolve(root, `${relativeStem}.html`),
     cssPath: resolve(root, `${relativeStem}.css`),
     jsPath: resolve(root, `${relativeStem}.js`),
+    islandsPath: resolve(root, `${relativeStem}.islands.json`),
   }
 }
 
@@ -746,6 +749,14 @@ export async function runCli(
       await writeFile(target.path, rendered.html, 'utf8')
       await writeSidecar(target.cssPath, result.css)
       await writeSidecar(target.jsPath, result.js)
+      // The island manifest is the only way a host learns what to mount. Without it `hmx build`
+      // emits placeholders that nothing can fill, which made islands unusable through the CLI
+      // even though the compiler API exposed them all along. Written on the same
+      // proportionality rule as the other sidecars: no islands, no file.
+      await writeSidecar(
+        target.islandsPath,
+        result.islands.length === 0 ? '' : `${JSON.stringify(result.islands, null, 2)}\n`,
+      )
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error)
       records.push({

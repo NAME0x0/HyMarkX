@@ -70,6 +70,49 @@ describe('built hmx CLI', () => {
   })
 
   /**
+   * A host cannot mount what it cannot find.
+   *
+   * `hmx build` emitted island placeholders and nothing else, so the only way to learn what to
+   * mount was to bypass the CLI and call the compiler API — which made islands effectively
+   * unusable through the tool most people use. Found while building this project's own site,
+   * the first real consumer of the feature.
+   *
+   * Written on the same proportionality rule as the CSS and JS sidecars: a document with no
+   * island produces no manifest, and one that loses its island loses the file with it.
+   */
+  it('writes an island manifest beside the page, and only when there is one', () => {
+    const project = mkdtempSync(join(tmpdir(), 'hmx-islands-'))
+    const document = join(project, 'index.hmx')
+    const manifest = join(project, 'dist', 'index.islands.json')
+    const run = () =>
+      spawnSync(
+        process.execPath,
+        [cliPath, 'build', 'index.hmx', '--out', 'dist', '--trust', 'app'],
+        { cwd: project, encoding: 'utf8' },
+      )
+
+    writeFileSync(document, '::island{from="./Hero.jsx" export="Hero" tone="dark"}\n', 'utf8')
+    const withIsland = run()
+
+    expect(withIsland.status).toBe(0)
+    expect(existsSync(manifest)).toBe(true)
+    expect(JSON.parse(readFileSync(manifest, 'utf8'))).toEqual([
+      { id: 0, from: './Hero.jsx', export: 'Hero', props: { tone: 'dark' } },
+    ])
+    expect(readFileSync(join(project, 'dist', 'index.html'), 'utf8')).toContain(
+      'data-hmx-island="0"',
+    )
+
+    writeFileSync(document, '# No islands here\n', 'utf8')
+    const without = run()
+
+    expect(without.status).toBe(0)
+    expect(existsSync(manifest)).toBe(false)
+
+    rmSync(project, { recursive: true, force: true })
+  })
+
+  /**
    * A document that loses its interactivity must lose its runtime with it.
    *
    * Skipping the write for empty output is only half the fix. If the previous build left a
