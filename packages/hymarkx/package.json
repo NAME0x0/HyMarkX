@@ -1,6 +1,6 @@
 {
   "name": "hymarkx",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "HyMarkX (HMX) command-line tool: build, check, format, and serve HMX documents. Installs the hmx binary.",
   "license": "MIT OR Apache-2.0",
   "publishConfig": {

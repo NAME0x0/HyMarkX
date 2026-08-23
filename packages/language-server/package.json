@@ -1,6 +1,6 @@
 {
   "name": "@hymarkx/language-server",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Language Server Protocol implementation for HyMarkX (HMX).",
   "license": "MIT OR Apache-2.0",
   "publishConfig": {
