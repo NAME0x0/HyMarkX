@@ -124,6 +124,151 @@ function guardDirectiveName(construct: Construct, type: DirectiveType): Construc
   }
 }
 
+/** What a completed content line means to the container scanning it. */
+type LineKind =
+  | { readonly kind: 'other' }
+  | { readonly kind: 'codeFence'; readonly char: number; readonly size: number; readonly bare: boolean }
+  | { readonly kind: 'open'; readonly size: number }
+  | { readonly kind: 'close'; readonly size: number }
+
+/**
+ * Classifies one content line of a container.
+ *
+ * Only the leading run matters: up to three spaces of indent, then a run of backticks, tildes,
+ * or colons. Four spaces would be an indented code block, which is why the prefix stops at
+ * three.
+ */
+function classifyLine(line: string): LineKind {
+  let index = 0
+  while (index < 3 && line.charCodeAt(index) === 32) {
+    index += 1
+  }
+  const first = line.charCodeAt(index)
+  if (first !== 96 && first !== 126 && first !== 58) {
+    return { kind: 'other' }
+  }
+
+  let size = 0
+  while (line.charCodeAt(index + size) === first) {
+    size += 1
+  }
+  if (size < 3) {
+    return { kind: 'other' }
+  }
+
+  const rest = line.slice(index + size)
+  if (first === 96 || first === 126) {
+    return { kind: 'codeFence', char: first, size, bare: rest.trim() === '' }
+  }
+  // A directive opener is followed by its name; a closing fence has nothing but whitespace.
+  return rest.trim() === '' ? { kind: 'close', size } : { kind: 'open', size }
+}
+
+/**
+ * Makes a container's content scan aware of code fences and of nested containers (ADR-0021).
+ *
+ * The upstream container tests every line for its closing fence before that line reaches the
+ * flow tokenizer, so it cannot tell markup from a code sample: a page quoting `:::note` lost
+ * everything after the quoted closing fence, silently. The same blindness is why nesting
+ * required the outer fence to be longer — the outer scan cannot see that an inner container is
+ * open.
+ *
+ * Both are fixed with state the scan can actually have. The closing-fence attempt for line *n*
+ * happens before line *n* is consumed, but it only needs to know about lines *1..n-1*: whether
+ * a code fence is still open, and whether an inner container is still open. Observing `consume`
+ * gives exactly that, so the attempt is suppressed — the line is content — whenever either is
+ * true.
+ *
+ * Wrapping rather than replacing keeps the opening parse, the label and attribute factories,
+ * and the lazy-line handling upstream's, which is where the subtlety lives.
+ */
+function guardContainerNesting(construct: Construct): Construct {
+  return {
+    ...construct,
+    tokenize(effects, ok, nok) {
+      let inContent = false
+      let line = ''
+      let codeFence: { char: number; size: number } | undefined
+      const inner: number[] = []
+
+      /** Applies a finished line to the scan state. */
+      function endLine(): void {
+        const classified = classifyLine(line)
+        line = ''
+        if (codeFence !== undefined) {
+          if (
+            classified.kind === 'codeFence' &&
+            classified.char === codeFence.char &&
+            classified.size >= codeFence.size &&
+            classified.bare
+          ) {
+            codeFence = undefined
+          }
+          // Everything else inside a fence is literal, including directive syntax.
+          return
+        }
+        if (classified.kind === 'codeFence') {
+          codeFence = { char: classified.char, size: classified.size }
+          return
+        }
+        if (classified.kind === 'open') {
+          inner.push(classified.size)
+          return
+        }
+        if (classified.kind === 'close') {
+          // Closes the innermost container this scan has seen opened with no more colons than
+          // the fence carries, and with it anything still open inside that one.
+          for (let index = inner.length - 1; index >= 0; index -= 1) {
+            if ((inner[index] as number) <= classified.size) {
+              inner.length = index
+              return
+            }
+          }
+        }
+      }
+
+      const guardedEffects: Effects = {
+        ...effects,
+        enter(type, fields) {
+          if (type === 'directiveContainerContent') {
+            inContent = true
+          }
+          return effects.enter(type, fields)
+        },
+        consume(code) {
+          // Only the container's content is scanned. Its own opening line runs through here
+          // first, and counting that as a nested opener left the stack permanently non-empty —
+          // which suppressed every closing fence and made each container run to end of file.
+          if (inContent) {
+            if (markdownLineEnding(code)) {
+              endLine()
+            } else if (code !== null) {
+              line += String.fromCodePoint(code)
+            }
+          }
+          return effects.consume(code)
+        },
+        attempt(candidate, attemptOk, attemptNok) {
+          // The only attempt made at the start of a content line is the closing fence. Label and
+          // attribute attempts happen on the opening line, before content begins, and the
+          // lazy-line test is a `check` rather than an attempt.
+          if (
+            inContent &&
+            line === '' &&
+            attemptNok !== undefined &&
+            (codeFence !== undefined || inner.length > 0)
+          ) {
+            return attemptNok
+          }
+          return effects.attempt(candidate, attemptOk, attemptNok)
+        },
+      }
+
+      return construct.tokenize.call(this, guardedEffects, ok, nok)
+    },
+  }
+}
+
 /**
  * ASCII letters and digits only.
  *
@@ -159,7 +304,9 @@ export function directiveTokenizer(): ReturnType<typeof directive> {
     flow: {
       ...extension.flow,
       58: flowColon.map((construct, index) =>
-        guardDirectiveName(construct, index === 0 ? 'containerDirective' : 'leafDirective'),
+        index === 0
+          ? guardContainerNesting(guardDirectiveName(construct, 'containerDirective'))
+          : guardDirectiveName(construct, 'leafDirective'),
       ),
     },
     text: {

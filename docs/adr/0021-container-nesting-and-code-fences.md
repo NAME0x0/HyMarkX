@@ -117,9 +117,15 @@ reported at the inner opener rather than swallowing the remainder of the outer o
 was sound when directive content might have been opaque. It is not, so the parity is
 superficial.
 
-**The upstream extension keeps its behaviour**, and HMX wraps it. That is a maintenance cost
-worth naming: this project now carries a container continuation of its own, and an upstream
-change to that construct will need reviewing rather than merely absorbing.
+**The upstream extension keeps its behaviour**, and HMX wraps it — the construct is not
+vendored, which the first design assumed would be necessary. The wrapper observes `consume` to
+learn what the previous lines were, and suppresses the closing-fence attempt while a code fence
+or an inner container is open. That works because the attempt for line *n* happens before line
+*n* is read, and only lines *1..n-1* are needed to make the decision.
+
+The maintenance cost is worth naming: this project now depends on where upstream places that
+attempt. An upstream change to the container needs reviewing rather than merely absorbing, and
+the tests in `packages/parser/test/directives.test.ts` are what would catch it.
 
 **The compatibility suite is the gate.** A document containing no HMX construct must still
 render identically to CommonMark plus GFM, and no existing fixture may change. Both rules are

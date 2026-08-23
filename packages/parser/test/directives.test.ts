@@ -367,3 +367,72 @@ describe('directives', () => {
     })
   })
 })
+
+/**
+ * ADR-0021. Both rules exist because building this project's own documentation page produced
+ * silently wrong output, so both are held here rather than left to the golden fixtures.
+ */
+describe('container nesting and code fences (ADR-0021)', () => {
+  /**
+   * The failure this fixed was silent: the `:::` closing a quoted sample closed the container
+   * around it, the code block was truncated at that line, and no diagnostic was emitted. A page
+   * that teaches the syntax quotes the syntax, so this is the documentation case exactly.
+   */
+  it('does not read a closing fence inside a fenced code block', () => {
+    const result = parse(':::box\n\n```md\n:::note\nBody\n:::\n```\n\n:::\n')
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.root.children).toHaveLength(1)
+    const container = result.root.children[0] as { type: string; children: unknown[] }
+    expect(container.type).toBe('containerDirective')
+    expect(container.children).toMatchObject([
+      { type: 'code', lang: 'md', value: ':::note\nBody\n:::' },
+    ])
+  })
+
+  it('closes a code fence only on the same character, at least as long', () => {
+    // The `~~~` never closes the backtick fence, so the container's own fence stays quoted too.
+    const result = parse(':::box\n\n````md\n~~~\n:::\n````\n\n:::\n')
+
+    expect(result.diagnostics).toEqual([])
+    const container = result.root.children[0] as { children: { value: string }[] }
+    expect(container.children[0]?.value).toBe('~~~\n:::')
+  })
+
+  it('nests containers of the same colon count', () => {
+    const result = parse(':::grid\n:::card\nBody\n:::\n:::\n')
+
+    expect(result.diagnostics).toEqual([])
+    expect(result.root.children).toMatchObject([
+      {
+        type: 'containerDirective',
+        name: 'grid',
+        children: [{ type: 'containerDirective', name: 'card' }],
+      },
+    ])
+  })
+
+  /**
+   * The rule every existing document was written against. A closing fence closes the innermost
+   * container opened with no more colons than it carries, so giving the outer fence more colons
+   * still means what it always meant.
+   */
+  it('keeps the longer-outer-fence form working unchanged', () => {
+    const result = parse('::::grid\n:::card\nBody\n:::\n::::\n')
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual([])
+    expect(result.root.children).toMatchObject([
+      {
+        type: 'containerDirective',
+        name: 'grid',
+        children: [{ type: 'containerDirective', name: 'card' }],
+      },
+    ])
+  })
+
+  it('still reports an unclosed container', () => {
+    const result = parse(':::grid\n:::card\nBody\n:::\n')
+
+    expect(result.diagnostics.map(({ code }) => code)).toEqual(['HMX1001'])
+  })
+})
