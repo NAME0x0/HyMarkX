@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "geist": "^1.7.2",
-    "hymarkx": "0.0.7",
+    "hymarkx": "0.0.8",
     "ogl": "^1.0.11"
   },
   "devDependencies": {
