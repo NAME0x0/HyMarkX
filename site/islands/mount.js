@@ -1,4 +1,5 @@
 import * as hero from './hero.js'
+import { enhance } from './enhance.js'
 
 /**
  * The host adapter — the only code on this site that knows how islands mount.
@@ -34,10 +35,17 @@ async function mountIslands() {
  * Mounted after first paint, and skipped entirely for readers who asked for less motion. The
  * page is complete without this file; it should never be what a reader waits on.
  */
-if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  if (document.readyState === 'complete') {
+function start() {
+  // Copy buttons and reveals are not motion for its own sake, so they run either way. Only the
+  // shader is skipped for readers who asked for less movement.
+  enhance()
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     void mountIslands()
-  } else {
-    window.addEventListener('load', () => void mountIslands(), { once: true })
   }
+}
+
+if (document.readyState === 'complete') {
+  start()
+} else {
+  window.addEventListener('load', start, { once: true })
 }

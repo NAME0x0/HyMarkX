@@ -13,38 +13,50 @@
 }
 
 /*
- * Dark first, and committed to.
+ * Ember over ink.
  *
- * The previous version was a light page with one dark hero, which reads as an accident rather
- * than a decision. The shaders are dark-native and the tooling audience lives in dark editors,
- * so the page follows the hero instead of fighting it. Light is still honoured below.
+ * Blue was the previous accent and it is every other developer tool's accent too. Warm amber on
+ * a near-black that carries a little warmth of its own gives the page an identity, keeps
+ * contrast high, and stays clear of the violet-to-blue gradient the design audit calls the most
+ * common AI fingerprint. One accent, used for everything interactive.
  */
 :global(:root) {
-  --bg: #090d16;
-  --surface: #0f1523;
-  --surface-high: #141c2e;
-  --line: #1d2740;
-  --ink: #e9edf6;
-  --muted: #8d9ab1;
-  --accent: #5b8cff;
-  --accent-ink: #b9cdff;
-  --shadow: 0 1px 2px rgba(3, 6, 14, 0.6), 0 8px 24px -12px rgba(3, 6, 14, 0.9);
+  --bg: #08080c;
+  --bg-lift: #0c0c12;
+  --surface: #101017;
+  --surface-high: #17171f;
+  --line: #23232f;
+  --line-bright: #32323f;
+  --ink: #f3f0ea;
+  --muted: #9c968f;
+  --muted-dim: #6f6a66;
+  --accent: #ff9e5e;
+  --accent-ink: #ffc9a5;
+  --accent-quiet: rgba(255, 158, 94, 0.14);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 40px -24px rgba(0, 0, 0, 0.9);
 
+  --step--2: 0.75rem;
   --step--1: 0.875rem;
-  --step-0: 1rem;
-  --step-1: 1.15rem;
-  --step-2: clamp(1.35rem, 1.1rem + 1vw, 1.7rem);
-  --step-3: clamp(1.8rem, 1.3rem + 2.2vw, 2.6rem);
-  --step-4: clamp(2.6rem, 1.6rem + 4.6vw, 4.4rem);
+  --step-0: 1.0625rem;
+  --step-1: 1.2rem;
+  --step-2: clamp(1.4rem, 1.1rem + 1.1vw, 1.8rem);
+  --step-3: clamp(1.9rem, 1.3rem + 2.4vw, 2.85rem);
+  --step-4: clamp(2.7rem, 1.5rem + 5.2vw, 4.8rem);
 
   --space-1: 0.5rem;
   --space-2: 0.875rem;
   --space-3: 1.5rem;
   --space-4: 2.5rem;
   --space-5: 4rem;
-  --space-6: 6.5rem;
+  --space-6: 7rem;
 
-  --hmx-radius: 0.75rem;
+  --radius-sm: 0.4rem;
+  --radius: 0.7rem;
+  --radius-lg: 1.1rem;
+  --radius-xl: 1.6rem;
+
+  --hmx-radius: var(--radius);
   --hmx-color-surface: var(--surface);
   --hmx-color-text: var(--ink);
   --hmx-color-muted: var(--muted);
@@ -53,15 +65,8 @@
 }
 
 /*
- * One scheme, deliberately.
- *
- * A light variant was written first and then removed: it put a dark hero band in a light page,
- * which is the copy-paste-accident look this redesign existed to fix. The hero's shader is
- * dark-native, so the page follows it rather than fighting it. `color-scheme` tells the browser
- * so form controls and scrollbars match instead of flashing white.
- *
- * A light page is now expressible — Grainient's colours are parameters — but it is a design
- * decision rather than a CSS one, so it stays out until it is actually made.
+ * One scheme, deliberately. A dark hero band in an otherwise light page is the copy-paste-
+ * accident look the design audit names; the shader is dark-native, so the page follows it.
  */
 :global(html) {
   color-scheme: dark;
@@ -75,26 +80,26 @@
 }
 
 :global(body) {
-  max-width: 68rem;
+  max-width: 72rem;
   margin: 0 auto;
   padding: 0 var(--space-3) var(--space-5);
   background: var(--bg);
   color: var(--ink);
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: var(--step-0);
-  line-height: 1.6;
+  line-height: 1.62;
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Breaks the digital flatness without shipping an image: one tiny SVG, no requests. */
+/* Breaks the digital flatness without shipping an image: one inline SVG, no request. */
 :global(body::before) {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.28;
+  opacity: 0.3;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
 }
 
@@ -103,30 +108,32 @@
   z-index: 1;
 }
 
+/* ---- typography ---- */
+
 :global(h1),
 :global(h2),
 :global(h3) {
-  line-height: 1.08;
-  letter-spacing: -0.028em;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
   text-wrap: balance;
-  font-weight: 620;
+  font-weight: 640;
 }
 
 :global(h1) {
   font-size: var(--step-4);
   margin: 0 0 var(--space-3);
-  letter-spacing: -0.038em;
+  letter-spacing: -0.042em;
 }
 
 :global(h2) {
   font-size: var(--step-3);
-  margin: var(--space-6) 0 var(--space-2);
+  margin: 0 0 var(--space-2);
 }
 
 :global(h3) {
   font-size: var(--step-1);
   margin: 0 0 var(--space-1);
-  letter-spacing: -0.018em;
+  letter-spacing: -0.02em;
 }
 
 :global(p) {
@@ -134,16 +141,15 @@
   text-wrap: pretty;
 }
 
-/* Roughly 68 characters. Prose wider than this stops being readable. */
-:global(section > p) {
-  max-width: 62ch;
-  color: var(--muted);
+:global(strong) {
+  font-weight: 600;
+  color: var(--ink);
 }
 
 :global(a) {
   color: var(--accent);
-  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-underline-offset: 0.2em;
   transition: color 180ms ease, text-decoration-color 180ms ease;
 }
 
@@ -155,41 +161,95 @@
 :global(:focus-visible) {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 :global(code) {
   font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, monospace;
-  font-size: 0.88em;
+  font-size: 0.86em;
+}
+
+/* Inline code reads as a chip rather than as differently-shaped prose. */
+:global(p > code),
+:global(li > code) {
+  padding: 0.12em 0.38em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--accent-ink);
 }
 
 :global(pre) {
+  position: relative;
   margin: 0;
   padding: var(--space-3);
   overflow-x: auto;
   border: 1px solid var(--line);
-  border-radius: 0.6rem;
-  background: var(--surface);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface-high), var(--surface));
   color: var(--ink);
-  font-size: 0.82rem;
-  line-height: 1.7;
-  box-shadow: var(--shadow);
+  font-size: 0.84rem;
+  line-height: 1.75;
+  box-shadow: var(--shadow-sm);
 }
 
-/* A keyboard user should not have to tab the whole nav to reach the page. */
+:global(pre.has-copy) {
+  padding-right: 5.5rem;
+}
+
+/* ---- copy button ---- */
+
+/*
+ * Added by host code, because HMX cannot express it: a handler cannot reach
+ * `navigator.clipboard`, or any host object, by design (ADR-0004).
+ */
+:global(.copy) {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius-sm);
+  background: var(--surface-high);
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--step--2);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+:global(pre:hover .copy),
+:global(.copy:focus-visible) {
+  opacity: 1;
+}
+
+:global(.copy:hover) {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+:global(.copy[data-state="copied"]) {
+  opacity: 1;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---- skip link ---- */
+
 :global(.skip) {
   position: absolute;
   left: -9999px;
   top: 0;
-  z-index: 10;
+  z-index: 20;
   padding: var(--space-1) var(--space-2);
   border: 1px solid var(--line);
-  border-radius: 0 0 0.5rem 0;
+  border-radius: 0 0 var(--radius-sm) 0;
   background: var(--surface-high);
 }
 
-/* `:focus-within`, not `:focus` — the link is inside the wrapper, so the wrapper never
-   receives focus itself. */
+/* `:focus-within`, not `:focus` — the link is inside the wrapper. */
 :global(.skip:focus-within) {
   left: 0;
 }
@@ -200,8 +260,25 @@
 
 /* ---- navigation ---- */
 
+:global(.nav-sentinel) {
+  height: 1px;
+}
+
 :global(.site-nav) {
-  padding: var(--space-3) 0;
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  margin-inline: calc(var(--space-3) * -1);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid transparent;
+  transition: background 220ms ease, border-color 220ms ease, backdrop-filter 220ms ease;
+}
+
+/* Earns a background only once it is over content, so the hero starts clean. */
+:global(.site-nav[data-stuck="true"]) {
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom-color: var(--line);
 }
 
 :global(.site-nav p) {
@@ -215,37 +292,130 @@
 :global(.site-nav p > a:first-child) {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.7rem;
   margin-right: auto;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  font-size: var(--step-0);
+  font-weight: 640;
+  letter-spacing: -0.03em;
+  font-size: 1.35rem;
   color: var(--ink);
   text-decoration: none;
 }
 
 :global(.site-nav img) {
   display: block;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 0.4rem;
-  box-shadow: 0 0 0 1px var(--line);
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.55rem;
+  box-shadow: 0 0 0 1px var(--line-bright), 0 6px 18px -10px rgba(0, 0, 0, 0.9);
 }
 
 :global(.site-nav a) {
   color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
+  transition: color 160ms ease;
 }
 
 :global(.site-nav a:hover) {
   color: var(--ink);
 }
 
-@media (max-width: 32rem) {
+@media (max-width: 34rem) {
   :global(.site-nav p) {
     gap: var(--space-2);
-    font-size: 0.8rem;
+    font-size: var(--step--2);
+  }
+
+  :global(.site-nav p > a:first-child) {
+    font-size: 1.1rem;
+  }
+}
+
+/* ---- section rhythm ---- */
+
+/*
+ * One vertical unit between sections, and an eyebrow above each heading so the page reads as
+ * chapters rather than as a stack of cards. The counter makes the numbering structural — adding
+ * a section renumbers the rest instead of leaving a stale label behind.
+ */
+:global(body) {
+  counter-reset: chapter;
+}
+
+:global(.chapter) {
+  margin-top: var(--space-6);
+}
+
+:global(.eyebrow p) {
+  counter-increment: chapter;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 var(--space-2);
+  font-size: var(--step--2);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+:global(.eyebrow p::before) {
+  content: counter(chapter, decimal-leading-zero);
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--accent-quiet);
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+:global(.lead) {
+  max-width: 58ch;
+  font-size: var(--step-1);
+  color: var(--muted);
+  margin-bottom: var(--space-3);
+}
+
+/* ---- scroll reveal ---- */
+
+/*
+ * Native scroll-driven animation where the browser has it, which is no JavaScript at all. The
+ * fallback in `enhance.js` only ever adds `data-revealed`, so a browser with neither still shows
+ * everything — content is never hidden by default, only animated from a lowered state.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.reveal) {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports not (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.reveal) {
+      opacity: 0;
+      transform: translateY(1.25rem);
+      transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    :global(.reveal[data-revealed="true"]) {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 
@@ -255,11 +425,12 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  margin-top: var(--space-2);
   padding: var(--space-6) var(--space-4) var(--space-5);
   border: 1px solid var(--line);
-  border-radius: 1.5rem;
-  background: #070b14;
-  color: #f2f5fb;
+  border-radius: var(--radius-xl);
+  background: #08080c;
+  color: #fbf7f2;
   box-shadow: var(--shadow);
 }
 
@@ -270,30 +441,43 @@
 }
 
 /*
- * A readable floor under the text, and no more than that.
- *
- * The previous scrim was nearly opaque because the shader behind it was tuned for someone
- * else's page and fought the headline. Grainient's palette is set to this page's colours, so
- * the gradient can stay visible and the scrim only has to protect the first column of text.
+ * A readable floor under the text and no more. The palette is tuned to this page, so the
+ * gradient stays visible instead of being hidden behind a near-opaque scrim.
  */
 :global(.hero::after) {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(95deg, rgba(7, 11, 20, 0.9) 18%, rgba(7, 11, 20, 0.55) 48%, rgba(7, 11, 20, 0.12) 82%);
+  background: linear-gradient(98deg, rgba(8, 8, 12, 0.94) 20%, rgba(8, 8, 12, 0.72) 44%, rgba(8, 8, 12, 0.12) 86%);
 }
 
 :global(.hero h1) {
-  max-width: 15ch;
+  max-width: 14ch;
+}
+
+:global(.hero-eyebrow p) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 var(--space-3);
+  padding: 0.3rem 0.7rem 0.3rem 0.4rem;
+  border: 1px solid rgba(255, 158, 94, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 158, 94, 0.1);
+  color: var(--accent-ink);
+  font-size: var(--step--2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
 }
 
 :global(.lede) {
-  max-width: 46ch;
+  max-width: 44ch;
   font-size: var(--step-2);
-  line-height: 1.4;
-  color: #aebbd2;
-  letter-spacing: -0.012em;
+  line-height: 1.38;
+  color: #c9c1b8;
+  letter-spacing: -0.014em;
 }
 
 :global(.cta p) {
@@ -305,31 +489,26 @@
 }
 
 :global(.cta code) {
-  padding: 0.6rem 0.9rem;
-  border: 1px solid #26314c;
-  border-radius: 0.55rem;
-  background: #0d1424;
-  color: #dbe4f5;
-  transition: border-color 180ms ease, transform 180ms ease;
-}
-
-:global(.cta code:hover) {
-  border-color: #3c4a6d;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid #2c2a33;
+  border-radius: var(--radius-sm);
+  background: rgba(12, 12, 18, 0.86);
+  color: #efe7dd;
+  font-size: 0.9rem;
 }
 
 :global(.cta a) {
-  color: #9dbaff;
+  color: var(--accent-ink);
 }
-
 
 /* ---- the progression stepper ---- */
 
 :global(.stepper) {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
   border: 1px solid var(--line);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--surface);
+  background: var(--bg-lift);
   box-shadow: var(--shadow);
 }
 
@@ -340,7 +519,7 @@
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--line);
-  background: var(--surface-high);
+  background: var(--surface);
 }
 
 :global(.stepper-bar p) {
@@ -352,9 +531,9 @@
 
 :global(.stepper .hmx-button) {
   padding: 0.4rem 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  background: var(--surface);
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius-sm);
+  background: var(--surface-high);
   color: var(--ink);
   font: inherit;
   font-size: var(--step--1);
@@ -363,8 +542,8 @@
 }
 
 :global(.stepper .hmx-button:hover) {
-  background: var(--surface-high);
   border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
 :global(.stepper .hmx-button:active) {
@@ -373,8 +552,8 @@
 
 /*
  * Every step is emitted and CSS shows the live one. HMX has conditional operators inside
- * expressions but no conditional blocks, so a reactive class is the honest way to express
- * this — and it means the page is correct with JavaScript off, showing step one.
+ * expressions but no conditional blocks, so a reactive class is the honest way to express this
+ * — and the page is correct with JavaScript off, showing step one.
  */
 :global(.step) {
   display: none;
@@ -396,27 +575,27 @@
 :global(.pane > h3:first-child),
 :global(.preview > h3:first-child) {
   margin: 0 0 var(--space-2);
-  font-size: 0.7rem;
+  font-size: var(--step--2);
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--muted-dim);
 }
 
 :global(.preview h3:not(:first-child)) {
   margin: 0 0 var(--space-1);
   font-size: var(--step-2);
-  font-weight: 620;
-  letter-spacing: -0.028em;
+  font-weight: 640;
+  letter-spacing: -0.03em;
   text-transform: none;
   color: var(--ink);
 }
 
 :global(.preview) {
   padding: var(--space-3);
-  border: 1px dashed var(--line);
-  border-radius: 0.6rem;
-  background: var(--surface-high);
+  border: 1px dashed var(--line-bright);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
 :global(.preview > :last-child) {
@@ -425,18 +604,10 @@
 
 /* ---- features: deliberately asymmetric ---- */
 
-:global(hr) {
-  border: 0;
-  border-top: 1px solid var(--line);
-  margin: var(--space-5) 0 0;
-}
-
 :global(.features) {
   display: grid;
   gap: var(--space-2);
   grid-template-columns: 1fr;
-  /* Cards size to their content. Stretching a short card to match a long one leaves a block of
-     dead space that reads as a mistake. */
   align-items: start;
   margin-top: var(--space-3);
 }
@@ -461,21 +632,39 @@
 }
 
 :global(.features .hmx-card) {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   padding: var(--space-3);
-  transition: border-color 200ms ease, background 200ms ease;
+  transition: border-color 220ms ease, background 220ms ease, transform 220ms ease;
+}
+
+:global(.features .hmx-card::before) {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 220ms ease;
 }
 
 :global(.features .hmx-card:hover) {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-color: var(--line-bright);
   background: var(--surface-high);
+  transform: translateY(-2px);
+}
+
+:global(.features .hmx-card:hover::before) {
+  opacity: 0.7;
 }
 
 :global(.features .hmx-card-title) {
   font-size: var(--step-1);
-  letter-spacing: -0.018em;
+  letter-spacing: -0.022em;
   margin-bottom: var(--space-1);
 }
 
@@ -493,7 +682,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: var(--space-3);
   border: 1px solid var(--line);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--line);
 }
@@ -511,37 +700,33 @@
   padding: var(--space-3);
   background: var(--surface);
   font-size: var(--step-3);
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-weight: 620;
+  letter-spacing: -0.035em;
   font-variant-numeric: tabular-nums;
-  transition: background 200ms ease;
+  transition: background 220ms ease, color 220ms ease;
 }
 
 :global(.numbers .hmx-metric:hover) {
   background: var(--surface-high);
+  color: var(--accent-ink);
 }
 
-/* Two lines reserved so every value sits on the same baseline whether its label wraps or not.
-   Misaligned figures across a row of numbers look broken. */
+/* Two lines reserved so every value sits on the same baseline whether its label wraps or not. */
 :global(.numbers .hmx-metric-label) {
   min-height: 2.4em;
-  font-size: 0.72rem;
-  line-height: 1.2;
-  letter-spacing: 0.06em;
+  font-size: var(--step--2);
+  line-height: 1.25;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--muted-dim);
   margin-bottom: var(--space-2);
 }
 
 /* ---- start ---- */
 
-:global(.start) {
+:global(.start .hmx-note) {
   margin-top: var(--space-3);
-}
-
-:global(.start p) {
-  color: var(--muted);
-  max-width: 62ch;
+  border-radius: var(--radius);
 }
 
 :global(.site-footer) {
@@ -549,7 +734,7 @@
   padding-top: var(--space-3);
   border-top: 1px solid var(--line);
   font-size: var(--step--1);
-  color: var(--muted);
+  color: var(--muted-dim);
 }
 
 :global(.site-footer p) {
@@ -560,7 +745,7 @@
 @media (max-width: 40rem) {
   :global(.hero) {
     padding: var(--space-5) var(--space-3) var(--space-4);
-    border-radius: 1.1rem;
+    border-radius: var(--radius-lg);
   }
 }
 </style>

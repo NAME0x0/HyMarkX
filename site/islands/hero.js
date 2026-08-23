@@ -38,6 +38,10 @@ uniform float uRotationAmount;
 uniform float uNoiseScale;
 uniform float uGrainAmount;
 uniform float uGrainScale;
+uniform float uDotScale;
+uniform float uDotRadius;
+uniform float uDotAmount;
+uniform float uDotPulse;
 uniform float uContrast;
 uniform float uGamma;
 uniform float uSaturation;
@@ -85,6 +89,22 @@ void mainImage(out vec4 o, vec2 C){
   vec3 layer2=mix(colOrg,colLav,S(edge0,edge1,blendX));
   vec3 col=mix(layer1,layer2,S(v0,v1,tuv.y));
 
+  // The dot matrix, folded into the same pass as the gradient rather than layered as a second
+  // canvas. The grid is aspect-corrected so the dots stay circular, and each one breathes on a
+  // phase offset taken from its own cell, so the field ripples instead of blinking in unison.
+  vec2 cell=uv*vec2(ratio,1.0)*uDotScale;
+  vec2 cellId=floor(cell);
+  vec2 cellUv=fract(cell)-0.5;
+  float phase=hash(cellId).x*6.2831;
+  float pulse=0.65+0.35*sin(t*uDotPulse*6.2831+phase);
+  // Named dotMask rather than dot: that name is a GLSL built-in, and shadowing it breaks the
+  // luma read on the next line.
+  float dotMask=1.0-smoothstep(uDotRadius*pulse*0.65,uDotRadius*pulse,length(cellUv));
+  // Brightest where the gradient already is, so the matrix reads as texture on the light rather
+  // than as a grid sitting on top of it.
+  float lift=dotMask*uDotAmount*(0.35+0.65*dot(col,vec3(0.2126,0.7152,0.0722)));
+  col+=vec3(lift);
+
   vec2 grainUv=uv*max(uGrainScale,0.001);
   float grain=fract(sin(dot(grainUv,vec2(12.9898,78.233)))*43758.5453);
   col+=(grain-0.5)*uGrainAmount;
@@ -124,27 +144,33 @@ function hexToRgb(hex) {
  * stay readable, which wasted most of what it drew.
  */
 const DEFAULTS = {
-  color1: '#3f6fe0',
-  color2: '#14224a',
-  color3: '#070b14',
-  timeSpeed: 0.14,
-  colorBalance: 0.1,
+  // Ember over ink. Blue everywhere was the palette of every other developer-tool page; this
+  // one runs warm, and the violet mid-tone keeps the falloff from going muddy.
+  color1: '#ff9e5e',
+  color2: '#3a1f47',
+  color3: '#08080c',
+  timeSpeed: 0.4,
+  colorBalance: 0.08,
   warpStrength: 1,
-  warpFrequency: 4,
-  warpSpeed: 1.4,
-  warpAmplitude: 60,
-  blendAngle: 18,
-  blendSoftness: 0.16,
-  rotationAmount: 260,
-  noiseScale: 1.6,
-  grainAmount: 0.06,
+  warpFrequency: 4.2,
+  warpSpeed: 2.6,
+  warpAmplitude: 46,
+  blendAngle: 22,
+  blendSoftness: 0.18,
+  rotationAmount: 300,
+  noiseScale: 1.7,
+  grainAmount: 0.055,
   grainScale: 2.4,
-  contrast: 1.12,
+  dotScale: 96,
+  dotRadius: 0.34,
+  dotAmount: 0.5,
+  dotPulse: 0.22,
+  contrast: 1.1,
   gamma: 1,
-  saturation: 0.92,
-  centerX: -0.06,
-  centerY: 0,
-  zoom: 0.92,
+  saturation: 0.95,
+  centerX: -0.08,
+  centerY: -0.04,
+  zoom: 0.9,
 }
 
 /** Mounts the field into `element`. Returns a teardown. */
@@ -181,6 +207,10 @@ export function Hero(element, props = {}) {
       uNoiseScale: { value: options.noiseScale },
       uGrainAmount: { value: options.grainAmount },
       uGrainScale: { value: options.grainScale },
+      uDotScale: { value: options.dotScale },
+      uDotRadius: { value: options.dotRadius },
+      uDotAmount: { value: options.dotAmount },
+      uDotPulse: { value: options.dotPulse },
       uContrast: { value: options.contrast },
       uGamma: { value: options.gamma },
       uSaturation: { value: options.saturation },
