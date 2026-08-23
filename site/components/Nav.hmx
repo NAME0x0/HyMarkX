@@ -1,9 +1,9 @@
 :::box{as=nav class=site-nav}
 [![HyMarkX](/logo-32.png) HyMarkX](/)
-[How it works](#how)
-[Why](#why)
-[Cost](#cost)
-[Start](#start)
+[How it works](/#how)
+[Why](/#why)
+[Cost](/#cost)
+[Docs](/docs)
 [GitHub](https://github.com/NAME0x0/HyMarkX)
 [npm](https://www.npmjs.com/package/hymarkx)
 :::

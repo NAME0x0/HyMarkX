@@ -105,12 +105,11 @@ compile(
   'app',
 )
 
-// Only bundle when a page actually declared an island. `hmx build` writes the manifest beside
-// the page and removes it when the island goes, so its presence is the whole condition.
-if (existsSync(join(out, 'index.islands.json'))) {
-  const bundled = await esbuild({
-    entryPoints: [join(root, 'islands/mount.js')],
-    outfile: join(out, 'islands.js'),
+/** Bundles one entry with esbuild and reports what it cost. */
+async function bundle(entry, outfile, label) {
+  const built = await esbuild({
+    entryPoints: [join(root, entry)],
+    outfile: join(out, outfile),
     bundle: true,
     minify: true,
     format: 'iife',
@@ -118,20 +117,36 @@ if (existsSync(join(out, 'index.islands.json'))) {
     logLevel: 'warning',
     metafile: true,
   })
-  const bytes = Object.values(bundled.metafile.outputs)[0]?.bytes ?? 0
-  console.log(`bundled islands: ${(bytes / 1024).toFixed(0)} kB minified`)
+  const bytes = Object.values(built.metafile.outputs)[0]?.bytes ?? 0
+  console.log(`bundled ${label}: ${(bytes / 1024).toFixed(0)} kB minified`)
+}
 
-  // The host wires its own runtime in. A document cannot ask for a script — ADR-0020 rejected
-  // a `scripts:` frontmatter key deliberately, because a document that can introduce
-  // JavaScript is the escape hatch the trust boundary exists to refuse. Mounting islands is
-  // the host's job (ADR-0016), so the host adds the tag.
-  const page = join(out, 'index.html')
-  const html = await readFile(page, 'utf8')
-  await writeFile(
-    page,
-    html.replace('</body>', '<script src="/islands.js" defer></script>\n</body>'),
-    'utf8',
-  )
+/**
+ * The host wires its own runtime in.
+ *
+ * A document cannot ask for a script — ADR-0020 rejected a `scripts:` frontmatter key
+ * deliberately, because a document that can introduce JavaScript is the escape hatch the trust
+ * boundary exists to refuse. Mounting islands and adding copy buttons are the host's job
+ * (ADR-0016), so the host adds the tags.
+ */
+async function addScript(page, src) {
+  const file = join(out, page)
+  const html = await readFile(file, 'utf8')
+  await writeFile(file, html.replace('</body>', `<script src="${src}" defer></script>
+</body>`), 'utf8')
+}
+
+// Enhancement is page-agnostic and cheap, so every page gets it.
+await bundle('islands/enhance-entry.js', 'enhance.js', 'enhancement')
+for (const input of inputs) {
+  await addScript(input.replace(/\.hmx$/, '.html'), '/enhance.js')
+}
+
+// Islands are bundled only when a page actually declared one. `hmx build` writes the manifest
+// beside the page and removes it when the island goes, so its presence is the whole condition.
+if (existsSync(join(out, 'index.islands.json'))) {
+  await bundle('islands/mount.js', 'islands.js', 'islands')
+  await addScript('index.html', '/islands.js')
 }
 
 await cp(join(root, 'public'), out, { recursive: true })

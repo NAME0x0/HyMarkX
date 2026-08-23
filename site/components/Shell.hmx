@@ -312,9 +312,11 @@
 :global(.site-nav p) {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 0.15rem;
   margin: 0;
-  font-size: var(--step--1);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
 }
 
 :global(.site-nav p > a:first-child) {
@@ -323,9 +325,9 @@
   gap: 0.7rem;
   margin-right: auto;
   padding-inline: 0;
-  font-weight: 640;
-  letter-spacing: -0.03em;
-  font-size: 1.35rem;
+  font-weight: 660;
+  letter-spacing: -0.035em;
+  font-size: 1.45rem;
   color: var(--ink);
 }
 
@@ -556,6 +558,58 @@
   font-size: 0.9rem;
 }
 
+/* The install command, promoted to a real button by `enhance.js` so it can be copied. */
+:global(.install-copy) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.75rem;
+  padding: 0 0.75rem 0 0;
+  border: 1px solid #2c2a33;
+  border-radius: var(--radius-sm);
+  background: rgba(12, 12, 18, 0.86);
+  color: #efe7dd;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+:global(.install-copy code) {
+  border: 0;
+  background: none;
+  padding: 0.65rem 0 0.65rem 0.95rem;
+  color: inherit;
+}
+
+:global(.install-copy-hint) {
+  padding-left: 0.7rem;
+  border-left: 1px solid #2c2a33;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--step--2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+:global(.install-copy:hover) {
+  border-color: var(--accent);
+  background: rgba(20, 16, 14, 0.92);
+}
+
+:global(.install-copy:hover .install-copy-hint) {
+  color: var(--accent-ink);
+}
+
+:global(.install-copy[data-state="copied"]) {
+  border-color: var(--accent);
+}
+
+:global(.install-copy[data-state="copied"] .install-copy-hint) {
+  color: var(--accent);
+}
+
 :global(.cta a) {
   color: var(--accent-ink);
 }
@@ -659,6 +713,48 @@
 
 :global(.preview > :last-child) {
   margin-bottom: 0;
+}
+
+/* ---- documentation ---- */
+
+:global(.docs-header) {
+  padding: var(--space-5) 0 0;
+}
+
+:global(.example) {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: 1fr;
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-lift);
+}
+
+@media (min-width: 46rem) {
+  :global(.example) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+:global(.example .pane > h3:first-child),
+:global(.example .preview > h3:first-child) {
+  margin: 0 0 var(--space-2);
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
+
+:global(.example .preview > :last-child) {
+  margin-bottom: 0;
+}
+
+:global(.links p) {
+  color: var(--muted);
 }
 
 /* ---- features: deliberately asymmetric ---- */

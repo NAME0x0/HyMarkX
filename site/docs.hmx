@@ -1,0 +1,305 @@
+---
+title: Documentation — HyMarkX
+description: Install HyMarkX, write your first document, and see every built-in component with the source that produced it.
+canonical: https://hymarkx.afsah.xyz/docs
+icon: /logo-32.png
+image: https://hymarkx.afsah.xyz/social-preview.png
+siteName: HyMarkX
+lang: en
+---
+
+:::Shell
+:::
+
+:::box{class=skip}
+[Skip to content](#install)
+:::
+
+:::Nav
+:::
+
+:::::::box{as=header class=docs-header}
+
+::::::box{class=eyebrow}
+Documentation
+::::::
+
+# Everything, on one page
+
+::::::box{class=lead}
+HyMarkX is small enough that its documentation fits in a single document. Every example below
+is compiled by this page — the rendered half is the real component, not a screenshot.
+::::::
+
+:::::::
+
+:::::::box{as=section class="chapter reveal" #install}
+
+::::::box{class=eyebrow}
+Install
+::::::
+
+## Two commands
+
+```sh
+npm install hymarkx
+```
+
+```sh
+npx hmx build index.md --out dist
+```
+
+::::::box{class=lead}
+`hmx` also gives you `check` for CI, `fmt`, and `dev` with live reload. Any Markdown file is
+already a valid input — nothing in it has to change.
+::::::
+
+:::::::
+
+:::::::box{as=section class="chapter reveal" #components}
+
+::::::box{class=eyebrow}
+The built-in vocabulary
+::::::
+
+## Components
+
+::::::box{class=lead}
+Nine components ship with the language. Each one is a container directive: three colons, a
+name, optional attributes in braces, and a matching closing fence.
+::::::
+
+:::::box{class=example}
+
+::::box{class=pane}
+### Source
+
+```md
+:::note[Heads up]{type=warning}
+Deployment starts at 8 PM UTC.
+:::
+```
+::::
+
+::::box{class=preview}
+### Rendered
+
+:::note[Heads up]{type=warning}
+Deployment starts at 8 PM UTC.
+:::
+::::
+
+:::::
+
+:::::box{class=example}
+
+::::box{class=pane}
+### Source
+
+```md
+:::card[Quarterly report]
+Revenue rose in every region except EMEA.
+:::
+```
+::::
+
+::::box{class=preview}
+### Rendered
+
+:::card[Quarterly report]
+Revenue rose in every region except EMEA.
+:::
+::::
+
+:::::
+
+:::::box{class=example}
+
+::::box{class=pane}
+### Source
+
+```md
+:::metric[requests per second]
+18,400
+:::
+```
+::::
+
+::::box{class=preview}
+### Rendered
+
+:::metric[requests per second]
+18,400
+:::
+::::
+
+:::::
+
+:::::box{class=example}
+
+::::box{class=pane}
+### Source
+
+```md
+A release is :badge[stable]{kind=success} once the suite is green.
+```
+::::
+
+::::box{class=preview}
+### Rendered
+
+A release is :badge[stable]{kind=success} once the suite is green.
+::::
+
+:::::
+
+::::::box{class=lead}
+The rest are `grid` for columns, `box` for a plain wrapper — give it `as=section` or `as=nav`
+when the wrapper means something — and `button`, `input` and `form`, which exist so that
+interactivity has native elements to attach to.
+::::::
+
+:::::::
+
+:::::::box{as=section class="chapter reveal" #values}
+
+::::::box{class=eyebrow}
+Frontmatter and expressions
+::::::
+
+## Values
+
+::::::box{class=lead}
+Frontmatter is YAML, parsed with aliases bounded and custom tags disabled. Read it back with
+double braces. Everything resolves at compile time, so a document that only interpolates ships
+no JavaScript.
+::::::
+
+:::::box{class=example}
+
+::::box{class=pane}
+### Source
+
+```md
+---
+region: EMEA
+target: 12000
+---
+
+Sales in {{ region }} against a target of {{ target }}.
+```
+::::
+
+::::box{class=preview}
+### Rendered
+
+Sales in EMEA against a target of 12000.
+::::
+
+:::::
+
+::::::box{class=lead}
+Expressions are deliberately not JavaScript. They can compare, do arithmetic, and choose
+between values — and they cannot reach the network, storage, timers, or any host object. That
+restriction is what makes it safe to compile a document you did not write.
+::::::
+
+:::::::
+
+:::::::box{as=section class="chapter reveal" #interactivity}
+
+::::::box{class=eyebrow}
+State and events
+::::::
+
+## Interactivity
+
+::::::box{class=lead}
+Declare state in the document root, assign it from an allowed event, and read it anywhere. The
+initial value is already in the HTML, so the page is correct before the runtime loads — and the
+runtime is 591 bytes, emitted only when something uses it.
+::::::
+
+:::::box{class=example}
+
+::::box{class=pane}
+### Source
+
+```md
+::state{count=0}
+
+:::button{on-click="count = count + 1"}
+Increment
+:::
+
+Clicked {{ count }} times.
+```
+::::
+
+::::box{class=preview}
+### Rendered
+
+A live example needs `--trust app`; this page is built in `document` mode, so the source is
+shown without running it. The [home page](/#how) has it running.
+::::
+
+:::::
+
+:::::::
+
+:::::::box{as=section class="chapter reveal" #styling}
+
+::::::box{class=eyebrow}
+Scoped CSS
+::::::
+
+## Styling
+
+::::::box{class=lead}
+A component may carry a `<style scoped>` block. Its selectors are rewritten to match only the
+elements that component emitted, and `:global(...)` opts a rule back out. Rules are emitted
+once per component, however many times it is used.
+::::::
+
+```md
+<style scoped>
+.callout { border-left: 3px solid currentColor; }
+:global(body) { font-family: system-ui; }
+</style>
+```
+
+::::::box{class=lead}
+Built-in components bring a restrained default stylesheet, and only for the components a
+document actually uses. Override it with design tokens — `--hmx-color-info`, `--hmx-radius`
+and the rest — rather than by fighting selectors.
+::::::
+
+:::::::
+
+:::::::box{as=section class="chapter reveal" #next}
+
+::::::box{class=eyebrow}
+Further
+::::::
+
+## Where to go next
+
+::::::box{class=lead}
+The guides in the repository go deeper on each of these, and the specification is the normative
+reference when something here is ambiguous.
+::::::
+
+::::::box{class=links}
+[Guides](https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides) ·
+[Specification](https://github.com/NAME0x0/HyMarkX/blob/main/SPEC.md) ·
+[Architecture decisions](https://github.com/NAME0x0/HyMarkX/tree/main/docs/adr) ·
+[Report an issue](https://github.com/NAME0x0/HyMarkX/issues)
+::::::
+
+:::::::
+
+:::::::box{as=footer class=site-footer}
+HyMarkX is MIT/Apache-2.0 dual licensed. Built in the open on
+[GitHub](https://github.com/NAME0x0/HyMarkX). This page is itself a HyMarkX document, compiled
+in `document` trust mode.
+:::::::

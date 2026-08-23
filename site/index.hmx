@@ -41,37 +41,37 @@ a value, or a button — and then it is still the same file.
 
 ::::::
 
-::::::box{as=section class="chapter reveal" #how}
+:::::::box{as=section class="chapter reveal" #how}
 
-:::::box{class=eyebrow}
+::::::box{class=eyebrow}
 The same file, four times
-:::::
+::::::
 
 ## Nothing to migrate to
 
-:::::box{class=lead}
+::::::box{class=lead}
 There is no point where you stop writing Markdown and start writing a program. Each step below
 is the one before it with a line added. Move through them.
-:::::
+::::::
 
-:::::box{class=stepper}
+::::::box{class=stepper}
 
-::::box{class=stepper-bar}
+:::::box{class=stepper-bar}
 Step {{ step }} of 4
 
-:::button{on-click="step = step - 1 < 1 ? 4 : step - 1"}
+::::button{on-click="step = step - 1 < 1 ? 4 : step - 1"}
 Back
-:::
+::::
 
-:::button{on-click="step = step + 1 > 4 ? 1 : step + 1"}
+::::button{on-click="step = step + 1 > 4 ? 1 : step + 1"}
 Next
-:::
-
 ::::
 
-::::box{class={step == 1 ? "step live" : "step"}}
+:::::
 
-:::box{class=pane}
+:::::box{class={step == 1 ? "step live" : "step"}}
+
+::::box{class=pane}
 ### You write
 
 ```md
@@ -79,21 +79,21 @@ Next
 
 Shipping on **Friday**.
 ```
-:::
+::::
 
-:::box{class=preview}
+::::box{class=preview}
 ### You get
 
 ### Release notes
 
 Shipping on **Friday**.
-:::
-
 ::::
 
-::::box{class={step == 2 ? "step live" : "step"}}
+:::::
 
-:::box{class=pane}
+:::::box{class={step == 2 ? "step live" : "step"}}
+
+::::box{class=pane}
 ### You write
 
 ```md
@@ -103,9 +103,9 @@ Shipping on **Friday**.
 Deployment starts at 8 PM UTC.
 :::
 ```
-:::
+::::
 
-:::box{class=preview}
+::::box{class=preview}
 ### You get
 
 ### Release notes
@@ -113,13 +113,13 @@ Deployment starts at 8 PM UTC.
 :::note[Heads up]{type=warning}
 Deployment starts at 8 PM UTC.
 :::
-:::
-
 ::::
 
-::::box{class={step == 3 ? "step live" : "step"}}
+:::::
 
-:::box{class=pane}
+:::::box{class={step == 3 ? "step live" : "step"}}
+
+::::box{class=pane}
 ### You write
 
 ```md
@@ -132,21 +132,21 @@ revenue: 42500
 
 Revenue was {{ revenue }}.
 ```
-:::
+::::
 
-:::box{class=preview}
+::::box{class=preview}
 ### You get
 
 ### Results for Q3
 
 Revenue was 42500.
-:::
-
 ::::
 
-::::box{class={step == 4 ? "step live" : "step"}}
+:::::
 
-:::box{class=pane}
+:::::box{class={step == 4 ? "step live" : "step"}}
+
+::::box{class=pane}
 ### You write
 
 ```md
@@ -158,9 +158,9 @@ Increment
 
 Clicked {{ count }} times.
 ```
-:::
+::::
 
-:::box{class=preview}
+::::box{class=preview}
 ### You get
 
 :::button{on-click="count = count + 1"}
@@ -168,13 +168,13 @@ Increment
 :::
 
 Clicked {{ count }} times.
-:::
-
 ::::
 
 :::::
 
 ::::::
+
+:::::::
 
 ::::::box{as=section class="chapter reveal" #why}
 
@@ -272,6 +272,9 @@ compile.
 
 ```sh
 npm install hymarkx
+```
+
+```sh
 npx hmx build index.md --out dist
 ```
 

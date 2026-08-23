@@ -177,10 +177,52 @@ function stickyNav() {
   }).observe(sentinel)
 }
 
+/**
+ * Turns the hero's install command into something you can actually take.
+ *
+ * It is inline code in the markup, which is right — it is a phrase in a sentence of links, not
+ * a code block. But the one command a visitor wants is the one that had no way to be copied.
+ * Promoting it to a real button keeps it keyboard-reachable and announced, which a click
+ * handler on a `<code>` would not be.
+ */
+function makeInstallCopyable() {
+  const code = document.querySelector('.cta code')
+  if (code === null) {
+    return
+  }
+  const command = code.textContent ?? ''
+
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = 'install-copy'
+  button.setAttribute('aria-label', `Copy ${command} to clipboard`)
+  button.append(code.cloneNode(true))
+
+  const hint = document.createElement('span')
+  hint.className = 'install-copy-hint'
+  hint.textContent = 'Copy'
+  button.append(hint)
+
+  let reset
+  button.addEventListener('click', async () => {
+    const ok = await copy(command)
+    hint.textContent = ok ? COPIED : 'Ctrl+C'
+    button.dataset.state = ok ? 'copied' : 'failed'
+    clearTimeout(reset)
+    reset = setTimeout(() => {
+      hint.textContent = COPY
+      delete button.dataset.state
+    }, 1600)
+  })
+
+  code.replaceWith(button)
+}
+
 export function enhance() {
   for (const pre of document.querySelectorAll('pre')) {
     addCopyButton(pre)
   }
+  makeInstallCopyable()
   revealOnScroll()
   stickyNav()
   scrollSpy()

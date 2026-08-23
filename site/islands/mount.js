@@ -1,6 +1,5 @@
 import * as hero from './hero.js'
 import * as cost from './cost.js'
-import { enhance } from './enhance.js'
 
 /**
  * The host adapter — the only code on this site that knows how islands mount.
@@ -38,9 +37,6 @@ async function mountIslands() {
  * page is complete without this file; it should never be what a reader waits on.
  */
 function start() {
-  // Copy buttons and reveals are not motion for its own sake, so they run either way. Only the
-  // shader is skipped for readers who asked for less movement.
-  enhance()
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     void mountIslands()
   }
