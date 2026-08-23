@@ -24,38 +24,36 @@ the whole site, so promoting a page stays a visible decision.
 | `index.hmx` | The landing page, including the four-step progression demo |
 | `components/Shell.hmx` | Every global rule on the site, via `:global(...)` inside `<style scoped>` |
 | `components/Nav.hmx` | The header, reused by every page |
-| `islands/` | The hero's WebGL field and the host adapter that mounts it |
+| `islands/` | The hero's WebGL gradient and the host adapter that mounts it |
 | `public/` | Static files copied verbatim into `dist/` |
 | `build.mjs` | Compile, bundle islands, copy static files |
 
 ## The hero island
 
-The field behind the headline is [`@designcodeio/threeui`](https://threeui.com) (MIT, © Meng To)
-mounted through a HyMarkX island. HyMarkX emits `<div data-hmx-island="0">` and a manifest; it
-never imports or evaluates the module. `build.mjs` bundles the adapter with esbuild and adds the
-script tag, because mounting is the host's job (ADR-0016) and a document deliberately cannot ask
-for a script (ADR-0020).
+The gradient behind the headline is React Bits' `Grainient` shader (MIT, © React Bits), ported
+to a plain module on [`ogl`](https://github.com/oframe/ogl) and mounted through a HyMarkX
+island. HyMarkX emits `<div data-hmx-island="0">` and a manifest; it never imports or evaluates
+the module. `build.mjs` bundles the adapter with esbuild and adds the script tag, because
+mounting is the host's job (ADR-0016) and a document deliberately cannot ask for a script
+(ADR-0020).
 
-It costs **186 kB gzipped**, which the page says out loud rather than hiding.
+It costs **15 kB gzipped**, which the page says out loud rather than hiding.
 
-Two deliberate constraints follow from islands having no server rendering:
+It started at 186 kB — a three.js shader mounted by React. Two things were wrong with that:
+three unpacks to 23 MB against ogl's 423 kB, and React was 60 kB of the bundle purely to render
+one decorative `<div>`. An island export here is a plain function that takes an element, so the
+site ships no framework at all.
+
+Three deliberate constraints follow from islands having no server rendering:
 
 - the hero is **decorative only** — the headline, the install command and the links are ordinary
   HTML above it, so the page is complete before any of this loads;
 - it is skipped entirely for `prefers-reduced-motion`, and mounted after `load` so it is never
-  what a reader waits on.
+  what a reader waits on;
+- it stops animating when scrolled offscreen or the tab is hidden.
 
-The package's stylesheet is 57 kB for 109 components and this page uses one class from it, so
-the single rule it needs is reproduced in `Shell.hmx` under the package's MIT licence instead.
-
-This needs `hymarkx` **0.0.7 or later**: earlier versions emitted the island placeholder without
-a manifest, so there was nothing for the host to mount.
-
-## Why the CSS lives in a component
-
-Page-level `<style>` is rejected in `document` mode, but a component may carry `<style scoped>`,
-and `:global(...)` inside it emits unscoped CSS. So `Shell.hmx` is a styles-only component: it
-renders nothing and exists to carry the stylesheet. Calling it is what pulls the CSS in.
+This needs `hymarkx` **0.0.7 or later** for island manifests, and **0.0.8 or later** for
+`box{as=}` page landmarks.
 
 ## Things this site found
 
@@ -65,4 +63,6 @@ Building it surfaced real gaps, each fixed in the language rather than worked ar
   (ADR-0020);
 - `HMX2031` warned about a style block whose every rule was `:global`, which asks for no scope;
 - there was no neutral block wrapper, so every layout container had to be a `grid` that then
-  emitted `--hmx-grid-columns` it did not use — now `:::box`.
+  emitted `--hmx-grid-columns` it did not use — now `:::box`;
+- `hmx build` wrote island placeholders with no manifest, so nothing could mount them;
+- every wrapper was a `div` because `box` could emit nothing else — now `box{as=}`.

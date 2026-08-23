@@ -60,8 +60,8 @@
  * dark-native, so the page follows it rather than fighting it. `color-scheme` tells the browser
  * so form controls and scrollbars match instead of flashing white.
  *
- * Revisit when the hero moves to Grainient, whose colours are parameters — a light hero is
- * expressible then, and a light page becomes honest rather than patched.
+ * A light page is now expressible — Grainient's colours are parameters — but it is a design
+ * decision rather than a CSS one, so it stays out until it is actually made.
  */
 :global(html) {
   color-scheme: dark;
@@ -269,12 +269,19 @@
   z-index: -1;
 }
 
+/*
+ * A readable floor under the text, and no more than that.
+ *
+ * The previous scrim was nearly opaque because the shader behind it was tuned for someone
+ * else's page and fought the headline. Grainient's palette is set to this page's colours, so
+ * the gradient can stay visible and the scrim only has to protect the first column of text.
+ */
 :global(.hero::after) {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(120% 90% at 8% 0%, rgba(7, 11, 20, 0.97) 30%, rgba(7, 11, 20, 0.5) 70%, rgba(7, 11, 20, 0.15));
+  background: linear-gradient(95deg, rgba(7, 11, 20, 0.9) 18%, rgba(7, 11, 20, 0.55) 48%, rgba(7, 11, 20, 0.12) 82%);
 }
 
 :global(.hero h1) {
@@ -314,16 +321,6 @@
   color: #9dbaff;
 }
 
-/* The one rule DotMatrixBackground needs, rather than the package's 57 kB stylesheet.
-   Reproduced under its MIT licence, © Meng To. */
-:global(.threeui-background) {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-}
 
 /* ---- the progression stepper ---- */
 

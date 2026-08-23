@@ -109,14 +109,12 @@ compile(
 // the page and removes it when the island goes, so its presence is the whole condition.
 if (existsSync(join(out, 'index.islands.json'))) {
   const bundled = await esbuild({
-    entryPoints: [join(root, 'islands/mount.jsx')],
+    entryPoints: [join(root, 'islands/mount.js')],
     outfile: join(out, 'islands.js'),
     bundle: true,
     minify: true,
     format: 'iife',
-    jsx: 'automatic',
     target: 'es2022',
-    define: { 'process.env.NODE_ENV': '"production"' },
     logLevel: 'warning',
     metafile: true,
   })

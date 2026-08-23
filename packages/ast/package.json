@@ -1,6 +1,6 @@
 {
   "name": "@hymarkx/ast",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Core node types, source spans, and diagnostics for the HyMarkX (HMX) language.",
   "license": "MIT OR Apache-2.0",
   "publishConfig": {

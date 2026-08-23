@@ -1,6 +1,6 @@
 {
   "name": "@hymarkx/parser",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Markdown parser producing the HyMarkX (HMX) syntax tree.",
   "license": "MIT OR Apache-2.0",
   "publishConfig": {
