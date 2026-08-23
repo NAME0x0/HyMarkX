@@ -8,6 +8,7 @@
     "dev": "hmx dev . --trust document"
   },
   "dependencies": {
+    "@hymarkx/compiler": "^0.0.9",
     "geist": "^1.7.2",
     "hymarkx": "0.0.9",
     "ogl": "^1.0.11"

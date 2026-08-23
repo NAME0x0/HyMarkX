@@ -27,7 +27,7 @@ const out = join(root, 'dist')
  * than promote the whole site, the two are built in separate passes and this list is the
  * exception — kept explicit so that adding an island to a page is a visible decision.
  */
-const APP_TRUST = new Set(['index.hmx'])
+const APP_TRUST = new Set(['index.hmx', 'play.hmx'])
 
 /** Every `.hmx` document at the site root, plus anything under `docs/`. */
 async function documents() {
@@ -142,11 +142,25 @@ for (const input of inputs) {
   await addScript(input.replace(/\.hmx$/, '.html'), '/enhance.js')
 }
 
-// Islands are bundled only when a page actually declared one. `hmx build` writes the manifest
-// beside the page and removes it when the island goes, so its presence is the whole condition.
-if (existsSync(join(out, 'index.islands.json'))) {
-  await bundle('islands/mount.js', 'islands.js', 'islands')
-  await addScript('index.html', '/islands.js')
+/**
+ * One island bundle per page, not one for the site.
+ *
+ * The playground contains the compiler. Sharing a bundle would make every visitor to the
+ * landing page download it to look at a headline, which is the opposite of the argument that
+ * page makes. Each entry is bundled and injected only into the page that declared an island.
+ */
+const ISLAND_ENTRIES = [
+  { page: 'index', entry: 'islands/mount.js', out: 'islands.js' },
+  { page: 'play', entry: 'islands/play-entry.js', out: 'play.js' },
+]
+
+for (const { page, entry, out: file } of ISLAND_ENTRIES) {
+  // `hmx build` writes the manifest beside the page and removes it when the island goes, so its
+  // presence is the whole condition.
+  if (existsSync(join(out, `${page}.islands.json`))) {
+    await bundle(entry, file, `${page} islands`)
+    await addScript(`${page}.html`, `/${file}`)
+  }
 }
 
 await cp(join(root, 'public'), out, { recursive: true })

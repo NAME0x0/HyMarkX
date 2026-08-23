@@ -1,0 +1,67 @@
+---
+title: Playground — HyMarkX
+description: Write HyMarkX and watch the HTML, CSS and JavaScript it compiles to, with real gzipped sizes. Runs entirely in your browser.
+canonical: https://hymarkx.afsah.xyz/play
+icon: /logo-32.png
+image: https://hymarkx.afsah.xyz/social-preview.png
+siteName: HyMarkX
+lang: en
+---
+
+:::Shell
+:::
+
+:::box{class=skip}
+[Skip to content](#playground)
+:::
+
+:::Nav
+:::
+
+::::box{as=header class=play-header}
+
+:::box{class=eyebrow}
+Playground
+:::
+
+# Watch it compile
+
+:::box{class=lead}
+The compiler runs in this tab. Nothing you type is sent anywhere — `@hymarkx/compiler` has no
+server half, so the page loads it and calls it. Edit the left, and the right updates: the HTML,
+the CSS, the JavaScript, and what each actually costs gzipped.
+:::
+
+::::
+
+::::box{as=section class=play-mount #playground}
+
+::island{from="./islands/play.js" export="Play"}
+
+::::
+
+::::box{as=section class="chapter reveal"}
+
+:::box{class=eyebrow}
+What to try
+:::
+
+## Things worth deleting
+
+:::box{class=lead}
+Delete the `:::note` and watch the CSS shrink — component styles are emitted only for the
+components a document uses. Delete the `::state` line and the JavaScript goes to zero, not to a
+smaller runtime. Then put them back.
+:::
+
+:::box{class=lead}
+The URL updates as you type, so whatever you end up with is a link you can send someone.
+:::
+
+::::
+
+::::box{as=footer class=site-footer}
+HyMarkX is MIT/Apache-2.0 dual licensed. Built in the open on
+[GitHub](https://github.com/NAME0x0/HyMarkX). Compiled in `document` trust — the mode a host
+uses for content it did not write, which is what your input is.
+::::

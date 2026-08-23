@@ -715,6 +715,173 @@
   margin-bottom: 0;
 }
 
+/* ---- playground ---- */
+
+:global(.play-header) {
+  padding: var(--space-5) 0 0;
+}
+
+/* The grid lives on the island element, because that is what the panes are mounted into —
+   putting it on the section left it with a single child and one column. */
+:global(.play-mount) {
+  margin-top: var(--space-3);
+}
+
+:global(.play-mount [data-hmx-island]) {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: 1fr;
+  min-height: 32rem;
+}
+
+@media (min-width: 60rem) {
+  :global(.play-mount [data-hmx-island]) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+}
+
+:global(.play-pane) {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+:global(.play-pane-title) {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-high);
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
+
+:global(.play-editor) {
+  flex: 1;
+  min-height: 22rem;
+  padding: var(--space-3);
+  border: 0;
+  resize: none;
+  background: transparent;
+  color: var(--ink);
+  font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+:global(.play-editor:focus) {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent-quiet);
+}
+
+:global(.play-tabs) {
+  display: flex;
+  gap: 0.25rem;
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+:global(.play-tab) {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--step--2);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+:global(.play-tab:hover) {
+  color: var(--ink);
+}
+
+:global(.play-tab[data-active="true"]) {
+  background: var(--accent-quiet);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent);
+}
+
+:global(.play-output) {
+  flex: 1;
+  min-height: 16rem;
+  overflow: auto;
+}
+
+:global(.play-code) {
+  margin: 0;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+:global(.play-preview) {
+  display: block;
+  width: 100%;
+  min-height: 16rem;
+  height: 100%;
+  border: 0;
+  background: var(--bg-lift);
+}
+
+/* The point of the whole page: what the document above actually costs, measured. */
+:global(.play-meter) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  border-top: 1px solid var(--line);
+  background: var(--line);
+}
+
+:global(.play-measure) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+
+:global(.play-measure-label) {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+}
+
+:global(.play-diagnostics) {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--line);
+  background: var(--surface-high);
+  color: var(--muted);
+  font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, monospace;
+  font-size: 0.74rem;
+  white-space: pre-wrap;
+  max-height: 8rem;
+  overflow: auto;
+}
+
+:global(.play-diagnostics[data-state="warning"]) {
+  color: var(--accent-ink);
+}
+
+:global(.play-diagnostics[data-state="error"]) {
+  color: #ff8f8f;
+}
+
 /* ---- documentation ---- */
 
 :global(.docs-header) {
