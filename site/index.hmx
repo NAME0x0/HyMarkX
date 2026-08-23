@@ -20,58 +20,58 @@ lang: en
 
 ::state{step=1 count=0}
 
-::::::box{as=header class=hero}
+::::box{as=header class=hero}
 
 ::island{from="./islands/hero.js" export="Hero"}
 
-:::::box{class=hero-eyebrow}
+::::box{class=hero-eyebrow}
 Alpha · 0.0.8
-:::::
+::::
 
 # Markdown that grows with you
 
-:::::box{class=lede}
+::::box{class=lede}
 Every HyMarkX document is a Markdown document. It stays one until the day you need a component,
 a value, or a button — and then it is still the same file.
-:::::
+::::
 
-:::::box{class=cta}
+::::box{class=cta}
 `npm install hymarkx` [read the docs](https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides) [browse the source](https://github.com/NAME0x0/HyMarkX)
-:::::
+::::
 
-::::::
+::::
 
-:::::::box{as=section class="chapter reveal" #how}
+::::box{as=section class="chapter reveal" #how}
 
-::::::box{class=eyebrow}
+::::box{class=eyebrow}
 The same file, four times
-::::::
+::::
 
 ## Nothing to migrate to
 
-::::::box{class=lead}
+::::box{class=lead}
 There is no point where you stop writing Markdown and start writing a program. Each step below
 is the one before it with a line added. Move through them.
-::::::
+::::
 
-::::::box{class=stepper}
+::::box{class=stepper}
 
-:::::box{class=stepper-bar}
+::::box{class=stepper-bar}
 Step {{ step }} of 4
 
-::::button{on-click="step = step - 1 < 1 ? 4 : step - 1"}
+:::button{on-click="step = step - 1 < 1 ? 4 : step - 1"}
 Back
-::::
+:::
 
-::::button{on-click="step = step + 1 > 4 ? 1 : step + 1"}
+:::button{on-click="step = step + 1 > 4 ? 1 : step + 1"}
 Next
+:::
+
 ::::
 
-:::::
+::::box{class={step == 1 ? "step live" : "step"}}
 
-:::::box{class={step == 1 ? "step live" : "step"}}
-
-::::box{class=pane}
+:::box{class=pane}
 ### You write
 
 ```md
@@ -79,21 +79,21 @@ Next
 
 Shipping on **Friday**.
 ```
-::::
+:::
 
-::::box{class=preview}
+:::box{class=preview}
 ### You get
 
 ### Release notes
 
 Shipping on **Friday**.
+:::
+
 ::::
 
-:::::
+::::box{class={step == 2 ? "step live" : "step"}}
 
-:::::box{class={step == 2 ? "step live" : "step"}}
-
-::::box{class=pane}
+:::box{class=pane}
 ### You write
 
 ```md
@@ -103,9 +103,9 @@ Shipping on **Friday**.
 Deployment starts at 8 PM UTC.
 :::
 ```
-::::
+:::
 
-::::box{class=preview}
+:::box{class=preview}
 ### You get
 
 ### Release notes
@@ -113,13 +113,13 @@ Deployment starts at 8 PM UTC.
 :::note[Heads up]{type=warning}
 Deployment starts at 8 PM UTC.
 :::
+:::
+
 ::::
 
-:::::
+::::box{class={step == 3 ? "step live" : "step"}}
 
-:::::box{class={step == 3 ? "step live" : "step"}}
-
-::::box{class=pane}
+:::box{class=pane}
 ### You write
 
 ```md
@@ -132,21 +132,21 @@ revenue: 42500
 
 Revenue was {{ revenue }}.
 ```
-::::
+:::
 
-::::box{class=preview}
+:::box{class=preview}
 ### You get
 
 ### Results for Q3
 
 Revenue was 42500.
+:::
+
 ::::
 
-:::::
+::::box{class={step == 4 ? "step live" : "step"}}
 
-:::::box{class={step == 4 ? "step live" : "step"}}
-
-::::box{class=pane}
+:::box{class=pane}
 ### You write
 
 ```md
@@ -158,9 +158,9 @@ Increment
 
 Clicked {{ count }} times.
 ```
-::::
+:::
 
-::::box{class=preview}
+:::box{class=preview}
 ### You get
 
 :::button{on-click="count = count + 1"}
@@ -168,68 +168,68 @@ Increment
 :::
 
 Clicked {{ count }} times.
+:::
+
 ::::
 
-:::::
+::::
 
-::::::
+::::
 
-:::::::
+::::box{as=section class="chapter reveal" #why}
 
-::::::box{as=section class="chapter reveal" #why}
-
-:::::box{class=eyebrow}
+::::box{class=eyebrow}
 The three decisions
-:::::
+::::
 
 ## Why it is built this way
 
-:::::box{class=lead}
+::::box{class=lead}
 Every language that extends Markdown makes the same three choices. These are ours, and each one
 is held by a test rather than by intent.
-:::::
+::::
 
-:::::box{class=features}
+::::box{class=features}
 
-::::card[Markdown first, not Markdown-shaped]{}
+:::card[Markdown first, not Markdown-shaped]{}
 A document containing no HyMarkX construct renders as CommonMark plus GFM, byte for byte. That
 is not a goal, it is a gate: 692 conformance examples run on every commit, and a regression
 fails the build rather than becoming a footnote.
-::::
+:::
 
-::::card[The output is proportional]{}
+:::card[The output is proportional]{}
 A document that uses no component emits no component CSS. One with no interactive construct
 emits no JavaScript at all — not a smaller runtime, none.
-::::
+:::
 
-::::card[Safe by default, not by discipline]{}
+:::card[Safe by default, not by discipline]{}
 Trust mode is chosen by the host, and nothing inside a document can raise it. Expressions cannot
 reach the network, storage, timers or any host object — which is why the copy buttons on this
 page are host code rather than something the document was able to ask for.
+:::
+
 ::::
 
-:::::
+::::
 
-::::::
+::::box{as=section class="chapter reveal" #cost}
 
-::::::box{as=section class="chapter reveal" #cost}
-
-:::::box{class=eyebrow}
+::::box{class=eyebrow}
 Measured, not claimed
-:::::
+::::
 
 ## What it costs
 
-:::::box{class=lead}
+::::box{class=lead}
 Every number here comes from a script in the repository that regenerates it. The decorative
 gradient behind the headline is a foreign component, and it is counted too.
-:::::
+::::
 
-:::::box{class=cost-panel}
+::::box{class=cost-panel}
 
 ::island{from="./islands/cost.js" export="Cost"}
 
-::::box{class=numbers}
+:::box{class=numbers}
 
 :::metric[conformance examples, green]
 692
@@ -251,24 +251,24 @@ gradient behind the headline is a foreign component, and it is counted too.
 7
 :::
 
+:::
+
 ::::
 
-:::::
+::::
 
-::::::
+::::box{as=section class="chapter reveal" #start}
 
-::::::box{as=section class="chapter reveal" #start}
-
-:::::box{class=eyebrow}
+::::box{class=eyebrow}
 Two commands
-:::::
+::::
 
 ## Start
 
-:::::box{class=lead}
+::::box{class=lead}
 Point it at a Markdown file you already have. Nothing in that file has to change for it to
 compile.
-:::::
+::::
 
 ```sh
 npm install hymarkx
@@ -278,19 +278,19 @@ npm install hymarkx
 npx hmx build index.md --out dist
 ```
 
-:::::box{class=start}
+::::box{class=start}
 
-::::note[Also in the box]{type=info}
+:::note[Also in the box]{type=info}
 `hmx check` for CI, `hmx fmt` that leaves your prose alone, and `hmx dev` with live reload.
 There is a [VS Code extension](https://marketplace.visualstudio.com/items?itemName=name0x0.hymarkx)
 with a real language server behind it — diagnostics, completion, hover and formatting.
+:::
+
 ::::
 
-:::::
+::::
 
-::::::
-
-::::::box{as=footer class=site-footer}
+::::box{as=footer class=site-footer}
 HyMarkX is MIT/Apache-2.0 dual licensed. Built in the open on
 [GitHub](https://github.com/NAME0x0/HyMarkX). This page is itself a HyMarkX document.
-::::::
+::::
