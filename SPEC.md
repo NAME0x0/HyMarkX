@@ -64,9 +64,15 @@ Normative rules:
 - `[label]` is optional; `:x` and `:x[]` are equivalent. A label MAY contain inline
   Markdown constructs.
 - `{attrs}` is optional; `:x` and `:x{}` are equivalent.
-- A container's closing fence MUST have at least as many colons as its opening fence.
-  Nesting containers of the same colon count is achieved by increasing the outer
-  fence's colon count.
+- A closing fence of *n* colons MUST close the innermost open container whose opening fence
+  had *n* colons or fewer. Containers therefore nest by matching rather than by counting, and
+  two containers of the same colon count MAY nest. Giving the outer fence more colons remains
+  legal and unchanged in meaning (ADR-0021).
+- A fenced code block inside a container MUST be opaque: while the container's content is
+  inside one, a line MUST be treated as content and MUST NOT be recognized as a closing fence.
+  A code fence opens on a run of three or more backticks or tildes and closes on a run of the
+  same character at least as long, as CommonMark requires. Without this a document that quotes
+  directive syntax silently loses everything after the quoted closing fence.
 - An unclosed container MUST produce diagnostic `HMX1001` pointing at the opening
   fence, and the processor SHOULD recover by closing it at end of document.
 - A text directive with a name but neither label nor attributes (`:name:`) MUST NOT be
