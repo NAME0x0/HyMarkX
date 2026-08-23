@@ -24,6 +24,19 @@ costs nothing:
 
 Reach for `:::grid` when you actually want its columns, and `:::box` the rest of the time.
 
+Give it `as` when the wrapper means something — `section`, `article`, `nav`, `header`, `footer`,
+`aside`, or `main`. A page built entirely from `div`s has no landmarks for a screen reader:
+
+```md
+:::box{as=nav class=site-nav}
+[Home](/) · [Docs](/docs)
+:::
+```
+
+The list is closed rather than any tag name, because the value becomes an element and a document
+choosing its own element is what `document` mode exists to prevent. An unknown value produces
+`HMX2004` with the nearest suggestion.
+
 ## Design tokens
 
 Override tokens with ordinary CSS. Put the opening tag of a non-empty plain style block on

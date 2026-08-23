@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@designcodeio/threeui": "^0.3.0",
+    "geist": "^1.7.2",
     "hymarkx": "0.0.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

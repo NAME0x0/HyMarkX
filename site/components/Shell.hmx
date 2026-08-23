@@ -1,132 +1,266 @@
 <style scoped>
-:global(:root) {
-  --site-ink: #172033;
-  --site-blue: #2563eb;
-  --site-paper: #f8fafc;
-  --site-muted: #526176;
-  --site-line: #e2e8f0;
-  --site-code: #0f172a;
-  --hmx-radius: 0.75rem;
+/*
+ * Self-hosted and subset to Latin: 25 kB for the whole 100-900 weight axis, down from 68 kB.
+ * Not linked from Google Fonts — a page that argues about what it costs a reader should not
+ * open a third-party connection to render its own headline.
+ */
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
 }
 
 /*
- * The gutter lives on `body` itself, so every block on the page inherits it.
+ * Dark first, and committed to.
  *
- * The first version styled `main, .band` — neither of which the page emits, so the rule was
- * dead and every heading and code block ran to the viewport edge while the nav centred itself.
- * Constraining the element that definitely exists cannot go stale the same way.
+ * The previous version was a light page with one dark hero, which reads as an accident rather
+ * than a decision. The shaders are dark-native and the tooling audience lives in dark editors,
+ * so the page follows the hero instead of fighting it. Light is still honoured below.
  */
+:global(:root) {
+  --bg: #090d16;
+  --surface: #0f1523;
+  --surface-high: #141c2e;
+  --line: #1d2740;
+  --ink: #e9edf6;
+  --muted: #8d9ab1;
+  --accent: #5b8cff;
+  --accent-ink: #b9cdff;
+  --shadow: 0 1px 2px rgba(3, 6, 14, 0.6), 0 8px 24px -12px rgba(3, 6, 14, 0.9);
+
+  --step--1: 0.875rem;
+  --step-0: 1rem;
+  --step-1: 1.15rem;
+  --step-2: clamp(1.35rem, 1.1rem + 1vw, 1.7rem);
+  --step-3: clamp(1.8rem, 1.3rem + 2.2vw, 2.6rem);
+  --step-4: clamp(2.6rem, 1.6rem + 4.6vw, 4.4rem);
+
+  --space-1: 0.5rem;
+  --space-2: 0.875rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
+
+  --hmx-radius: 0.75rem;
+  --hmx-color-surface: var(--surface);
+  --hmx-color-text: var(--ink);
+  --hmx-color-muted: var(--muted);
+  --hmx-color-border: var(--line);
+  --hmx-color-info: var(--accent);
+}
+
+/*
+ * One scheme, deliberately.
+ *
+ * A light variant was written first and then removed: it put a dark hero band in a light page,
+ * which is the copy-paste-accident look this redesign existed to fix. The hero's shader is
+ * dark-native, so the page follows it rather than fighting it. `color-scheme` tells the browser
+ * so form controls and scrollbars match instead of flashing white.
+ *
+ * Revisit when the hero moves to Grainient, whose colours are parameters — a light hero is
+ * expressible then, and a light page becomes honest rather than patched.
+ */
+:global(html) {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html) {
+    scroll-behavior: auto;
+  }
+}
+
 :global(body) {
-  max-width: 62rem;
+  max-width: 68rem;
   margin: 0 auto;
-  padding: 0 1.5rem;
-  background: #ffffff;
-  color: var(--site-ink);
-  font: 1rem/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding: 0 var(--space-3) var(--space-5);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Breaks the digital flatness without shipping an image: one tiny SVG, no requests. */
+:global(body::before) {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+:global(body > *) {
+  position: relative;
+  z-index: 1;
 }
 
 :global(h1),
 :global(h2),
 :global(h3) {
-  line-height: 1.15;
-  letter-spacing: -0.022em;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
   text-wrap: balance;
+  font-weight: 620;
 }
 
 :global(h1) {
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  margin: 0 0 1rem;
+  font-size: var(--step-4);
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.038em;
 }
 
-/* A section heading needs air above it, or it sits on the block it follows. */
 :global(h2) {
-  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
-  margin: 3.5rem 0 0.75rem;
+  font-size: var(--step-3);
+  margin: var(--space-6) 0 var(--space-2);
 }
 
 :global(h3) {
-  font-size: 1.05rem;
-  margin: 0 0 0.4rem;
+  font-size: var(--step-1);
+  margin: 0 0 var(--space-1);
+  letter-spacing: -0.018em;
 }
 
 :global(p) {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-2);
+  text-wrap: pretty;
+}
+
+/* Roughly 68 characters. Prose wider than this stops being readable. */
+:global(section > p) {
+  max-width: 62ch;
+  color: var(--muted);
 }
 
 :global(a) {
-  color: var(--site-blue);
-  text-underline-offset: 0.15em;
+  color: var(--accent);
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 0.18em;
+  transition: color 180ms ease, text-decoration-color 180ms ease;
+}
+
+:global(a:hover) {
+  color: var(--accent-ink);
+  text-decoration-color: currentColor;
+}
+
+:global(:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 :global(code) {
   font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, monospace;
-  font-size: 0.9em;
+  font-size: 0.88em;
 }
 
 :global(pre) {
   margin: 0;
-  padding: 1rem 1.1rem;
+  padding: var(--space-3);
   overflow-x: auto;
-  background: var(--site-code);
-  color: #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 0.6rem;
-  font-size: 0.85rem;
-  line-height: 1.6;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  box-shadow: var(--shadow);
 }
 
-:global(pre code) {
-  font-size: inherit;
+/* A keyboard user should not have to tab the whole nav to reach the page. */
+:global(.skip) {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: 0 0 0.5rem 0;
+  background: var(--surface-high);
 }
 
-:global(hr) {
-  border: 0;
-  border-top: 1px solid var(--site-line);
-  margin: 4rem 0;
+/* `:focus-within`, not `:focus` — the link is inside the wrapper, so the wrapper never
+   receives focus itself. */
+:global(.skip:focus-within) {
+  left: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :global(body) {
-    background: #0b1120;
-    color: var(--site-paper);
-  }
+:global(.skip p) {
+  margin: 0;
+}
 
-  :global(:root) {
-    --site-ink: #f8fafc;
-    --site-muted: #94a3b8;
-    --site-line: #1e293b;
-    --site-blue: #60a5fa;
-    /* The light-mode code colour is barely lighter than the dark page, so the code block
-       dissolved into the background. Lifted, and given an edge below. */
-    --site-code: #151f38;
-  }
+/* ---- navigation ---- */
 
-  :global(pre) {
-    border: 1px solid #24304d;
-  }
+:global(.site-nav) {
+  padding: var(--space-3) 0;
+}
 
-  /* The logo tile is dark ink on a dark page; a hairline keeps it a distinct object. */
-  :global(.site-nav img) {
-    box-shadow: 0 0 0 1px #2a3654;
+:global(.site-nav p) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--step--1);
+}
+
+:global(.site-nav p > a:first-child) {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-right: auto;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: var(--step-0);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+:global(.site-nav img) {
+  display: block;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 0.4rem;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+:global(.site-nav a) {
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+:global(.site-nav a:hover) {
+  color: var(--ink);
+}
+
+@media (max-width: 32rem) {
+  :global(.site-nav p) {
+    gap: var(--space-2);
+    font-size: 0.8rem;
   }
 }
 
 /* ---- hero ---- */
 
-/*
- * The band is dark in both colour schemes, because the shader behind it is. Everything a
- * reader needs is ordinary HTML stacked above the island — the island is empty until
- * JavaScript mounts it, and a headline nobody can read without JavaScript is not a headline.
- */
 :global(.hero) {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  margin-top: 0.5rem;
-  padding: 5rem 2.5rem 4rem;
-  border-radius: 1.25rem;
-  background: #080d1a;
-  color: #f8fafc;
+  padding: var(--space-6) var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: #070b14;
+  color: #f2f5fb;
+  box-shadow: var(--shadow);
 }
 
 :global(.hero [data-hmx-island]) {
@@ -135,14 +269,53 @@
   z-index: -1;
 }
 
-/*
- * The one rule DotMatrixBackground needs, rather than the package's whole stylesheet.
- *
- * `@designcodeio/threeui/style.css` is 57 kB — 24 kB gzipped — and covers all 109 of its
- * components; this page uses one class from it. Importing the sheet to get three declarations
- * would cost more than the argument this page makes about proportional output is worth.
- * Reproduced under the package's MIT licence, © Meng To.
- */
+:global(.hero::after) {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 90% at 8% 0%, rgba(7, 11, 20, 0.97) 30%, rgba(7, 11, 20, 0.5) 70%, rgba(7, 11, 20, 0.15));
+}
+
+:global(.hero h1) {
+  max-width: 15ch;
+}
+
+:global(.lede) {
+  max-width: 46ch;
+  font-size: var(--step-2);
+  line-height: 1.4;
+  color: #aebbd2;
+  letter-spacing: -0.012em;
+}
+
+:global(.cta p) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+}
+
+:global(.cta code) {
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #26314c;
+  border-radius: 0.55rem;
+  background: #0d1424;
+  color: #dbe4f5;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+:global(.cta code:hover) {
+  border-color: #3c4a6d;
+}
+
+:global(.cta a) {
+  color: #9dbaff;
+}
+
+/* The one rule DotMatrixBackground needs, rather than the package's 57 kB stylesheet.
+   Reproduced under its MIT licence, © Meng To. */
 :global(.threeui-background) {
   position: relative;
   width: 100%;
@@ -152,181 +325,245 @@
   overflow: hidden;
 }
 
-/* A readable floor under the text, so the headline never depends on what the shader drew. */
-:global(.hero::after) {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(100deg, #080d1a 22%, rgba(8, 13, 26, 0.55) 62%, rgba(8, 13, 26, 0.2));
-}
-
-:global(.hero h1) {
-  max-width: 16ch;
-}
-
-:global(.lede) {
-  max-width: 34rem;
-  font-size: 1.2rem;
-  color: #b6c2d4;
-}
-
-:global(.cta p) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.9rem;
-  margin: 1.75rem 0 0;
-}
-
-:global(.cta code) {
-  padding: 0.55rem 0.85rem;
-  border: 1px solid #26324c;
-  border-radius: 0.5rem;
-  background: #0f1729;
-  color: #e2e8f0;
-}
-
-:global(.cta a) {
-  color: #93b4fd;
-}
-
-@media (max-width: 40rem) {
-  :global(.hero) {
-    padding: 3.5rem 1.5rem 3rem;
-  }
-}
-
 /* ---- the progression stepper ---- */
 
 :global(.stepper) {
-  border: 1px solid var(--site-line);
-  border-radius: 0.9rem;
+  margin-top: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
   overflow: hidden;
-  margin: 2.5rem 0 0;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 :global(.stepper-bar) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid var(--site-line);
-  background: color-mix(in srgb, var(--site-line) 22%, transparent);
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-high);
 }
 
 :global(.stepper-bar p) {
   margin: 0 auto 0 0;
-  font-size: 0.85rem;
-  color: var(--site-muted);
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 :global(.stepper .hmx-button) {
   padding: 0.4rem 0.9rem;
+  border: 1px solid var(--line);
   border-radius: 0.5rem;
-  font-size: 0.85rem;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--step--1);
   cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 120ms ease;
+}
+
+:global(.stepper .hmx-button:hover) {
+  background: var(--surface-high);
+  border-color: var(--accent);
+}
+
+:global(.stepper .hmx-button:active) {
+  transform: translateY(1px);
 }
 
 /*
- * Every step is emitted and CSS shows the live one. HMX has conditional
- * operators inside expressions but no conditional blocks, so a reactive class
- * is the honest way to express this — and it means the page is correct with
- * JavaScript switched off, showing step one.
+ * Every step is emitted and CSS shows the live one. HMX has conditional operators inside
+ * expressions but no conditional blocks, so a reactive class is the honest way to express
+ * this — and it means the page is correct with JavaScript off, showing step one.
  */
 :global(.step) {
   display: none;
-  padding: 1.4rem;
+  padding: var(--space-3);
 }
 
 :global(.step.live) {
   display: grid;
-  gap: 1px;
+  gap: var(--space-3);
   grid-template-columns: 1fr;
 }
 
 @media (min-width: 46rem) {
   :global(.step.live) {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 1.25rem;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   }
 }
 
-/*
- * Only the pane's own first heading is the caption. Anything below it is the demo's output and
- * must look like a real document heading, or the preview stops demonstrating anything.
- */
 :global(.pane > h3:first-child),
 :global(.preview > h3:first-child) {
-  margin: 0 0 0.6rem;
-  font-size: 0.75rem;
+  margin: 0 0 var(--space-2);
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--site-muted);
+  color: var(--muted);
 }
 
 :global(.preview h3:not(:first-child)) {
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.022em;
+  margin: 0 0 var(--space-1);
+  font-size: var(--step-2);
+  font-weight: 620;
+  letter-spacing: -0.028em;
   text-transform: none;
-  color: inherit;
-}
-
-:global(.step pre) {
-  font-size: 0.8rem;
+  color: var(--ink);
 }
 
 :global(.preview) {
-  padding: 1rem 1.1rem;
-  border: 1px dashed var(--site-line);
+  padding: var(--space-3);
+  border: 1px dashed var(--line);
   border-radius: 0.6rem;
+  background: var(--surface-high);
 }
 
 :global(.preview > :last-child) {
   margin-bottom: 0;
 }
 
-/* ---- feature row and proof numbers ---- */
+/* ---- features: deliberately asymmetric ---- */
+
+:global(hr) {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: var(--space-5) 0 0;
+}
 
 :global(.features) {
   display: grid;
-  gap: 1.25rem;
+  gap: var(--space-2);
   grid-template-columns: 1fr;
-  margin: 1.5rem 0 0;
+  /* Cards size to their content. Stretching a short card to match a long one leaves a block of
+     dead space that reads as a mistake. */
+  align-items: start;
+  margin-top: var(--space-3);
 }
 
 @media (min-width: 46rem) {
   :global(.features) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  /* The lead claim gets the room. Three equal columns is the layout everything else has. */
+  :global(.features > *:first-child) {
+    grid-column: span 3;
+  }
+
+  :global(.features > *:nth-child(2)) {
+    grid-column: span 2;
+  }
+
+  :global(.features > *:last-child) {
+    grid-column: span 5;
   }
 }
+
+:global(.features .hmx-card) {
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: var(--surface);
+  padding: var(--space-3);
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+:global(.features .hmx-card:hover) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: var(--surface-high);
+}
+
+:global(.features .hmx-card-title) {
+  font-size: var(--step-1);
+  letter-spacing: -0.018em;
+  margin-bottom: var(--space-1);
+}
+
+:global(.features .hmx-card p) {
+  color: var(--muted);
+  margin-bottom: 0;
+  max-width: 58ch;
+}
+
+/* ---- the numbers ---- */
 
 :global(.numbers) {
   display: grid;
-  gap: 1.25rem;
+  gap: 1px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 1.5rem 0 0;
+  margin-top: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background: var(--line);
 }
 
-@media (min-width: 46rem) {
+@media (min-width: 52rem) {
   :global(.numbers) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
+/* One continuous instrument panel rather than five floating cards. */
+:global(.numbers .hmx-metric) {
+  border: 0;
+  border-radius: 0;
+  padding: var(--space-3);
+  background: var(--surface);
+  font-size: var(--step-3);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  transition: background 200ms ease;
+}
+
+:global(.numbers .hmx-metric:hover) {
+  background: var(--surface-high);
+}
+
+/* Two lines reserved so every value sits on the same baseline whether its label wraps or not.
+   Misaligned figures across a row of numbers look broken. */
+:global(.numbers .hmx-metric-label) {
+  min-height: 2.4em;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-2);
+}
+
+/* ---- start ---- */
+
+:global(.start) {
+  margin-top: var(--space-3);
+}
+
+:global(.start p) {
+  color: var(--muted);
+  max-width: 62ch;
+}
+
 :global(.site-footer) {
-  margin-top: 4rem;
-  padding: 2rem 0 3rem;
-  border-top: 1px solid var(--site-line);
-  font-size: 0.9rem;
-  color: var(--site-muted);
+  margin-top: var(--space-6);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--step--1);
+  color: var(--muted);
 }
 
 :global(.site-footer p) {
   margin: 0;
+  max-width: none;
+}
+
+@media (max-width: 40rem) {
+  :global(.hero) {
+    padding: var(--space-5) var(--space-3) var(--space-4);
+    border-radius: 1.1rem;
+  }
 }
 </style>

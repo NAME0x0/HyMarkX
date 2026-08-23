@@ -76,8 +76,17 @@ function compile(inputs, trust) {
   }
 }
 
-await rm(out, { recursive: true, force: true })
+/*
+ * Empty the directory rather than remove it.
+ *
+ * `rm -r dist` fails with EBUSY whenever anything holds the directory open — a local preview
+ * server, a browser, an editor — which is most of the time while iterating. Deleting the
+ * contents works regardless, because only `rmdir` needs the handle released.
+ */
 await mkdir(out, { recursive: true })
+for (const entry of await readdir(out)) {
+  await rm(join(out, entry), { recursive: true, force: true })
+}
 
 const inputs = await documents()
 if (inputs.length === 0) {

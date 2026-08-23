@@ -11,12 +11,16 @@ lang: en
 :::Shell
 :::
 
+:::box{class=skip}
+[Skip to content](#start)
+:::
+
 :::Nav
 :::
 
 ::state{step=1 count=0}
 
-::::::box{class=hero}
+::::::box{as=header class=hero}
 
 ::island{from="./islands/Hero.jsx" export="Hero"}
 
@@ -33,7 +37,7 @@ component, a value, or a button — and then it is still the same file.
 
 ::::::
 
-::::::box{class=stepper}
+::::::box{as=section class=stepper}
 
 :::::box{class=stepper-bar}
 Step {{ step }} of 4 — the same file, gaining one capability at a time
@@ -157,7 +161,7 @@ Clicked {{ count }} times.
 
 ## Why it is built this way
 
-::::::box{class=features}
+::::::box{as=section class=features}
 
 :::::card[Markdown first, not Markdown-shaped]{}
 A document containing no HyMarkX construct renders as CommonMark plus GFM. That is not a goal,
@@ -180,7 +184,7 @@ cannot reach the network, storage, timers, or any host object.
 
 ## What that costs you
 
-::::::box{class=numbers}
+::::::box{as=section class=numbers}
 
 :::::metric[conformance examples, green]{}
 692
@@ -204,6 +208,8 @@ cannot reach the network, storage, timers, or any host object.
 
 ::::::
 
+::::::box{as=section class=start #start}
+
 ## Start
 
 ```sh
@@ -215,7 +221,9 @@ npx hmx build index.md --out dist
 [VS Code extension](https://marketplace.visualstudio.com/items?itemName=name0x0.hymarkx) with a
 language server behind it — diagnostics, completion, hover, and formatting.
 
-::::::box{class=site-footer}
+::::::
+
+::::::box{as=footer class=site-footer}
 HyMarkX is MIT/Apache-2.0 dual licensed. Built in the open on
 [GitHub](https://github.com/NAME0x0/HyMarkX). This page is a HyMarkX document.
 ::::::

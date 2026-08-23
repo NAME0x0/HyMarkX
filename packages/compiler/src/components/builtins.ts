@@ -7,6 +7,26 @@ import type {
 
 const statusValues = ['info', 'warning', 'danger', 'success'] as const
 
+/**
+ * Elements `box` may emit.
+ *
+ * Semantic structure is the one thing a Markdown document cannot express and a page needs:
+ * without this every layout wrapper is a `div`, and a generated site is div soup with no
+ * landmarks for assistive technology. Each of these is a sectioning or landmark element that
+ * carries no behaviour of its own, so choosing one changes meaning without changing what the
+ * component does.
+ */
+const sectioningElements = [
+  'div',
+  'section',
+  'article',
+  'nav',
+  'header',
+  'footer',
+  'aside',
+  'main',
+] as const
+
 const schemas: ComponentRegistry['schemas'] = {
   note: {
     name: 'note',
@@ -43,7 +63,20 @@ const schemas: ComponentRegistry['schemas'] = {
   box: {
     name: 'box',
     kinds: ['container'],
-    attributes: {},
+    attributes: {
+      /**
+       * A closed set, not a free string. The value becomes a tag name, so an open attribute
+       * would let a document choose its own element — and `document` mode exists precisely so
+       * that a document cannot. An enum keeps the choice inside a vocabulary the processor
+       * controls, and `HMX2004` already suggests the nearest valid value.
+       */
+      as: {
+        type: 'enum',
+        values: sectioningElements,
+        default: 'div',
+        description: 'Sectioning element to emit instead of a div.',
+      },
+    },
     children: 'block',
     label: 'forbidden',
     description: 'A plain block wrapper with no styling of its own.',
@@ -185,7 +218,11 @@ const renderers: ComponentRegistry['renderers'] = {
     classPlan('article', 'hmx-card', 'h3', 'hmx-card-title', [
       classBinding('hmx-card', attributes),
     ]),
-  box: () => ({ wrappers: [{ tag: 'div', attributes: {} }] }),
+  box: (_node, attributes) => ({
+    wrappers: [
+      { tag: typeof attributes.as === 'string' ? attributes.as : 'div', attributes: {} },
+    ],
+  }),
   grid: (_node, attributes: ResolvedAttributes) => {
     const numericStyle =
       typeof attributes.columns === 'number' && typeof attributes.gap === 'number'

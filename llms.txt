@@ -74,7 +74,7 @@ Attributes: `{key=value}`, `{key="quoted value"}`, `{flag}` (bare, means true), 
 |---|---|---|
 | `note` | container | `type`: info \| warning \| danger \| success (default info) |
 | `card` | container | — |
-| `box` | container | — (a plain `div`; no class, no CSS — use it for layout wrappers) |
+| `box` | container | `as`: div \| section \| article \| nav \| header \| footer \| aside \| main (default div) — no class, no CSS; use it for layout wrappers and page landmarks |
 | `grid` | container | `columns`: number (default 3), `gap`: number (default 4) |
 | `metric` | container | — |
 | `badge` | text | `kind`: info \| warning \| danger \| success (default info) |

@@ -62,6 +62,24 @@ describe('built-in components', () => {
     expect(result.js).toBe('')
   })
 
+  /**
+   * Semantic structure is the one thing Markdown cannot express and a page needs. Without it
+   * every layout wrapper is a `div` and a generated site has no landmarks at all.
+   *
+   * The value is an enum rather than a free string because it becomes a tag name, and a
+   * document choosing its own element is exactly what `document` mode exists to prevent.
+   */
+  it('emits the sectioning element box asks for, and refuses anything else', () => {
+    const semantic = compile(':::box{as=section class=hero}\nBody\n:::\n')
+    const rejected = compile(':::box{as=script}\nBody\n:::\n')
+
+    expect(semantic.diagnostics).toEqual([])
+    expect(semantic.html).toBe('<section class="hero"><p>Body</p>\n</section>\n')
+    expect(rejected.diagnostics.map(({ code }) => code)).toEqual(['HMX2004'])
+    expect(rejected.html).toContain('<div>')
+    expect(rejected.html).not.toContain('script')
+  })
+
   it.each(['info', 'warning', 'danger', 'success'])('renders badge kind %s', (kind) => {
     const result = compile(`A :badge[new]{kind=${kind}} badge.\n`)
     expect(result.diagnostics).toEqual([])
