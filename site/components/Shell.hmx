@@ -269,22 +269,50 @@
   top: 0;
   z-index: 15;
   margin-inline: calc(var(--space-3) * -1);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-3);
   border-bottom: 1px solid transparent;
-  transition: background 220ms ease, border-color 220ms ease, backdrop-filter 220ms ease;
+  transition: background 240ms ease, border-color 240ms ease;
 }
 
 /* Earns a background only once it is over content, so the hero starts clean. */
 :global(.site-nav[data-stuck="true"]) {
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(14px) saturate(140%);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(150%);
   border-bottom-color: var(--line);
+}
+
+/*
+ * A reading indicator, driven by the scroll timeline. No JavaScript, no scroll listener, and it
+ * simply does not appear where the browser lacks the feature.
+ */
+@supports (animation-timeline: scroll()) {
+  :global(.site-nav::after) {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 2px;
+    width: 100%;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-ink));
+    animation: progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 :global(.site-nav p) {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-1);
   margin: 0;
   font-size: var(--step--1);
 }
@@ -294,11 +322,11 @@
   align-items: center;
   gap: 0.7rem;
   margin-right: auto;
+  padding-inline: 0;
   font-weight: 640;
   letter-spacing: -0.03em;
   font-size: 1.35rem;
   color: var(--ink);
-  text-decoration: none;
 }
 
 :global(.site-nav img) {
@@ -309,25 +337,56 @@
   box-shadow: 0 0 0 1px var(--line-bright), 0 6px 18px -10px rgba(0, 0, 0, 0.9);
 }
 
+/* Tap targets are 44px tall including the padding, per WCAG 2.1 target size. */
 :global(.site-nav a) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding-inline: 0.7rem;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 160ms ease;
+  transition: color 160ms ease, background 160ms ease;
 }
 
 :global(.site-nav a:hover) {
   color: var(--ink);
+  background: var(--surface);
+}
+
+/* The section currently under the reader. Set by `enhance.js`, which is the only thing here
+   that needs to know where the page is scrolled to. */
+:global(.site-nav a[data-active="true"]) {
+  color: var(--accent);
+  background: var(--accent-quiet);
+}
+
+/* GitHub and npm sit apart from the in-page links: outbound, not navigation. */
+:global(.site-nav p > a:nth-last-child(2)) {
+  margin-left: var(--space-2);
+}
+
+@media (max-width: 62rem) {
+  /* In-page anchors go first when there is no room — the brand and the outbound links are what
+     a narrow screen still needs. */
+  :global(.site-nav a[href^="#"]) {
+    display: none;
+  }
 }
 
 @media (max-width: 34rem) {
   :global(.site-nav p) {
-    gap: var(--space-2);
     font-size: var(--step--2);
   }
 
   :global(.site-nav p > a:first-child) {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+  }
+
+  :global(.site-nav img) {
+    width: 2rem;
+    height: 2rem;
   }
 }
 
@@ -676,15 +735,33 @@
 
 /* ---- the numbers ---- */
 
+/* The panel holds the readout behind the figures; the figures themselves stay ordinary HTML. */
+:global(.cost-panel) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+:global(.cost-panel [data-hmx-island]) {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.85;
+  /* The renderer's palette is green-dominant whatever its `hue` option is set to, and a second
+     accent is exactly what the design audit warns against. Rotated into the page's ember. */
+  filter: hue-rotate(212deg) saturate(1.25);
+  mask-image: radial-gradient(120% 140% at 50% 50%, #000 25%, transparent 78%);
+}
+
 :global(.numbers) {
   display: grid;
   gap: 1px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--line);
+  background: transparent;
 }
 
 @media (min-width: 52rem) {
@@ -693,12 +770,14 @@
   }
 }
 
-/* One continuous instrument panel rather than five floating cards. */
+/* One continuous instrument panel rather than five floating cards. Translucent so the readout
+   behind it reads as depth rather than as a picture sitting underneath. */
 :global(.numbers .hmx-metric) {
   border: 0;
   border-radius: 0;
   padding: var(--space-3);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 58%, transparent);
+  backdrop-filter: blur(3px);
   font-size: var(--step-3);
   font-weight: 620;
   letter-spacing: -0.035em;

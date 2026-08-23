@@ -41,7 +41,7 @@ a value, or a button — and then it is still the same file.
 
 ::::::
 
-::::::box{as=section class="chapter reveal"}
+::::::box{as=section class="chapter reveal" #how}
 
 :::::box{class=eyebrow}
 The same file, four times
@@ -176,7 +176,7 @@ Clicked {{ count }} times.
 
 ::::::
 
-::::::box{as=section class="chapter reveal"}
+::::::box{as=section class="chapter reveal" #why}
 
 :::::box{class=eyebrow}
 The three decisions
@@ -212,7 +212,7 @@ page are host code rather than something the document was able to ask for.
 
 ::::::
 
-::::::box{as=section class="chapter reveal"}
+::::::box{as=section class="chapter reveal" #cost}
 
 :::::box{class=eyebrow}
 Measured, not claimed
@@ -225,26 +225,32 @@ Every number here comes from a script in the repository that regenerates it. The
 gradient behind the headline is a foreign component, and it is counted too.
 :::::
 
-:::::box{class=numbers}
+:::::box{class=cost-panel}
 
-::::metric[conformance examples, green]{}
+::island{from="./islands/cost.js" export="Cost"}
+
+::::box{class=numbers}
+
+:::metric[conformance examples, green]
 692
-::::
+:::
 
-::::metric[gzipped runtime, when used]{}
+:::metric[gzipped runtime, when used]
 591 B
-::::
+:::
 
-::::metric[JavaScript for a static document]{}
+:::metric[JavaScript for a static document]
 0 B
-::::
+:::
 
-::::metric[this page's decorative hero]{}
+:::metric[this page's decorative hero]
 15 kB
-::::
+:::
 
-::::metric[packages, one boundary each]{}
+:::metric[packages, one boundary each]
 7
+:::
+
 ::::
 
 :::::

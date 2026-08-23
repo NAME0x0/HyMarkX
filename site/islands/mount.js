@@ -1,4 +1,5 @@
 import * as hero from './hero.js'
+import * as cost from './cost.js'
 import { enhance } from './enhance.js'
 
 /**
@@ -14,6 +15,7 @@ import { enhance } from './enhance.js'
  */
 const modules = {
   './islands/hero.js': hero,
+  './islands/cost.js': cost,
 }
 
 async function mountIslands() {

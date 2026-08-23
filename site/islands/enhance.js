@@ -112,6 +112,55 @@ function revealOnScroll() {
   }
 }
 
+/**
+ * Marks the nav link for whichever chapter the reader is in.
+ *
+ * Chosen by which section is nearest the top of the viewport rather than by whichever crossed
+ * an observer threshold last — with sections of very different heights, the latter leaves the
+ * highlight on a section that has already scrolled past.
+ */
+function scrollSpy() {
+  const links = [...document.querySelectorAll('.site-nav a[href^="#"]')]
+  const sections = links
+    .map((link) => ({ link, section: document.querySelector(link.getAttribute('href')) }))
+    .filter((entry) => entry.section !== null)
+  if (sections.length === 0) {
+    return
+  }
+
+  let queued = false
+  const update = () => {
+    queued = false
+    let current
+    for (const entry of sections) {
+      if (entry.section.getBoundingClientRect().top <= window.innerHeight * 0.35) {
+        current = entry
+      }
+    }
+    for (const entry of sections) {
+      if (entry === current) {
+        entry.link.dataset.active = 'true'
+        entry.link.setAttribute('aria-current', 'true')
+      } else {
+        delete entry.link.dataset.active
+        entry.link.removeAttribute('aria-current')
+      }
+    }
+  }
+
+  addEventListener(
+    'scroll',
+    () => {
+      if (!queued) {
+        queued = true
+        requestAnimationFrame(update)
+      }
+    },
+    { passive: true },
+  )
+  update()
+}
+
 /** Marks the nav once the page has scrolled, so it can earn a background only when over content. */
 function stickyNav() {
   const nav = document.querySelector('.site-nav')
@@ -134,4 +183,5 @@ export function enhance() {
   }
   revealOnScroll()
   stickyNav()
+  scrollSpy()
 }
