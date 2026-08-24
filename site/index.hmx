@@ -235,7 +235,7 @@ removes the cliff instead of narrowing it. You pay for a capability when you use
 in learning, and in bytes.
 ::::
 
-::::box{class=features}
+::::box{class=reasons}
 
 :::card[You already have the file]
 Point `hmx` at a `.md` file you wrote years ago and it compiles. No migration, no project
@@ -248,7 +248,7 @@ A document that only writes prose and values ships zero JavaScript, not a small 
 button and you get 591 bytes. The bill arrives with the feature, not with the tool.
 :::
 
-:::card[Safe to compile something you did not write]
+:::card[A stranger's file is data]
 Trust mode is chosen by the host and no construct in a document can raise it. Expressions cannot
 reach the network, storage, timers, or any host object — so a document from a stranger is data,
 not code. That is a property of the language, not of a sandbox.
@@ -256,22 +256,36 @@ not code. That is a property of the language, not of a sandbox.
 
 ::::
 
-::::box{class=lead}
-Set against the neighbours, honestly. **MDX** compiles a document to a JavaScript module: full
-JSX power, and rendering an untrusted file means running untrusted code. If you already write
-React, MDX is excellent and this is not trying to replace it. **Markdoc** is the closest in
-spirit — schema-validated tags, content that stays content — and it deliberately stops before
-interactivity and styling; almost everything here that Markdoc lacks is something it chose not
-to build. **Astro** and the site generators are frameworks: you adopt a project. This is a file
-and a command.
+### Set against the neighbours
+
+::::box{class=reasons}
+
+:::card[MDX]
+Full JSX, and excellent if you already write React — this is not trying to replace it. But an
+MDX document compiles to a JavaScript module, so rendering a file you did not write means
+running code you did not write.
+:::
+
+:::card[Markdoc]
+The closest in spirit: schema-validated tags, content that stays content. It stops before
+interactivity and styling, deliberately — almost everything here that Markdoc lacks is
+something it chose not to build.
+:::
+
+:::card[Astro, and the site generators]
+A whole publishing pipeline with a large ecosystem behind it, and worth it when you want one.
+The difference is what you take on: a project, rather than a file and a command.
+:::
+
 ::::
 
-::::box{class=lead}
-And when not to. If you want a large ecosystem of ready-made components, use something with
-one. If you need React inside the document, use MDX. If you are rendering content submitted by
-strangers in production, wait — that is what the [alpha status](/docs#stability) means, and the
-[security notes](https://github.com/NAME0x0/HyMarkX/blob/main/SECURITY.md) say exactly why.
-::::
+### When not to use it
+
+- You want a large ecosystem of ready-made components. Use something that has one.
+- You need React inside the document. Use MDX.
+- You are rendering content submitted by strangers in production. Wait — that is what the
+  [alpha status](/docs#stability) means, and the
+  [security notes](https://github.com/NAME0x0/HyMarkX/blob/main/SECURITY.md) say exactly why.
 
 ::::
 

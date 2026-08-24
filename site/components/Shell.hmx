@@ -185,6 +185,24 @@
   text-wrap: pretty;
 }
 
+/* Lists had no rules at all, so they took the browser's 40px indent against a page whose every
+   other block starts at the gutter. */
+:global(ul),
+:global(ol) {
+  margin: 0 0 var(--space-2);
+  padding-left: 1.15rem;
+  max-width: 68ch;
+  color: var(--muted);
+}
+
+:global(li) {
+  margin-bottom: var(--space-1);
+}
+
+:global(li::marker) {
+  color: var(--muted-dim);
+}
+
 :global(strong) {
   font-weight: 600;
   color: var(--ink);
@@ -1508,6 +1526,45 @@
   color: var(--muted);
 }
 
+/*
+ * A subheading inside a chapter needs air above it.
+ *
+ * `h3` carries no top margin because most of them label a pane inside an example, where the
+ * pane's own padding is the spacing. One that divides prose in a chapter has nothing above it,
+ * so it lands flush against whatever block it follows.
+ */
+:global(.chapter > h3) {
+  margin-top: var(--space-4);
+  font-size: var(--step-1);
+  color: var(--ink);
+}
+
+/*
+ * Three reasons of equal weight, so three equal columns.
+ *
+ * They were first put in `.features`, whose 3/2/5 asymmetry exists because that section's first
+ * card carries a claim the other two support. These three do not rank, and forcing them into
+ * that shape produced a ragged block with one card stranded full-width underneath.
+ */
+:global(.reasons) {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  margin: var(--space-3) 0 var(--space-4);
+}
+
+/* A grid that follows a subheading already has that heading's space above it. */
+:global(.chapter > h3 + .reasons) {
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 52rem) {
+  :global(.reasons) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 /* ---- features: deliberately asymmetric ---- */
 
 :global(.features) {
@@ -1537,7 +1594,8 @@
   }
 }
 
-:global(.features .hmx-card) {
+:global(.features .hmx-card),
+:global(.reasons .hmx-card) {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1547,7 +1605,8 @@
   transition: border-color 220ms ease, background 220ms ease, transform 220ms ease;
 }
 
-:global(.features .hmx-card::before) {
+:global(.features .hmx-card::before),
+:global(.reasons .hmx-card::before) {
   content: "";
   position: absolute;
   inset-inline: 0;
@@ -1558,23 +1617,27 @@
   transition: opacity 220ms ease;
 }
 
-:global(.features .hmx-card:hover) {
+:global(.features .hmx-card:hover),
+:global(.reasons .hmx-card:hover) {
   border-color: var(--line-bright);
   background: var(--surface-high);
   transform: translateY(-2px);
 }
 
-:global(.features .hmx-card:hover::before) {
+:global(.features .hmx-card:hover::before),
+:global(.reasons .hmx-card:hover::before) {
   opacity: 0.7;
 }
 
-:global(.features .hmx-card-title) {
+:global(.features .hmx-card-title),
+:global(.reasons .hmx-card-title) {
   font-size: var(--step-1);
   letter-spacing: -0.022em;
   margin-bottom: var(--space-1);
 }
 
-:global(.features .hmx-card p) {
+:global(.features .hmx-card p),
+:global(.reasons .hmx-card p) {
   color: var(--muted);
   margin-bottom: 0;
   max-width: 58ch;
