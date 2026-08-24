@@ -222,7 +222,7 @@ compiled by the test suite.
 
 ## Status
 
-**Phases 0–9 complete; published to npm as 0.0.9.** 1,524 tests. CommonMark 652/652 and
+**Phases 0–9 complete; published to npm as 0.0.9.** 1,529 tests. CommonMark 652/652 and
 GFM 40/40, never regressed across ten phases and eight syntax additions.
 
 | Phase | |

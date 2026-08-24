@@ -12,7 +12,7 @@ lang: en
 :::
 
 :::box{class=skip}
-[Skip to content](#install)
+[Skip to content](#quick-start)
 :::
 
 :::Nav
@@ -33,25 +33,110 @@ is compiled by this page — the rendered half is the real component, not a scre
 
 ::::
 
-::::box{as=section class="chapter reveal" #install}
+::::box{as=section class="chapter reveal" #quick-start}
 
 ::::box{class=eyebrow}
-Install
+From nothing to a page
 ::::
 
-## Two commands
+## Quick start
+
+::::box{class=lead}
+Six steps, each one a command you can paste. By the end you will have a page you can put on any
+static host, and you will have watched the JavaScript appear only when you asked for it.
+::::
+
+::::box{class=step-block}
+
+### 1 · Install it
 
 ```sh
 npm install hymarkx
 ```
 
+Installs the `hmx` command into the current project. `npm install -g hymarkx` if you would
+rather have it on your PATH everywhere.
+
+::::
+
+::::box{class=step-block}
+
+### 2 · Write a file
+
+Nothing here is HyMarkX yet — it is a Markdown file, and that is the point.
+
+```md
+# Release notes
+
+Shipping on **Friday**.
+```
+
+Save it as `index.md`. A file you already have works just as well.
+
+::::
+
+::::box{class=step-block}
+
+### 3 · Build it
+
 ```sh
 npx hmx build index.md --out dist
 ```
 
+You get `dist/index.html`: a complete document with `<!doctype>`, a `<title>` taken from
+frontmatter if you wrote any, and nothing else. No CSS file, because nothing used any. No
+JavaScript file, because nothing needed any.
+
+::::
+
+::::box{class=step-block}
+
+### 4 · Add something Markdown cannot say
+
+```md
+# Release notes
+
+:::note[Heads up]{type=warning}
+Deployment starts at 8 PM UTC.
+:::
+
+Shipping on **Friday**.
+```
+
+Build again. Now there is a `dist/index.css` beside the HTML, holding the styles for `note` and
+for nothing else. Delete the note, build again, and the file goes away.
+
+::::
+
+::::box{class=step-block}
+
+### 5 · See it while you write
+
+```sh
+npx hmx dev .
+```
+
+Serves the directory with live reload, so the page updates as you save. `npx hmx check .`
+reports diagnostics without writing anything, which is the form to put in CI, and
+`npx hmx fmt .` formats HyMarkX constructs while leaving your prose alone.
+
+::::
+
+::::box{class=step-block}
+
+### 6 · Put it somewhere
+
+`dist/` is plain files. Any static host will serve it — Vercel, Netlify, GitHub Pages, S3, a
+directory behind nginx. There is no server half and no runtime to install: this site is built
+by the same command and deployed exactly this way.
+
+::::
+
 ::::box{class=lead}
-`hmx` also gives you `check` for CI, `fmt`, and `dev` with live reload. Any Markdown file is
-already a valid input — nothing in it has to change.
+Interactivity is the one thing that needs a decision from you rather than from the document.
+`::state` and event handlers only compile under `--trust app`, the mode a host picks for content
+it wrote itself — see [trust modes](#stability) below and the
+[interactivity guide](https://github.com/NAME0x0/HyMarkX/blob/main/docs/guides/interactivity.md).
 ::::
 
 ::::
@@ -329,6 +414,51 @@ Severity decides what happens next: `hmx check` fails the build on an error and 
 The [playground](/play) renders diagnostics with this same function, on whatever you type. It is
 the fastest way to find out what a code means.
 ::::
+
+::::
+
+::::box{as=section class="chapter reveal" #stability}
+
+::::box{class=eyebrow}
+What alpha means here
+::::
+
+## Stability
+
+::::box{class=lead}
+The version is 0.0.9. Pre-1.0, syntax may change, and the specification says so rather than
+implying otherwise: every change is recorded in an architecture decision record and the
+changelog, and there are no migration paths yet. What follows is which parts have actually
+moved and which are held down by something.
+::::
+
+| Area | Status | What holds it |
+| --- | --- | --- |
+| Plain Markdown and GFM | **Stable** | 652 CommonMark and 40 GFM examples run on every commit. A document with no HyMarkX construct compiling differently is a failed build, not a footnote. |
+| Trust modes | **Stable** | Normative in the specification: the host selects the mode, and no construct in a document can raise it. |
+| Diagnostic codes | **Stable** | A code is stable once published and never reused. A test fails if a code is emitted without being documented, or documented without being emitted. |
+| Directive syntax | **Settled, moved once** | `:::name[label]{attrs}` has not changed shape, but 0.0.9 changed how containers nest and made code fences opaque (ADR-0021). Additive, and still a syntax change inside one alpha. |
+| Built-in components | **Will grow** | Nine ship today. Adding one cannot break a document; defaults can be tuned — 0.0.5 changed which attributes a declared prop consumes (ADR-0019). |
+| Frontmatter | **Reserved keys will grow** | `title`, `description`, `layout`, `lang`, `draft`, `canonical`, `icon`, `image`, `siteName` and `author` are reserved at this version. A key added later could collide with one of yours. |
+| Expressions | **Bounded by design** | They can compare, do arithmetic and choose between values. They cannot reach the network, storage, timers or any host object, and that is a security boundary rather than a roadmap item. |
+| State and events | **Newest, most likely to move** | Named derived state is not specified at this version. |
+| Authored components | **Incomplete** | Named slots are not specified at this version. |
+| Styling by untrusted authors | **Not available** | A document compiled in `document` trust cannot bring its own styles. |
+
+::::box{class=lead}
+Practical version of all that: pin an exact version rather than a range, read the changelog
+before upgrading, and keep your documents in source control — which, since they are text files
+that render as Markdown anywhere, they already are.
+::::
+
+:::note[Not for untrusted content in production]{type=warning}
+Compiling a document from a stranger is safe by design — expressions cannot reach a host object,
+and `document` trust is the default. It is not yet *proven* safe: this is alpha software whose
+security work is written down, not finished. The
+[security notes](https://github.com/NAME0x0/HyMarkX/blob/main/SECURITY.md) and the
+[audit](https://github.com/NAME0x0/HyMarkX/blob/main/docs/security-audit.md) name every control
+and the ones with no test behind them.
+:::
 
 ::::
 

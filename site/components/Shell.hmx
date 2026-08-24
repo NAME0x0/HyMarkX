@@ -599,6 +599,18 @@
   font-weight: 500;
 }
 
+/* The chip is a link now: a reader who notices "alpha" has a question, and the answer should be
+   one click away rather than somewhere in a documentation page they have not opened. */
+:global(.hero-eyebrow a) {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+}
+
+:global(.hero-eyebrow a:hover) {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
 :global(.lede) {
   max-width: 44ch;
   font-size: var(--step-2);
@@ -1372,6 +1384,35 @@
   color: var(--muted);
 }
 
+/*
+ * A numbered step in the quick start.
+ *
+ * Each one is a self-contained instruction, so it gets a box: a reader following along needs to
+ * see where one step ends, and a wall of headings and code fences does not show that.
+ */
+:global(.step-block) {
+  margin: var(--space-2) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-bright);
+  border-radius: var(--radius);
+  background: var(--bg-lift);
+}
+
+:global(.step-block > h3:first-child) {
+  margin-top: 0;
+  color: var(--accent-ink);
+}
+
+:global(.step-block > :last-child) {
+  margin-bottom: 0;
+}
+
+:global(.step-block p) {
+  color: var(--muted);
+  max-width: 68ch;
+}
+
 /* ---- reference tables ---- */
 
 /*
@@ -1394,6 +1435,10 @@
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid var(--line);
+}
+
+/* Prose cells wrap; a code chip never breaks mid-identifier. */
+:global(.chapter td code) {
   white-space: nowrap;
 }
 
@@ -1412,6 +1457,48 @@
 
 :global(.chapter tbody tr:last-child td) {
   border-bottom: 0;
+}
+
+/*
+ * The stability table stacks on a phone rather than scrolling sideways.
+ *
+ * Its third column is a paragraph, so at 390px the row is mostly off screen and the reader has
+ * to swipe inside a table to find out what holds a promise down. Stacking loses the header row,
+ * which is fine here — "Plain Markdown / Stable / 652 examples run on every commit" reads on its
+ * own. The reference tables in the gallery keep scrolling, because a bare `kind / enum / info`
+ * without its header would not.
+ */
+@media (max-width: 46rem) {
+  :global(#stability table),
+  :global(#stability tbody),
+  :global(#stability tr),
+  :global(#stability td) {
+    display: block;
+    width: 100%;
+  }
+
+  :global(#stability thead) {
+    display: none;
+  }
+
+  :global(#stability tr) {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  :global(#stability td) {
+    padding: 0.1rem 0;
+    border: 0;
+  }
+
+  :global(#stability td:first-child) {
+    color: var(--ink);
+    font-size: var(--step-0);
+  }
+
+  :global(#stability td:nth-child(2)) {
+    color: var(--accent);
+  }
 }
 
 /* The `box` example passes a class of its own through; this is what receiving one looks like. */

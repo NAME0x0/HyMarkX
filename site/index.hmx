@@ -25,7 +25,7 @@ lang: en
 ::island{from="./islands/hero.js" export="Hero"}
 
 ::::box{class=hero-eyebrow}
-Alpha · 0.0.9
+[Alpha · 0.0.9 — what that means](/docs#stability)
 ::::
 
 # Markdown that grows with you
@@ -222,10 +222,66 @@ Clicked {{ count }} times.
 ::::box{as=section class="chapter reveal" #why}
 
 ::::box{class=eyebrow}
+The problem it removes
+::::
+
+## Why you would reach for it
+
+::::box{class=lead}
+Markdown is the best way to write content and the worst way to build an interface. The moment
+you need a layout, a reusable block, or one button, you fall off a cliff into HTML, CSS, JSX,
+TypeScript, a component library and a bundler — all at once, before you needed any of it. This
+removes the cliff instead of narrowing it. You pay for a capability when you use it, in syntax,
+in learning, and in bytes.
+::::
+
+::::box{class=features}
+
+:::card[You already have the file]
+Point `hmx` at a `.md` file you wrote years ago and it compiles. No migration, no project
+scaffold, no `src/`. Add one directive when you need one; the rest of the file is untouched and
+still renders in anything that reads Markdown.
+:::
+
+:::card[Nothing to run to read it]
+A document that only writes prose and values ships zero JavaScript, not a small runtime. Add a
+button and you get 591 bytes. The bill arrives with the feature, not with the tool.
+:::
+
+:::card[Safe to compile something you did not write]
+Trust mode is chosen by the host and no construct in a document can raise it. Expressions cannot
+reach the network, storage, timers, or any host object — so a document from a stranger is data,
+not code. That is a property of the language, not of a sandbox.
+:::
+
+::::
+
+::::box{class=lead}
+Set against the neighbours, honestly. **MDX** compiles a document to a JavaScript module: full
+JSX power, and rendering an untrusted file means running untrusted code. If you already write
+React, MDX is excellent and this is not trying to replace it. **Markdoc** is the closest in
+spirit — schema-validated tags, content that stays content — and it deliberately stops before
+interactivity and styling; almost everything here that Markdoc lacks is something it chose not
+to build. **Astro** and the site generators are frameworks: you adopt a project. This is a file
+and a command.
+::::
+
+::::box{class=lead}
+And when not to. If you want a large ecosystem of ready-made components, use something with
+one. If you need React inside the document, use MDX. If you are rendering content submitted by
+strangers in production, wait — that is what the [alpha status](/docs#stability) means, and the
+[security notes](https://github.com/NAME0x0/HyMarkX/blob/main/SECURITY.md) say exactly why.
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #built}
+
+::::box{class=eyebrow}
 The three decisions
 ::::
 
-## Why it is built this way
+## How it is built
 
 ::::box{class=lead}
 Every language that extends Markdown makes the same three choices. These are ours, and each one
@@ -328,6 +384,11 @@ npm install hymarkx
 ```sh
 npx hmx build index.md --out dist
 ```
+
+::::box{class=lead}
+That is the whole thing. If you would rather be walked through it — what appears in `dist`, when
+the CSS shows up, how to serve it — the [quick start](/docs#quick-start) is six steps long.
+::::
 
 ::::box{class=start}
 
