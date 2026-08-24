@@ -25,7 +25,7 @@ lang: en
 ::island{from="./islands/hero.js" export="Hero"}
 
 ::::box{class=hero-eyebrow}
-Alpha · 0.0.8
+Alpha · 0.0.9
 ::::
 
 # Markdown that grows with you
@@ -292,6 +292,10 @@ gradient behind the headline is a foreign component, and it is counted too.
 
 :::metric[this page's decorative hero]
 15 kB
+:::
+
+:::metric[display face, subset to Latin]
+14 kB
 :::
 
 :::metric[packages, one boundary each]

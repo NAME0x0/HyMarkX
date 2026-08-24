@@ -13,6 +13,25 @@
 }
 
 /*
+ * The display face: Instrument Serif (SIL OFL 1.1), one weight, headlines only.
+ *
+ * Everything in this project's visual language is a grotesque or a monospace, which is what
+ * every other developer tool looks like. A high-contrast serif on the headlines says the thing
+ * the page is arguing — that this is a document format before it is a framework — faster than
+ * the copy does, and it is already the voice the pipeline diagram's callout speaks in.
+ *
+ * Subset to Latin and the punctuation the site uses: 14 kB, down from 21 kB for the shipped
+ * latin file. It is counted on the page like everything else.
+ */
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+
+/*
  * Ember over ink.
  *
  * Blue was the previous accent and it is every other developer tool's accent too. Warm amber on
@@ -110,6 +129,15 @@
 
 /* ---- typography ---- */
 
+/*
+ * Two faces with one job each. The serif is the page's voice at display size; the grotesque
+ * does everything a reader has to work through — prose, navigation, labels, subheadings — and
+ * the monospace is reserved for anything that is literally source.
+ *
+ * `h3` stays on the grotesque deliberately: it is a working label inside an example, not a
+ * headline, and setting it in the display face would flatten the distinction the pair exists
+ * to make.
+ */
 :global(h1),
 :global(h2),
 :global(h3) {
@@ -119,15 +147,29 @@
   font-weight: 640;
 }
 
+:global(h1),
+:global(h2) {
+  font-family: "Instrument Serif", ui-serif, Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  /* The face has one weight, so a browser asked for a bolder one would draw a smeared
+     approximation of it. Better to have the real letterforms or the fallback's. */
+  font-synthesis: none;
+}
+
 :global(h1) {
   font-size: var(--step-4);
   margin: 0 0 var(--space-3);
-  letter-spacing: -0.042em;
+  /* A serif at display size needs far less negative tracking than a grotesque: the same
+     -0.042em that tightened Geist collides the serifs here. */
+  letter-spacing: -0.012em;
+  line-height: 0.98;
 }
 
 :global(h2) {
   font-size: var(--step-3);
   margin: 0 0 var(--space-2);
+  letter-spacing: -0.008em;
+  line-height: 1.02;
 }
 
 :global(h3) {
@@ -1254,9 +1296,17 @@
   background: transparent;
 }
 
-@media (min-width: 52rem) {
+@media (min-width: 40rem) {
   :global(.numbers) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Six cells, so the row count has to divide six: a widow in a panel that is meant to read as one
+   instrument leaves the readout behind it showing through a gap. */
+@media (min-width: 64rem) {
+  :global(.numbers) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 

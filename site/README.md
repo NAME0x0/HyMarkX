@@ -33,6 +33,32 @@ JavaScript.
 | `public/` | Static files copied verbatim into `dist/` |
 | `build.mjs` | Compile, bundle islands, copy static files |
 
+## Typography
+
+Two faces, one job each. **Geist** sets everything a reader works through — prose, navigation,
+labels, subheadings. **Instrument Serif** sets `h1` and `h2` only: a high-contrast serif says
+"document format" faster than the copy does, and every other developer tool on the internet is a
+grotesque on a dark background.
+
+Both are self-hosted and subset to Latin. Neither is linked from a font CDN — a page arguing
+about what it costs a reader should not open a third-party connection to draw its own headline.
+
+| File | From | Licence | Size |
+|---|---|---|---|
+| `public/fonts/geist-latin.woff2` | `geist@1.7.2` | SIL OFL 1.1 | 25 kB |
+| `public/fonts/instrument-serif-latin.woff2` | `@fontsource/instrument-serif@5.3.0` | SIL OFL 1.1 (`instrument-serif-OFL.txt`) | 14 kB |
+
+The serif was subset from the 21 kB Latin file the package ships:
+
+```sh
+pyftsubset instrument-serif-latin-400-normal.woff2 \
+  --output-file=instrument-serif-latin.woff2 --flavor=woff2 \
+  --layout-features='kern,liga,clig,calt' \
+  --unicodes="U+0020-007E,U+00A0,U+00B7,U+00D7,U+2010-2015,U+2018-201D,U+2026"
+```
+
+Its 14 kB is on the landing page's cost strip, next to the hero's 15 kB.
+
 ## The hero island
 
 The gradient behind the headline is React Bits' `Grainient` shader (MIT, © React Bits), ported
