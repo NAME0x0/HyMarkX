@@ -22,7 +22,7 @@ npm install -g hymarkx
 hmx build page.hmx
 ```
 
-> ⚠️ **Status: alpha (0.0.2).** Published and installable, but syntax may still change
+> ⚠️ **Status: alpha (0.0.9).** Published and installable, but syntax may still change
 > without migration paths, and HyMarkX **must not be used to render untrusted content in
 > production** — see [`SECURITY.md`](SECURITY.md) and the
 > [security audit](docs/security-audit.md) for exactly why.
@@ -222,7 +222,7 @@ compiled by the test suite.
 
 ## Status
 
-**Phases 0–9 complete; published to npm as 0.0.2.** 1,383 tests. CommonMark 652/652 and
+**Phases 0–9 complete; published to npm as 0.0.9.** 1,522 tests. CommonMark 652/652 and
 GFM 40/40, never regressed across ten phases and eight syntax additions.
 
 | Phase | |

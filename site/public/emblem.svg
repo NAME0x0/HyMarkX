@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-labelledby="emblem-title emblem-desc">
+  <title id="emblem-title">HyMarkX</title>
+  <desc id="emblem-desc">A container directive drawn as a mark: three dots for the opening fence, three lines of content, three dots for the closing fence.</desc>
+  <circle cx="20" cy="20" r="6" fill="#9c968f"/>
+  <circle cx="40" cy="20" r="6" fill="#9c968f"/>
+  <circle cx="60" cy="20" r="6" fill="#9c968f"/>
+  <rect x="20" y="40" width="80" height="8" rx="4" fill="#4a4a58"/>
+  <rect x="20" y="56" width="56" height="8" rx="4" fill="#ff9e5e"/>
+  <rect x="20" y="72" width="72" height="8" rx="4" fill="#4a4a58"/>
+  <circle cx="20" cy="100" r="6" fill="#9c968f"/>
+  <circle cx="40" cy="100" r="6" fill="#9c968f"/>
+  <circle cx="60" cy="100" r="6" fill="#9c968f"/>
+</svg>

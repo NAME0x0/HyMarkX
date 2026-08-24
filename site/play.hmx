@@ -61,6 +61,9 @@ The URL updates as you type, so whatever you end up with is a link you can send 
 ::::
 
 ::::box{as=footer class=site-footer}
+
+![HyMarkX](/emblem.svg)
+
 HyMarkX is MIT/Apache-2.0 dual licensed. Built in the open on
 [GitHub](https://github.com/NAME0x0/HyMarkX). Compiled in `document` trust — the mode a host
 uses for content it did not write, which is what your input is.

@@ -1361,6 +1361,24 @@
   max-width: none;
 }
 
+/*
+ * The emblem signs the page: a container directive drawn at the size of a mark. The wordmark in
+ * the nav says which project this is; this says what the language is, and it is the right size
+ * for the end of a document rather than the start of one.
+ */
+:global(.site-footer p:first-child) {
+  margin-bottom: var(--space-2);
+}
+
+/* 40px, not 28: below about 36 the three fence dots stop reading as three and the mark becomes
+   texture. The favicon-sized case is the wordmark's job, not this one's. */
+:global(.site-footer img) {
+  display: block;
+  width: 40px;
+  height: 40px;
+  opacity: 0.85;
+}
+
 @media (max-width: 40rem) {
   :global(.hero) {
     padding: var(--space-5) var(--space-3) var(--space-4);
