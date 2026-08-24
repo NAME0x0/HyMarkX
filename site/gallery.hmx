@@ -1,0 +1,424 @@
+---
+title: Component gallery — HyMarkX
+description: Every built-in HyMarkX component rendered live beside the source that produced it, with the attributes each one accepts.
+canonical: https://hymarkx.afsah.xyz/gallery
+icon: /logo-32.png
+image: https://hymarkx.afsah.xyz/social-preview.png
+siteName: HyMarkX
+lang: en
+---
+
+:::Shell
+:::
+
+:::box{class=skip}
+[Skip to content](#note)
+:::
+
+:::Nav
+:::
+
+::state{clicks=0 who=Ada}
+
+::::box{as=header class=docs-header}
+
+:::box{class=eyebrow}
+Component gallery
+:::
+
+# Nine components, rendered
+
+:::box{class=lead}
+Every built-in the language ships, each one beside the source that produced it. Nothing here is
+a screenshot — this page is a HyMarkX document, so the right-hand half of each pair is the
+component itself, compiled by the same compiler you would run.
+:::
+
+:::note[This page pays for what it shows]{type=info}
+The last three components exist so that interactivity has native elements to attach to, so this
+page compiles in `app` trust and ships the runtime. The [documentation](/docs) does not, and
+ships no JavaScript at all — same site, same compiler, different bill. The state for the live
+example is declared once at the top of this document, because a declaration is only legal in a
+document root.
+:::
+
+::::
+
+::::box{as=section class="chapter reveal" #note}
+
+:::box{class=eyebrow}
+Container · label optional
+:::
+
+## note
+
+:::box{class=lead}
+A callout for something related to the prose but not part of it. `type` picks one of four
+statuses; the label in square brackets becomes the heading, and a note without one is still a
+note.
+:::
+
+| Attribute | Type | Default | Accepts |
+| --- | --- | --- | --- |
+| `type` | enum | `info` | `info`, `warning`, `danger`, `success` |
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+:::note[Heads up]{type=warning}
+Deployment starts at 8 PM UTC.
+:::
+
+:::note[Shipped]{type=success}
+0.0.9 is on npm.
+:::
+
+:::note[Breaking]{type=danger}
+`--fragment` replaces the old default.
+:::
+
+:::note
+A note with no label at all.
+:::
+```
+:::
+
+:::box{class=preview}
+### Rendered
+
+:::note[Heads up]{type=warning}
+Deployment starts at 8 PM UTC.
+:::
+
+:::note[Shipped]{type=success}
+0.0.9 is on npm.
+:::
+
+:::note[Breaking]{type=danger}
+`--fragment` replaces the old default.
+:::
+
+:::note
+A note with no label at all.
+:::
+:::
+
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #card}
+
+:::box{class=eyebrow}
+Container · label optional
+:::
+
+## card
+
+:::box{class=lead}
+A grouped block of content. The label becomes an `h3`, which keeps a page of cards navigable by
+heading rather than by shape.
+:::
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+:::card[Quarterly report]
+Revenue rose in every region except EMEA.
+:::
+```
+:::
+
+:::box{class=preview}
+### Rendered
+
+:::card[Quarterly report]
+Revenue rose in every region except EMEA.
+:::
+:::
+
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #grid}
+
+:::box{class=eyebrow}
+Container · label optional
+:::
+
+## grid
+
+:::box{class=lead}
+Columns, for the one case Markdown cannot express. Both attributes are bounded integers, and
+both are emitted as custom properties rather than as classes, so a host stylesheet can override
+them at any breakpoint.
+:::
+
+| Attribute | Type | Default | Accepts |
+| --- | --- | --- | --- |
+| `columns` | number | `3` | `1` through `12` |
+| `gap` | number | `4` | `0` through `16` |
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+:::grid{columns=3 gap=3}
+:::card[Parse]
+micromark extensions, no regex.
+:::
+:::card[Analyse]
+Schemas, spans, diagnostics.
+:::
+:::card[Emit]
+Only what the document used.
+:::
+:::
+```
+:::
+
+:::box{class=preview}
+### Rendered
+
+:::grid{columns=3 gap=3}
+:::card[Parse]
+micromark extensions, no regex.
+:::
+:::card[Analyse]
+Schemas, spans, diagnostics.
+:::
+:::card[Emit]
+Only what the document used.
+:::
+:::
+:::
+
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #metric}
+
+:::box{class=eyebrow}
+Container · label optional
+:::
+
+## metric
+
+:::box{class=lead}
+One figure and its caption. The label is the caption and the body is the figure — the reverse of
+what most people write first, and the reason every number on the [home page](/#cost) was upside
+down for a day.
+:::
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+:::metric[requests per second]
+18,400
+:::
+```
+:::
+
+:::box{class=preview}
+### Rendered
+
+:::metric[requests per second]
+18,400
+:::
+:::
+
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #badge}
+
+:::box{class=eyebrow}
+Text · label optional
+:::
+
+## badge
+
+:::box{class=lead}
+The only inline built-in. One colon, not three, because it belongs inside a sentence rather than
+around a block.
+:::
+
+| Attribute | Type | Default | Accepts |
+| --- | --- | --- | --- |
+| `kind` | enum | `info` | `info`, `warning`, `danger`, `success` |
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+A release is :badge[stable]{kind=success} once the suite is green,
+:badge[rc]{kind=warning} while it is being watched, :badge[yanked]{kind=danger}
+if it should not be installed, and :badge[alpha] until any of that applies.
+```
+:::
+
+:::box{class=preview}
+### Rendered
+
+A release is :badge[stable]{kind=success} once the suite is green,
+:badge[rc]{kind=warning} while it is being watched, :badge[yanked]{kind=danger}
+if it should not be installed, and :badge[alpha] until any of that applies.
+:::
+
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #box}
+
+:::box{class=eyebrow}
+Container · label forbidden
+:::
+
+## box
+
+:::box{class=lead}
+A wrapper that costs nothing: no default class, no stylesheet, only the `class` and `id` you
+gave it. `as` swaps the element for a landmark, which is the one thing Markdown cannot say and a
+real page needs — this document's header, sections and footer are all `box`.
+:::
+
+| Attribute | Type | Default | Accepts |
+| --- | --- | --- | --- |
+| `as` | enum | `div` | `div`, `section`, `article`, `nav`, `header`, `footer`, `aside`, `main` |
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+:::box{as=aside class=sidenote}
+Everything on this page is inside one of these.
+:::
+```
+:::
+
+:::box{class=preview}
+### Rendered
+
+:::box{as=aside class=sidenote}
+Everything on this page is inside one of these.
+:::
+:::
+
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #controls}
+
+:::box{class=eyebrow}
+Container and leaf · label forbidden
+:::
+
+## button, input and form
+
+:::box{class=lead}
+These three exist so that events have native elements to attach to. They are ordinary
+`<button>`, `<input>` and `<form>` elements — no wrapper, no widget — and they are the reason
+this page is in `app` trust. The counter below is live.
+:::
+
+| Component | Attribute | Type | Default | Accepts |
+| --- | --- | --- | --- | --- |
+| `button` | `type` | enum | `button` | `button`, `submit`, `reset` |
+| `input` | `type` | enum | `text` | `text` |
+| `input` | `value` | string | empty | any string |
+| `input` | `name` | string | — | any string |
+| `form` | — | — | — | — |
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+::state{clicks=0 who=Ada}
+
+:::form
+::input{name=visitor value=Ada on-input="who = who"}
+
+:::button{on-click="clicks = clicks + 1"}
+Count
+:::
+:::
+
+{{ who }} clicked {{ clicks }} times.
+```
+:::
+
+:::box{class=preview}
+### Rendered
+
+:::form
+::input{name=visitor value=Ada on-input="who = who"}
+
+:::button{on-click="clicks = clicks + 1"}
+Count
+:::
+:::
+
+{{ who }} clicked {{ clicks }} times.
+:::
+
+::::
+
+:::box{class=lead}
+Writing the same name on both sides of `on-input` is how a text input binds: the runtime coerces
+what was typed to that state's declared type before the handler runs. The handler itself is not
+JavaScript. It can assign, compare and do arithmetic, and it cannot reach the
+network, storage, timers or any host object — which is why compiling a document someone else
+wrote is safe, and why the copy buttons in the source panes above are host code rather than
+something this document was able to ask for.
+:::
+
+::::
+
+::::box{as=section class="chapter reveal" #more}
+
+:::box{class=eyebrow}
+Beyond the built-ins
+:::
+
+## Your own
+
+:::box{class=lead}
+A `.hmx` file in `components/` is a component: its frontmatter declares the attributes it takes,
+its body is the markup, and a `<style scoped>` block styles only what it emitted. The nine above
+are simply the ones that ship, and they are registered through the same interface.
+:::
+
+:::box{class=links}
+[Component guide](https://github.com/NAME0x0/HyMarkX/tree/main/docs/guides) ·
+[Specification](https://github.com/NAME0x0/HyMarkX/blob/main/SPEC.md) ·
+[Try one in the playground](/play)
+:::
+
+::::
+
+::::box{as=footer class=site-footer}
+HyMarkX is MIT/Apache-2.0 dual licensed. Built in the open on
+[GitHub](https://github.com/NAME0x0/HyMarkX). Every rendering above is this page's own output.
+::::

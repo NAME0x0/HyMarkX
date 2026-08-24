@@ -13,15 +13,20 @@ npm run dev       # hmx dev, live reload
 ```
 
 Documents build in `--trust document` by default — the mode a host uses for content it did not
-write. `index.hmx` is the exception: it declares an island, islands are `app`-mode only, so it
-compiles in a second pass. The exception is one named entry in `build.mjs` rather than a flag on
-the whole site, so promoting a page stays a visible decision.
+write. Three pages are exceptions: `index.hmx` and `play.hmx` declare islands, which are
+`app`-mode only, and `gallery.hmx` runs a live counter. They compile in a second pass. The
+exceptions are named entries in `build.mjs` rather than a flag on the whole site, so promoting a
+page stays a visible decision — and `docs.hmx`, which is the largest page here, still ships zero
+JavaScript.
 
 ## Layout
 
 | Path | Holds |
 |---|---|
 | `index.hmx` | The landing page, including the four-step progression demo |
+| `docs.hmx` | The whole documentation, in `document` trust |
+| `gallery.hmx` | Every built-in component rendered beside its source |
+| `play.hmx` | The playground, which runs the real compiler in the reader's browser |
 | `components/Shell.hmx` | Every global rule on the site, via `:global(...)` inside `<style scoped>` |
 | `components/Nav.hmx` | The header, reused by every page |
 | `islands/` | The hero's WebGL gradient and the host adapter that mounts it |

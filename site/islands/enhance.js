@@ -120,9 +120,12 @@ function revealOnScroll() {
  * highlight on a section that has already scrolled past.
  */
 function scrollSpy() {
-  const links = [...document.querySelectorAll('.site-nav a[href^="#"]')]
-  const sections = links
-    .map((link) => ({ link, section: document.querySelector(link.getAttribute('href')) }))
+  // The nav links to `/#how`, not `#how`, so that they work from every page — which means an
+  // `[href^="#"]` selector matches nothing and this whole function was a silent no-op. Match on
+  // the parsed `hash` instead, and only for links pointing at this page.
+  const sections = [...document.querySelectorAll('.site-nav a')]
+    .filter((link) => link.hash !== '' && link.pathname === location.pathname)
+    .map((link) => ({ link, section: document.querySelector(link.hash) }))
     .filter((entry) => entry.section !== null)
   if (sections.length === 0) {
     return

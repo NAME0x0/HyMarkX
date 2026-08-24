@@ -371,15 +371,28 @@
 
 @media (max-width: 62rem) {
   /* In-page anchors go first when there is no room — the brand and the outbound links are what
-     a narrow screen still needs. */
-  :global(.site-nav a[href^="#"]) {
+     a narrow screen still needs. Matched on `/#`, because the anchors are written absolutely so
+     that they also work from the docs and the gallery. */
+  :global(.site-nav a[href^="/#"]) {
     display: none;
   }
 }
 
 @media (max-width: 34rem) {
+  /* Six items and a wordmark do not fit on a phone. Wrapping to a second row keeps every
+     destination reachable; the alternative is hiding pages the nav exists to advertise. */
   :global(.site-nav p) {
+    flex-wrap: wrap;
+    row-gap: 0;
     font-size: var(--step--2);
+  }
+
+  :global(.site-nav p > a:first-child) {
+    flex: 1 0 100%;
+  }
+
+  :global(.site-nav a) {
+    padding-inline: 0.45rem;
   }
 
   :global(.site-nav p > a:first-child) {
@@ -888,10 +901,18 @@
   padding: var(--space-5) 0 0;
 }
 
+/*
+ * `minmax(0, 1fr)`, not `1fr`, in both the one-column and the two-column case.
+ *
+ * A grid item's automatic minimum size is its content, so a single unwrappable line inside a
+ * `pre` widens the track past the viewport and the whole page scrolls sideways. The two-column
+ * rule below always said `minmax(0, ...)`; this one did not, which is why every phone got a
+ * horizontally scrolling documentation page.
+ */
 :global(.example) {
   display: grid;
   gap: var(--space-2);
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   margin: var(--space-3) 0;
   padding: var(--space-3);
   border: 1px solid var(--line);
@@ -921,6 +942,55 @@
 }
 
 :global(.links p) {
+  color: var(--muted);
+}
+
+/* ---- reference tables ---- */
+
+/*
+ * The gallery states each component's attributes as a table, because a list of four columns
+ * pretending to be prose is harder to scan than a table admitting it is one. Scrolls inside its
+ * own container: a wide table must never make the page scroll sideways.
+ */
+:global(.chapter table) {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  margin: var(--space-3) 0;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+:global(.chapter th),
+:global(.chapter td) {
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+:global(.chapter th) {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-dim);
+  border-bottom-color: var(--line-bright);
+}
+
+:global(.chapter td) {
+  color: var(--muted);
+}
+
+:global(.chapter tbody tr:last-child td) {
+  border-bottom: 0;
+}
+
+/* The `box` example passes a class of its own through; this is what receiving one looks like. */
+:global(.sidenote) {
+  border-left: 2px solid var(--accent);
+  padding-left: var(--space-2);
   color: var(--muted);
 }
 

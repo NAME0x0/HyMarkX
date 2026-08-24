@@ -23,11 +23,12 @@ const out = join(root, 'dist')
 /**
  * Documents that declare an island, and therefore must compile in `app` trust.
  *
- * Islands are `app`-mode only, so the landing page cannot build in `document` mode. Rather
- * than promote the whole site, the two are built in separate passes and this list is the
- * exception — kept explicit so that adding an island to a page is a visible decision.
+ * Islands are `app`-mode only, so the landing page cannot build in `document` mode, and the
+ * gallery needs the same promotion for its live controls. Rather than promote the whole site,
+ * the two groups are built in separate passes and this list is the exception — kept explicit so
+ * that raising a page's trust stays a visible decision.
  */
-const APP_TRUST = new Set(['index.hmx', 'play.hmx'])
+const APP_TRUST = new Set(['index.hmx', 'play.hmx', 'gallery.hmx'])
 
 /** Every `.hmx` document at the site root, plus anything under `docs/`. */
 async function documents() {
