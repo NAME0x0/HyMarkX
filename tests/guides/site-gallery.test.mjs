@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { builtinComponents, compile, compileComponents } from '../../packages/compiler/src/index.js'
 
 const siteDirectory = fileURLToPath(new URL('../../site/', import.meta.url))
-const gallery = readFileSync(`${siteDirectory}gallery.hmx`, 'utf8')
+// Normalized: the fenced-example regex matches on `\n`, and a checkout on Windows has CRLF.
+const gallery = readFileSync(`${siteDirectory}gallery.hmx`, 'utf8').replaceAll('\r\n', '\n')
 
 /**
  * The site's component gallery, held against the schemas it claims to document.

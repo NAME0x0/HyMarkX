@@ -8,7 +8,7 @@
  * It compiles in `document` trust, the mode a host uses for content it did not write, because
  * that is exactly what a playground is handling.
  */
-import { compile } from '@hymarkx/compiler'
+import { compile, renderDiagnostics } from '@hymarkx/compiler'
 
 const STARTER = `---
 title: Release notes
@@ -162,9 +162,11 @@ export function Play(root) {
       diagnostics.textContent = 'No diagnostics.'
       delete diagnostics.dataset.state
     } else {
-      diagnostics.textContent = result.diagnostics
-        .map(({ code, severity, message }) => `${severity} ${code}: ${message}`)
-        .join('\n')
+      // The compiler's own renderer, not a summary of it: the frame here is character for
+      // character what `hmx check` prints in a terminal, which is the point of having one.
+      diagnostics.textContent = renderDiagnostics(result.diagnostics, text, {
+        from: 'playground.hmx',
+      })
       diagnostics.dataset.state = errors.length > 0 ? 'error' : 'warning'
     }
 

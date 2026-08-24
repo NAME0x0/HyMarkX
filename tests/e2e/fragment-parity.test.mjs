@@ -36,7 +36,9 @@ afterAll(() => {
   rmSync(outputRoot, { recursive: true, force: true })
 })
 
-describe('--fragment reproduces pre-0.0.4 output', () => {
+// Spawns the built CLI, so it is timed against process startup rather than against this
+// project's code. See the note in `cli.test.mjs`.
+describe('--fragment reproduces pre-0.0.4 output', { timeout: 60_000 }, () => {
   it.each([
     ['rich', [], 'headings, emphasis, code, links, notes, badges, nested grids, a GFM table'],
     ['interactive', ['--trust', 'app'], 'state, an event handler, and an emitted runtime'],

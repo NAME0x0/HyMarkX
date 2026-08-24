@@ -11,18 +11,29 @@ const cliPath = resolve(repositoryRoot, 'packages/cli/dist/bin.js')
 const typescriptPath = resolve(repositoryRoot, 'node_modules/typescript/bin/tsc')
 const outputRoot = mkdtempSync(join(tmpdir(), 'hmx-e2e-'))
 
+/**
+ * Generous, because what is being timed is not this project's code.
+ *
+ * Every test here spawns Node and runs the built CLI, and the hook below runs a whole
+ * TypeScript build. Their duration is dominated by process startup and by whatever else the
+ * machine is doing: on a loaded machine the suite failed here twice while every assertion was
+ * still correct, which is a gate reporting on the load average rather than on the code. Nothing
+ * in this file is fast enough for the default budget to be catching anything real.
+ */
+const E2E_TIMEOUT = 60_000
+
 beforeAll(() => {
   execFileSync(process.execPath, [typescriptPath, '-b', '--pretty', 'false'], {
     cwd: repositoryRoot,
     stdio: 'pipe',
   })
-})
+}, 180_000)
 
 afterAll(() => {
   rmSync(outputRoot, { recursive: true, force: true })
 })
 
-describe('built hmx CLI', () => {
+describe('built hmx CLI', { timeout: E2E_TIMEOUT }, () => {
   it('reports help and version from the built binary', () => {
     const help = spawnSync(process.execPath, [cliPath, '--help'], {
       cwd: repositoryRoot,

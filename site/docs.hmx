@@ -240,7 +240,8 @@ Clicked {{ count }} times.
 ### Rendered
 
 A live example needs `--trust app`; this page is built in `document` mode, so the source is
-shown without running it. The [home page](/#how) has it running.
+shown without running it. The [gallery](/gallery#controls) and the [home page](/#how) have it
+running.
 :::
 
 ::::
@@ -272,6 +273,61 @@ once per component, however many times it is used.
 Built-in components bring a restrained default stylesheet, and only for the components a
 document actually uses. Override it with design tokens — `--hmx-color-info`, `--hmx-radius`
 and the rest — rather than by fighting selectors.
+::::
+
+::::
+
+::::box{as=section class="chapter reveal" #diagnostics}
+
+::::box{class=eyebrow}
+When something is wrong
+::::
+
+## Diagnostics
+
+::::box{class=lead}
+Nothing recoverable throws. Every problem is a diagnostic carrying a stable code, a severity and
+a real span, and one renderer draws them all — so the compiler, the CLI, the language server and
+the playground say the same words about the same characters.
+::::
+
+::::box{class=example}
+
+:::box{class=pane}
+### Source
+
+```md
+:::note[Heads up]{typ=warning}
+Deployment starts at 8 PM UTC.
+:::
+```
+:::
+
+:::box{class=pane}
+### What you are told
+
+```text
+warning[HMX2001]: Unknown attribute "typ" on component "note".
+  ┌─ notes.hmx:1:19
+  │
+1 │ :::note[Heads up]{typ=warning}
+  │                   ^^^
+  │
+help: type
+```
+:::
+
+::::
+
+::::box{class=lead}
+The code is the part that lasts. `HMX2001` means the same thing in every version, so it is worth
+suppressing, searching for, or asserting on in a test — while the wording is free to improve.
+Severity decides what happens next: `hmx check` fails the build on an error and reports the rest.
+::::
+
+::::box{class=lead}
+The [playground](/play) renders diagnostics with this same function, on whatever you type. It is
+the fastest way to find out what a code means.
 ::::
 
 ::::
