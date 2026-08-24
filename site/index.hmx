@@ -57,7 +57,28 @@ is the one before it with a line added. Move through them.
 ::::box{class=stepper}
 
 ::::box{class=stepper-bar}
-Step {{ step }} of 4
+
+:::box{class=rail}
+
+:::button{class={step == 1 ? "rail-step on" : (step > 1 ? "rail-step done" : "rail-step")} on-click="step = 1"}
+Markdown
+:::
+
+:::button{class={step == 2 ? "rail-step on" : (step > 2 ? "rail-step done" : "rail-step")} on-click="step = 2"}
+A component
+:::
+
+:::button{class={step == 3 ? "rail-step on" : (step > 3 ? "rail-step done" : "rail-step")} on-click="step = 3"}
+Values
+:::
+
+:::button{class={step == 4 ? "rail-step on" : "rail-step"} on-click="step = 4"}
+State
+:::
+
+:::
+
+:::box{class=stepper-controls}
 
 :::button{on-click="step = step - 1 < 1 ? 4 : step - 1"}
 Back
@@ -67,9 +88,16 @@ Back
 Next
 :::
 
+:::
+
 ::::
 
 ::::box{class={step == 1 ? "step live" : "step"}}
+
+:::box{class=step-note}
+Plain CommonMark. Nothing on this step is HyMarkX, and the output is byte for byte what any
+other Markdown processor would give you.
+:::
 
 :::box{class=pane}
 ### You write
@@ -92,6 +120,11 @@ Shipping on **Friday**.
 ::::
 
 ::::box{class={step == 2 ? "step live" : "step"}}
+
+:::box{class=step-note}
+Three lines added, and the file is still a Markdown file. Only the components this document
+used bring any CSS with them.
+:::
 
 :::box{class=pane}
 ### You write
@@ -119,6 +152,11 @@ Deployment starts at 8 PM UTC.
 
 ::::box{class={step == 3 ? "step live" : "step"}}
 
+:::box{class=step-note}
+Frontmatter, read back in the prose. Every value resolves while compiling, so this step still
+emits no JavaScript at all.
+:::
+
 :::box{class=pane}
 ### You write
 
@@ -145,6 +183,11 @@ Revenue was 42500.
 ::::
 
 ::::box{class={step == 4 ? "step live" : "step"}}
+
+:::box{class=step-note}
+The first step that costs anything: state and an event handler bring in the 591-byte runtime.
+The button below is the real one — this page is that file.
+:::
 
 :::box{class=pane}
 ### You write
