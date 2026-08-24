@@ -210,6 +210,10 @@ page are host code rather than something the document was able to ask for.
 
 ::::
 
+::::box{class=figure}
+![How HyMarkX compiles a document: the document is parsed into an AST where every node carries a source span, then compiled. HTML is always emitted, CSS only when the document is styled, and JavaScript is zero bytes unless the document uses an interactive construct.](/pipeline.svg)
+::::
+
 ::::
 
 ::::box{as=section class="chapter reveal" #cost}

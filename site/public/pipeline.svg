@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 384" width="1120" height="384" role="img" aria-labelledby="pipeline-title pipeline-desc">
+  <title id="pipeline-title">How HyMarkX compiles a document</title>
+  <desc id="pipeline-desc">A document is parsed by micromark tokenizer extensions into an AST where every node carries a source span, then compiled. HTML is always emitted; CSS is emitted only when the document is styled; JavaScript is zero bytes unless the document uses an interactive construct.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#9c968f"/>
+    </marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#ff9e5e"/>
+    </marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#08080c"/>
+
+  <rect x="544" y="200" width="544" height="112" rx="8" fill="rgba(243,240,234,0.02)" stroke="#23232f" stroke-width="0.8" stroke-dasharray="4,4"/>
+  <rect x="556" y="204" width="104" height="12" rx="2" fill="#08080c"/>
+  <text x="608" y="212" fill="#6f6a66" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.14em">PROPORTIONAL</text>
+
+  <line x1="176" y1="96" x2="232" y2="96" stroke="#9c968f" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="400" y1="96" x2="456" y2="96" stroke="#9c968f" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="608" y1="96" x2="664" y2="96" stroke="#9c968f" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <path d="M 708,128 V 172 Q 708,180 700,180 H 640 Q 632,180 632,188 V 224" fill="none" stroke="#9c968f" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <path d="M 744,128 V 172 Q 744,180 752,180 H 808 Q 816,180 816,188 a 8,8 0 0,0 0,16 V 224" fill="none" stroke="#23232f" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <path d="M 780,128 V 188 Q 780,196 788,196 H 992 Q 1000,196 1000,204 V 224" fill="none" stroke="#ff9e5e" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+
+  <rect x="644" y="160" width="48" height="12" rx="2" fill="#08080c"/>
+  <text x="668" y="168" fill="#6f6a66" font-size="8" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.06em">ALWAYS</text>
+  <rect x="744" y="160" width="72" height="12" rx="2" fill="#08080c"/>
+  <text x="780" y="168" fill="#6f6a66" font-size="8" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.06em">IF STYLED</text>
+  <rect x="840" y="176" width="96" height="12" rx="2" fill="#08080c"/>
+  <text x="888" y="184" fill="#6f6a66" font-size="8" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.06em">IF INTERACTIVE</text>
+
+  <rect x="32" y="64" width="144" height="64" rx="6" fill="#08080c"/>
+  <rect x="32" y="64" width="144" height="64" rx="6" fill="rgba(156,150,143,0.10)" stroke="#6f6a66" stroke-width="1"/>
+  <rect x="40" y="72" width="24" height="12" rx="2" fill="none" stroke="#6f6a66" stroke-opacity="0.45" stroke-width="0.8"/>
+  <text x="52" y="80" fill="#6f6a66" fill-opacity="0.85" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.08em">IN</text>
+  <text x="104" y="100" fill="#f3f0ea" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif" text-anchor="middle">Document</text>
+  <text x="104" y="116" fill="#9c968f" font-size="9" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle">.md / .hmx</text>
+  <rect x="240" y="64" width="160" height="64" rx="6" fill="#08080c"/>
+  <rect x="240" y="64" width="160" height="64" rx="6" fill="#101017" stroke="#9c968f" stroke-width="1"/>
+  <rect x="248" y="72" width="32" height="12" rx="2" fill="none" stroke="#9c968f" stroke-opacity="0.45" stroke-width="0.8"/>
+  <text x="264" y="80" fill="#9c968f" fill-opacity="0.85" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.08em">STEP</text>
+  <text x="320" y="100" fill="#f3f0ea" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif" text-anchor="middle">Parser</text>
+  <text x="320" y="116" fill="#9c968f" font-size="9" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle">micromark ext</text>
+  <rect x="464" y="64" width="144" height="64" rx="6" fill="#08080c"/>
+  <rect x="464" y="64" width="144" height="64" rx="6" fill="rgba(243,240,234,0.05)" stroke="#9c968f" stroke-width="1"/>
+  <rect x="472" y="72" width="40" height="12" rx="2" fill="none" stroke="#9c968f" stroke-opacity="0.45" stroke-width="0.8"/>
+  <text x="492" y="80" fill="#9c968f" fill-opacity="0.85" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+  <text x="536" y="100" fill="#f3f0ea" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif" text-anchor="middle">AST</text>
+  <text x="536" y="116" fill="#9c968f" font-size="9" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle">every node spanned</text>
+  <rect x="672" y="64" width="144" height="64" rx="6" fill="#08080c"/>
+  <rect x="672" y="64" width="144" height="64" rx="6" fill="#101017" stroke="#9c968f" stroke-width="1"/>
+  <rect x="680" y="72" width="32" height="12" rx="2" fill="none" stroke="#9c968f" stroke-opacity="0.45" stroke-width="0.8"/>
+  <text x="696" y="80" fill="#9c968f" fill-opacity="0.85" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.08em">STEP</text>
+  <text x="744" y="104" fill="#f3f0ea" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif" text-anchor="middle">Compiler</text>
+  <rect x="560" y="232" width="144" height="64" rx="6" fill="#08080c"/>
+  <rect x="560" y="232" width="144" height="64" rx="6" fill="#101017" stroke="#9c968f" stroke-width="1"/>
+  <rect x="568" y="240" width="32" height="12" rx="2" fill="none" stroke="#9c968f" stroke-opacity="0.45" stroke-width="0.8"/>
+  <text x="584" y="248" fill="#9c968f" fill-opacity="0.85" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.08em">OUT</text>
+  <text x="632" y="268" fill="#f3f0ea" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif" text-anchor="middle">HTML</text>
+  <text x="632" y="284" fill="#9c968f" font-size="9" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle">always</text>
+  <rect x="744" y="232" width="144" height="64" rx="6" fill="#08080c"/>
+  <rect x="744" y="232" width="144" height="64" rx="6" fill="rgba(243,240,234,0.03)" stroke="#23232f" stroke-width="1" stroke-dasharray="4,3"/>
+  <rect x="752" y="240" width="32" height="12" rx="2" fill="none" stroke="#23232f" stroke-opacity="0.45" stroke-width="0.8"/>
+  <text x="768" y="248" fill="#23232f" fill-opacity="0.85" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.08em">OUT</text>
+  <text x="816" y="268" fill="#f3f0ea" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif" text-anchor="middle">CSS</text>
+  <text x="816" y="284" fill="#9c968f" font-size="9" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle">if styled</text>
+  <rect x="928" y="232" width="144" height="64" rx="6" fill="#08080c"/>
+  <rect x="928" y="232" width="144" height="64" rx="6" fill="rgba(255,158,94,0.12)" stroke="#ff9e5e" stroke-width="1"/>
+  <rect x="936" y="240" width="32" height="12" rx="2" fill="none" stroke="#ff9e5e" stroke-opacity="0.45" stroke-width="0.8"/>
+  <text x="952" y="248" fill="#ff9e5e" fill-opacity="0.85" font-size="7" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle" letter-spacing="0.08em">OUT</text>
+  <text x="1000" y="268" fill="#f3f0ea" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif" text-anchor="middle">JavaScript</text>
+  <text x="1000" y="284" fill="#9c968f" font-size="9" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" text-anchor="middle">0 B unless used</text>
+
+  <text x="32" y="248" fill="#9c968f" font-size="14" font-style="italic" font-family="ui-serif,Georgia,'Times New Roman',serif">A document that uses no component</text>
+  <text x="32" y="272" fill="#9c968f" font-size="14" font-style="italic" font-family="ui-serif,Georgia,'Times New Roman',serif">emits no component CSS. One with no</text>
+  <text x="32" y="296" fill="#9c968f" font-size="14" font-style="italic" font-family="ui-serif,Georgia,'Times New Roman',serif">interactive construct emits no script.</text>
+
+  <line x1="32" y1="328" x2="1088" y2="328" stroke="#23232f" stroke-width="0.8"/>
+  <text x="32" y="348" fill="#6f6a66" font-size="8" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace" letter-spacing="0.14em">LEGEND</text>
+  <line x1="128" y1="344" x2="160" y2="344" stroke="#9c968f" stroke-width="1.2"/>
+  <text x="168" y="348" fill="#9c968f" font-size="8" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace">ALWAYS EMITTED</text>
+  <line x1="336" y1="344" x2="368" y2="344" stroke="#23232f" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="376" y="348" fill="#9c968f" font-size="8" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace">EMITTED ONLY WHEN USED</text>
+  <line x1="624" y1="344" x2="656" y2="344" stroke="#ff9e5e" stroke-width="1.2"/>
+  <text x="664" y="348" fill="#ff9e5e" font-size="8" font-family="ui-monospace,'Cascadia Mono','SF Mono',Menlo,Consolas,monospace">ZERO BYTES UNLESS USED</text>
+</svg>

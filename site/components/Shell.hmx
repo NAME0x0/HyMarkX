@@ -996,6 +996,32 @@
   max-width: 58ch;
 }
 
+/* ---- figures ---- */
+
+/*
+ * The diagram is drawn on the page's own background, so it needs a frame to read as a figure
+ * rather than as loose marks floating in the section.
+ */
+:global(.figure) {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-lift);
+  overflow-x: auto;
+}
+
+:global(.figure p) {
+  margin: 0;
+}
+
+:global(.figure img) {
+  display: block;
+  width: 100%;
+  min-width: 42rem;
+  height: auto;
+}
+
 /* ---- the numbers ---- */
 
 /* The panel holds the readout behind the figures; the figures themselves stay ordinary HTML. */
