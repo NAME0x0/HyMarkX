@@ -155,6 +155,42 @@ export function Play(root) {
     tabs.append(output.tab)
   }
 
+  // Copies whichever artefact is on screen. Host code, because a document cannot reach the
+  // clipboard (ADR-0004) — the same reason the copy buttons on every other page here are.
+  const copy = element('button', 'ide-copy', 'Copy')
+  copy.type = 'button'
+  copy.addEventListener('click', async () => {
+    const active = outputs.find((output) => output.tab.dataset.active === 'true')
+    if (active?.code === undefined) {
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(active.code.textContent)
+      copy.textContent = 'Copied'
+      setTimeout(() => (copy.textContent = 'Copy'), 1400)
+    } catch {
+      copy.textContent = 'Select and copy'
+      setTimeout(() => (copy.textContent = 'Copy'), 1400)
+    }
+  })
+  // Emitted HTML is one long line per block, so the choice between reading a line and reading
+  // the shape of the output is a real one. The gutter survives either way: a wrapped line is
+  // still one element, so it still gets one number.
+  const wrap = element('button', 'ide-copy', 'Wrap')
+  wrap.type = 'button'
+  wrap.setAttribute('aria-pressed', 'false')
+  wrap.addEventListener('click', () => {
+    const on = wrap.getAttribute('aria-pressed') !== 'true'
+    wrap.setAttribute('aria-pressed', String(on))
+    for (const output of outputs) {
+      if (output.pre !== undefined) {
+        output.pre.dataset.wrap = String(on)
+      }
+    }
+  })
+
+  tabs.append(wrap, copy)
+
   function select(name) {
     for (const output of outputs) {
       const active = output.name === name
@@ -162,6 +198,9 @@ export function Play(root) {
       output.tab.setAttribute('aria-selected', String(active))
       output.panel.dataset.active = String(active)
     }
+    // Neither applies to an iframe you can already interact with.
+    copy.hidden = name === 'Preview'
+    wrap.hidden = name === 'Preview'
   }
   select('Preview')
 

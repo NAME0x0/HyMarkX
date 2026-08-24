@@ -1114,6 +1114,46 @@
   color: var(--accent);
 }
 
+:global(.ide-copy) {
+  margin: 0.25rem 0.2rem;
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+:global(.ide-copy:hover) {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* The first of the two pushes both to the right of the tabs. */
+:global(.ide-tab + .ide-copy) {
+  margin-left: auto;
+}
+
+:global(.ide-copy[aria-pressed="true"]) {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-quiet);
+  color: var(--accent);
+}
+
+:global(.ide-code[data-wrap="true"]) {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* A wrapped line hangs under its own number rather than under the gutter. */
+:global(.ide-code[data-wrap="true"] .ide-line) {
+  padding-left: calc(var(--space-2) + 2.4rem + var(--space-2));
+  text-indent: calc((2.4rem + var(--space-2)) * -1);
+}
+
 /* ---- panels ---- */
 
 /*
@@ -1182,6 +1222,15 @@
 
 :global(.ide-line:hover) {
   background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+/*
+ * Any class that sets `display` has to say what `hidden` means for it, because a class selector
+ * outranks the browser's `[hidden] { display: none }`. This is the same specificity trap that
+ * left a preview sitting on top of every other panel.
+ */
+:global([hidden]) {
+  display: none !important;
 }
 
 /* An empty artefact is this page's central claim, so it gets a sentence rather than a blank. */
