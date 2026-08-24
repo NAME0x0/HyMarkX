@@ -7,6 +7,13 @@
  *
  * It compiles in `document` trust, the mode a host uses for content it did not write, because
  * that is exactly what a playground is handling.
+ *
+ * Shaped like an editor rather than like a page: a title bar naming the file, a source pane, a
+ * tab strip whose tabs carry the size of the artefact behind them, one scroll container per
+ * panel, and a status bar with a problems drawer. Two reasons beyond familiarity. A panel that
+ * grows with its content pushed the page down every keystroke and stacked a second scrollbar
+ * inside the first; and the sizes are the point of this page, so they belong on the tabs where
+ * they are read as you switch rather than in a strip below the fold.
  */
 import { compile, renderDiagnostics } from '@hymarkx/compiler'
 
@@ -57,8 +64,8 @@ function decode(value) {
  * Real gzip sizes, measured rather than estimated.
  *
  * `CompressionStream` is what the browser itself uses, so the number matches what a server
- * would send. Where it is missing the raw byte count is shown instead and labelled as such,
- * because a wrong number is worse than a coarser one.
+ * would send. Where it is missing the size is reported as unknown rather than guessed, because
+ * a wrong number is worse than a missing one.
  */
 async function gzipSize(text) {
   // Zero is the answer, not a missing one. "JS — " reads as "unknown"; "JS 0 B" is the claim
@@ -88,57 +95,90 @@ function element(tag, className, text) {
   return node
 }
 
+/**
+ * Renders code one element per line so the gutter can number it.
+ *
+ * A CSS counter does the numbering, which keeps the digits unselectable — copying out of this
+ * panel should give back the code, not the code with a number welded onto every line.
+ */
+function codeLines(target, text) {
+  target.replaceChildren(
+    ...text.split('\n').map((line) => element('span', 'ide-line', line === '' ? ' ' : line)),
+  )
+}
+
 export function Play(root) {
   // An absent hash decodes to an empty string rather than to undefined, so `??` alone left the
   // editor blank on a first visit — the one case that matters most.
   const shared = location.hash.slice(1)
-  const source = shared === '' ? STARTER : (decode(shared) ?? STARTER)
 
-  const editor = element('textarea', 'play-editor')
-  editor.value = source
+  const editor = element('textarea', 'ide-editor')
+  editor.value = shared === '' ? STARTER : (decode(shared) ?? STARTER)
   editor.spellcheck = false
   editor.setAttribute('aria-label', 'HyMarkX source')
 
-  const tabs = element('div', 'play-tabs')
-  tabs.setAttribute('role', 'tablist')
-  const output = element('div', 'play-output')
-  const diagnostics = element('div', 'play-diagnostics')
-  const meter = element('div', 'play-meter')
-
-  const panels = {
-    Preview: element('iframe', 'play-preview'),
-    HTML: element('pre', 'play-code'),
-    CSS: element('pre', 'play-code'),
-    JS: element('pre', 'play-code'),
-  }
+  const preview = element('iframe', 'ide-panel ide-preview')
   // No same-origin, so the compiled document cannot reach this page even if something in it
   // tried. Scripts are allowed because the emitted runtime is the point of the preview.
-  panels.Preview.setAttribute('sandbox', 'allow-scripts')
-  panels.Preview.setAttribute('title', 'Rendered output')
+  preview.setAttribute('sandbox', 'allow-scripts')
+  preview.setAttribute('title', 'Rendered output')
 
-  let active = 'Preview'
-  const buttons = new Map()
-  for (const name of Object.keys(panels)) {
-    const button = element('button', 'play-tab', name)
-    button.type = 'button'
-    button.setAttribute('role', 'tab')
-    button.addEventListener('click', () => select(name))
-    buttons.set(name, button)
-    tabs.append(button)
-    output.append(panels[name])
+  /** Each artefact gets a panel, a tab, and a size that goes on the tab. */
+  const outputs = [
+    { name: 'Preview', panel: preview },
+    { name: 'HTML', code: element('code'), empty: 'Nothing was emitted.' },
+    { name: 'CSS', code: element('code'), empty: 'No CSS. Nothing in this document used any.' },
+    { name: 'JS', code: element('code'), empty: 'No JavaScript. Nothing in this document needed any.' },
+  ]
+
+  const tabs = element('div', 'ide-tabs')
+  tabs.setAttribute('role', 'tablist')
+  const panels = element('div', 'ide-panels')
+
+  for (const output of outputs) {
+    if (output.code !== undefined) {
+      output.pre = element('pre', 'ide-code')
+      output.pre.append(output.code)
+      output.note = element('p', 'ide-empty', output.empty)
+      output.panel = element('div', 'ide-panel')
+      output.panel.append(output.pre, output.note)
+    }
+    panels.append(output.panel)
+
+    output.tab = element('button', 'ide-tab')
+    output.tab.type = 'button'
+    output.tab.setAttribute('role', 'tab')
+    output.tab.append(element('span', 'ide-tab-name', output.name))
+    output.size = element('span', 'ide-tab-size')
+    output.tab.append(output.size)
+    output.tab.addEventListener('click', () => select(output.name))
+    tabs.append(output.tab)
   }
 
   function select(name) {
-    active = name
-    for (const [key, button] of buttons) {
-      button.dataset.active = String(key === name)
-      button.setAttribute('aria-selected', String(key === name))
-      panels[key].hidden = key !== name
+    for (const output of outputs) {
+      const active = output.name === name
+      output.tab.dataset.active = String(active)
+      output.tab.setAttribute('aria-selected', String(active))
+      output.panel.dataset.active = String(active)
     }
   }
-  select(active)
+  select('Preview')
+
+  const total = element('span', 'ide-total')
+  const problems = element('button', 'ide-problems')
+  problems.type = 'button'
+  const diagnostics = element('pre', 'ide-diagnostics')
+  const drawer = element('div', 'ide-drawer')
+  drawer.append(diagnostics)
+  drawer.hidden = true
+  problems.addEventListener('click', () => {
+    drawer.hidden = !drawer.hidden
+    problems.dataset.open = String(!drawer.hidden)
+  })
 
   let queued
+  let hadProblems = false
   async function run() {
     const text = editor.value
     let result
@@ -146,28 +186,53 @@ export function Play(root) {
       result = compile(text, { trust: 'document', from: 'playground.hmx' })
     } catch (error) {
       diagnostics.textContent = `The compiler threw: ${error instanceof Error ? error.message : String(error)}`
-      diagnostics.dataset.state = 'error'
+      drawer.hidden = false
+      problems.dataset.state = 'error'
+      problems.textContent = 'Compiler error'
       return
     }
 
-    panels.HTML.textContent = result.html || '(nothing)'
-    panels.CSS.textContent = result.css || '(no CSS — nothing used one)'
-    panels.JS.textContent = result.js || '(no JavaScript — nothing needed any)'
+    const artefacts = { HTML: result.html, CSS: result.css, JS: result.js }
+    for (const output of outputs) {
+      const source = artefacts[output.name]
+      if (source === undefined) {
+        continue
+      }
+      // An empty artefact is a claim, not a blank: it gets a sentence rather than an empty box.
+      output.pre.hidden = source === ''
+      output.note.hidden = source !== ''
+      if (source !== '') {
+        codeLines(output.code, source)
+      }
+    }
 
     // The runtime and styles are inlined so the preview is one self-contained document.
-    panels.Preview.srcdoc = `<!doctype html><meta charset="utf-8"><style>body{font:16px/1.6 system-ui;color:#f3f0ea;background:#101017;margin:0;padding:20px}${result.css}</style>${result.html}<script>${result.js}<\/script>`
+    preview.srcdoc = `<!doctype html><meta charset="utf-8"><style>body{font:16px/1.6 system-ui;color:#f3f0ea;background:#101017;margin:0;padding:20px}${result.css}</style>${result.html}<script>${result.js}<\/script>`
 
     const errors = result.diagnostics.filter(({ severity }) => severity === 'error')
     if (result.diagnostics.length === 0) {
       diagnostics.textContent = 'No diagnostics.'
-      delete diagnostics.dataset.state
+      drawer.hidden = true
+      hadProblems = false
+      delete problems.dataset.state
+      delete problems.dataset.open
+      problems.textContent = 'No problems'
     } else {
+      // Opens itself the first time something goes wrong and then stays as the reader left it:
+      // a drawer that reopens on every keystroke is impossible to close while typing.
+      if (!hadProblems) {
+        drawer.hidden = false
+        problems.dataset.open = 'true'
+      }
+      hadProblems = true
       // The compiler's own renderer, not a summary of it: the frame here is character for
       // character what `hmx check` prints in a terminal, which is the point of having one.
       diagnostics.textContent = renderDiagnostics(result.diagnostics, text, {
         from: 'playground.hmx',
       })
-      diagnostics.dataset.state = errors.length > 0 ? 'error' : 'warning'
+      problems.dataset.state = errors.length > 0 ? 'error' : 'warning'
+      const count = result.diagnostics.length
+      problems.textContent = `${count} problem${count === 1 ? '' : 's'}`
     }
 
     const [html, css, js] = await Promise.all([
@@ -175,21 +240,16 @@ export function Play(root) {
       gzipSize(result.css),
       gzipSize(result.js),
     ])
-    meter.replaceChildren(
-      measure('HTML', html),
-      measure('CSS', css),
-      measure('JS', js),
-      measure('Total', [html, css, js].reduce((sum, part) => sum + (part ?? 0), 0)),
-    )
+    const sizes = { HTML: html, CSS: css, JS: js }
+    for (const output of outputs) {
+      if (output.name in sizes) {
+        output.size.textContent = bytes(sizes[output.name])
+      }
+    }
+    total.textContent = `${bytes([html, css, js].reduce((sum, part) => sum + (part ?? 0), 0))} gzipped`
 
     // Replace rather than push: a playground should not fill the back button with keystrokes.
     history.replaceState(null, '', `#${encode(text)}`)
-  }
-
-  function measure(label, value) {
-    const cell = element('div', 'play-measure')
-    cell.append(element('span', 'play-measure-label', label), element('strong', undefined, bytes(value)))
-    return cell
   }
 
   editor.addEventListener('input', () => {
@@ -197,12 +257,70 @@ export function Play(root) {
     queued = setTimeout(run, 160)
   })
 
-  const left = element('div', 'play-pane')
-  left.append(element('div', 'play-pane-title', 'You write'), editor)
-  const right = element('div', 'play-pane')
-  right.append(element('div', 'play-pane-title', 'HyMarkX emits'), tabs, output, meter, diagnostics)
+  // Tab indents rather than leaving the editor. Trapping focus is normally wrong, so Escape
+  // then Tab still moves on — the pane says so.
+  let escaped = false
+  editor.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      escaped = true
+      return
+    }
+    if (event.key !== 'Tab' || escaped) {
+      escaped = false
+      return
+    }
+    event.preventDefault()
+    const { selectionStart: start, selectionEnd: end, value } = editor
+    editor.value = `${value.slice(0, start)}  ${value.slice(end)}`
+    editor.selectionStart = editor.selectionEnd = start + 2
+    clearTimeout(queued)
+    queued = setTimeout(run, 160)
+  })
 
-  root.append(left, right)
+  const file = element('div', 'ide-file')
+  file.append(element('span', 'ide-file-name', 'playground.hmx'), element('span', 'ide-trust', 'document trust'))
+
+  const reset = element('button', 'ide-action', 'Reset')
+  reset.type = 'button'
+  reset.addEventListener('click', () => {
+    editor.value = STARTER
+    void run()
+  })
+
+  // Host code, because a document cannot reach the clipboard (ADR-0004) — the same reason the
+  // copy buttons on every other page here are host code.
+  const share = element('button', 'ide-action', 'Copy link')
+  share.type = 'button'
+  share.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(location.href)
+      share.textContent = 'Link copied'
+      setTimeout(() => (share.textContent = 'Copy link'), 1600)
+    } catch {
+      share.textContent = 'Press ⌘C'
+      setTimeout(() => (share.textContent = 'Copy link'), 1600)
+    }
+  })
+
+  const actions = element('div', 'ide-actions')
+  actions.append(reset, share)
+
+  const bar = element('div', 'ide-bar')
+  bar.append(file, actions)
+
+  const source = element('section', 'ide-source')
+  source.append(element('div', 'ide-pane-title', 'You write'), editor)
+
+  const output = element('section', 'ide-output')
+  output.append(tabs, panels)
+
+  const body = element('div', 'ide-body')
+  body.append(source, output)
+
+  const status = element('div', 'ide-status')
+  status.append(element('span', 'ide-status-label', 'gzipped, as a server would send it'), total, problems)
+
+  root.append(bar, body, status, drawer)
   void run()
 
   return () => {

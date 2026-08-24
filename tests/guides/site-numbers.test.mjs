@@ -17,13 +17,13 @@ function metric(label) {
 
 describe("the landing page's cost strip", () => {
   it('states the display face at its size on disk', () => {
-    const bytes = statSync(`${siteDirectory}public/fonts/instrument-serif-latin.woff2`).size
+    const bytes = statSync(`${siteDirectory}public/fonts/newsreader-latin.woff2`).size
 
     expect(metric('display face, subset to Latin')).toBe(`${Math.round(bytes / 1024)} kB`)
   })
 
   it('ships the licence the font is used under', () => {
-    const licence = readFileSync(`${siteDirectory}public/fonts/instrument-serif-OFL.txt`, 'utf8')
+    const licence = readFileSync(`${siteDirectory}public/fonts/newsreader-OFL.txt`, 'utf8')
 
     expect(licence).toContain('SIL Open Font License')
   })

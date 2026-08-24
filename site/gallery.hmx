@@ -267,18 +267,20 @@ around a block.
 ### Source
 
 ```md
-A release is :badge[stable]{kind=success} once the suite is green,
-:badge[rc]{kind=warning} while it is being watched, :badge[yanked]{kind=danger}
-if it should not be installed, and :badge[alpha] until any of that applies.
+A release is :badge[stable]{kind=success} once green,
+:badge[rc]{kind=warning} while it is watched,
+:badge[yanked]{kind=danger} if it must not be used,
+and :badge[alpha] until any of that applies.
 ```
 :::
 
 :::box{class=preview}
 ### Rendered
 
-A release is :badge[stable]{kind=success} once the suite is green,
-:badge[rc]{kind=warning} while it is being watched, :badge[yanked]{kind=danger}
-if it should not be installed, and :badge[alpha] until any of that applies.
+A release is :badge[stable]{kind=success} once green,
+:badge[rc]{kind=warning} while it is watched,
+:badge[yanked]{kind=danger} if it must not be used,
+and :badge[alpha] until any of that applies.
 :::
 
 ::::

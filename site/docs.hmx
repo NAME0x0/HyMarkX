@@ -141,14 +141,14 @@ Revenue rose in every region except EMEA.
 ### Source
 
 ```md
-A release is :badge[stable]{kind=success} once the suite is green.
+A release is :badge[stable]{kind=success} once green.
 ```
 :::
 
 :::box{class=preview}
 ### Rendered
 
-A release is :badge[stable]{kind=success} once the suite is green.
+A release is :badge[stable]{kind=success} once green.
 :::
 
 ::::

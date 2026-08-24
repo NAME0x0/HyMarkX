@@ -65,11 +65,11 @@ This is my website.
 - HyMarkX
 ```
 
-Components are directives, not JSX. A container's fence needs more colons than anything
-it wraps:
+Components are directives, not JSX. Containers nest by matching, so depth costs nothing
+(ADR-0021):
 
 ```md
-::::grid{columns=3 gap=4}
+:::grid{columns=3 gap=4}
 
 :::card
 ## Revenue
@@ -81,7 +81,7 @@ $42,500
 14,302
 :::
 
-::::
+:::
 ```
 
 Not this:
@@ -203,7 +203,7 @@ Packages are created when a boundary is real, not to match a diagram.
 | [`docs/research/performance.md`](docs/research/performance.md) | Measured baseline: plain CommonMark costs what a bare CommonMark parse costs |
 | [`ROADMAP.md`](ROADMAP.md) | Phases, exit criteria, and the Markdoc gate |
 | [`BACKLOG.md`](BACKLOG.md) | Prioritised work, and rejected ideas with reasons |
-| [`docs/adr/`](docs/adr/) | 16 Architecture Decision Records |
+| [`docs/adr/`](docs/adr/) | 21 Architecture Decision Records |
 | [`docs/guides/`](docs/guides/) | Data and expressions, styling, components, interactivity, formatting, dev server, editors |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Workflow, change control, definition of done |
 | [`llms.txt`](llms.txt) | Canonical summary for language models, including the mistakes they actually make |
@@ -222,7 +222,7 @@ compiled by the test suite.
 
 ## Status
 
-**Phases 0–9 complete; published to npm as 0.0.9.** 1,522 tests. CommonMark 652/652 and
+**Phases 0–9 complete; published to npm as 0.0.9.** 1,524 tests. CommonMark 652/652 and
 GFM 40/40, never regressed across ten phases and eight syntax additions.
 
 | Phase | |
