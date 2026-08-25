@@ -35,3 +35,6 @@ pnpm-debug.log*
 # esbuild output for the VS Code extension; rebuilt by `pnpm build:extension`.
 editors/vscode/dist/
 *.vsix
+
+# Screenshots and other throwaway output from browser sessions.
+temp/
