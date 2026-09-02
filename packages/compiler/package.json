@@ -30,7 +30,7 @@
     "@hymarkx/ast": "workspace:*",
     "@hymarkx/parser": "workspace:*",
     "postcss": "^8.5.26",
-    "postcss-selector-parser": "^7.1.1",
+    "postcss-selector-parser": "^7.1.3",
     "yaml": "^2.9.0"
   },
   "engines": {
